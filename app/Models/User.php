@@ -34,4 +34,14 @@ class User extends Authenticatable
             'two_factor_confirmed_at' => 'datetime',
         ];
     }
+
+    public function doador(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Doador::class, 'usuario_id');
+    }
+
+    public function instituicao(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Instituicao::class, 'usuario_id');
+    }
 }

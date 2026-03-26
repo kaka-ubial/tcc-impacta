@@ -1,5 +1,5 @@
 import { Transition } from '@headlessui/react';
-import { Form, Head, Link, usePage } from '@inertiajs/react';
+import { Form, Head, Link, usePage, useForm } from '@inertiajs/react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import DeleteUser from '@/components/delete-user';
 import Heading from '@/components/heading';
@@ -28,6 +28,7 @@ export default function Profile({
     status?: string;
 }) {
     const { auth } = usePage().props;
+    const tipo = auth.user.tipo_usuario;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -50,11 +51,17 @@ export default function Profile({
                         }}
                         className="space-y-6"
                     >
-                        {({ processing, recentlySuccessful, errors }) => (
+                        {({ processing, recentlySuccessful, errors }) => {
+                            if (Object.keys(errors).length > 0) console.log('Erros:', errors);
+                        return (
                             <>
                                 <div className="grid gap-2">
+                                    <Input
+                                        type="hidden"
+                                        name="tipo_usuario"
+                                        defaultValue={auth.user.tipo_usuario}
+                                    />
                                     <Label htmlFor="email">Email address</Label>
-
                                     <Input
                                         id="email"
                                         type="email"
@@ -70,6 +77,44 @@ export default function Profile({
                                         className="mt-2"
                                         message={errors.email}
                                     />
+
+                                    { tipo == 'instituicao' && (
+                                        <>
+                                            <Label htmlFor="email">Nome Fantasia</Label>
+                                            <Input 
+                                                name="nome_fantasia"
+                                                defaultValue={auth.user.instituicao?.nome_fantasia} 
+                                                placeholder="Nome Fantasia"
+                                            />
+                                            <Label htmlFor="email">Razão social</Label>
+                                            <Input 
+                                                name="razao_social"
+                                                defaultValue={auth.user.instituicao?.razao_social}
+                                                placeholder="Razão social"
+                                            />
+                                            <Label htmlFor="email">CNPJ</Label>
+                                            <Input 
+                                                name="cnpj"
+                                                defaultValue={auth.user.instituicao?.cnpj}
+                                                placeholder="CNPJ"
+                                            />
+                                            <Label htmlFor="email">Telefone</Label>
+                                            <Input 
+                                                name="telefone_inst"
+                                                defaultValue={auth.user.instituicao?.telefone}
+                                                placeholder="Telefone"
+                                            />
+                                            <Label htmlFor="email">Endereço</Label>
+                                            <Input 
+                                                name="endereco_completo"
+                                                defaultValue={auth.user.instituicao?.endereco_completo}
+                                                placeholder="Endereço"
+                                            />
+
+                                        </>
+                                    )
+
+                                    }
                                 </div>
 
                                 {mustVerifyEmail &&
@@ -120,7 +165,7 @@ export default function Profile({
                                     </Transition>
                                 </div>
                             </>
-                        )}
+                        )}}
                     </Form>
                 </div>
 
