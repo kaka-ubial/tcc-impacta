@@ -17,6 +17,10 @@ class InstituicaoHandler implements UserTypeHandler {
             'endereco_completo'  => $data['endereco_completo'],
             'validada_por_admin' => false,
         ]);
+
+        if (!empty($data['causas_apoiadas'])) {
+            $user->causas()->sync($data['causas_apoiadas']);        
+        }
     }
 
     public function update(User $user, array $data): void
