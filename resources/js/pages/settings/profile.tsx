@@ -81,40 +81,62 @@ export default function Profile({
                                     { tipo == 'instituicao' && (
                                         <>
                                             <Label htmlFor="email">Nome Fantasia</Label>
-                                            <Input 
+                                            <Input
                                                 name="nome_fantasia"
-                                                defaultValue={auth.user.instituicao?.nome_fantasia} 
+                                                defaultValue={auth.user.instituicao?.nome_fantasia}
                                                 placeholder="Nome Fantasia"
                                             />
                                             <Label htmlFor="email">Razão social</Label>
-                                            <Input 
+                                            <Input
                                                 name="razao_social"
                                                 defaultValue={auth.user.instituicao?.razao_social}
                                                 placeholder="Razão social"
                                             />
                                             <Label htmlFor="email">CNPJ</Label>
-                                            <Input 
+                                            <Input
                                                 name="cnpj"
                                                 defaultValue={auth.user.instituicao?.cnpj}
                                                 placeholder="CNPJ"
                                             />
                                             <Label htmlFor="email">Telefone</Label>
-                                            <Input 
+                                            <Input
                                                 name="telefone_inst"
                                                 defaultValue={auth.user.instituicao?.telefone}
                                                 placeholder="Telefone"
                                             />
                                             <Label htmlFor="email">Endereço</Label>
-                                            <Input 
+                                            <Input
                                                 name="endereco_completo"
                                                 defaultValue={auth.user.instituicao?.endereco_completo}
                                                 placeholder="Endereço"
                                             />
 
                                         </>
-                                    )
+                                    )}
 
-                                    }
+                                    { tipo === 'doador' && (
+                                        <>
+                                            <Label htmlFor='nome_completo'>Nome Completo</Label>
+                                            <Input
+                                                name='nome_completo'
+                                                defaultValue={auth.user.doador?.nome_completo}
+                                                placeholder='Nome completo'
+                                            />
+                                            <Label htmlFor='cpf'>CPF</Label>
+                                            <Input
+                                                name='cpf'
+                                                defaultValue={auth.user.doador?.cpf}
+                                                placeholder='CPF'
+                                            />
+                                            <Label htmlFor='telefone'>Telefone</Label>
+                                            <Input
+                                                name='telefone'
+                                                defaultValue={auth.user.doador?.telefone}
+                                                placeholder='Telefone'
+                                            />
+
+                                        </>
+                                    )}
                                 </div>
 
                                 {mustVerifyEmail &&

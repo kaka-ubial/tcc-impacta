@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('nome_completo');
             $table->string('cpf')->unique();
             $table->string('telefone');
-            $table->integer('pontuacao_gamificacao')->default(0);
+            $table->integer('pontuacao_gamificacao')->default(0)->nullable();
             $table->float('latitude')->nullable();
             $table->float('longitude')->nullable();
             $table->timestamps();
