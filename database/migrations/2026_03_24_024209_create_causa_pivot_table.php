@@ -11,28 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('doador_causa', function (Blueprint $table) {
+        Schema::create('usuario_causa', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('doador_id');
+            $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('causa_id');
             $table->timestamps();
 
-            $table->foreign('doador_id')->references('usuario_id')->on('doador')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('usuarios')->onDelete('cascade');
             $table->foreign('causa_id')->references('id')->on('causas')->onDelete('cascade');
 
-            $table->unique(['doador_id', 'causa_id']);
-        });
-
-        Schema::create('instituicao_causa', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('instituicao_id');
-            $table->unsignedBigInteger('causa_id');
-            $table->timestamps();
-
-            $table->foreign('instituicao_id')->references('usuario_id')->on('instituicao')->onDelete('cascade');
-            $table->foreign('causa_id')->references('id')->on('causas')->onDelete('cascade');
-
-            $table->unique(['instituicao_id', 'causa_id']);
+            $table->unique(['user_id', 'causa_id']);
         });
 
     }
@@ -42,7 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('instituicao_causa');
-        Schema::dropIfExists('doador_causa');
+        Schema::dropIfExists('usuario_causa');
     }
 };
