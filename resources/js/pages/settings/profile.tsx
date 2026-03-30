@@ -15,7 +15,7 @@ import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Profile settings',
+        title: 'Perfil',
         href: edit(),
     },
 ];
@@ -40,8 +40,8 @@ export default function Profile({
                 <div className="space-y-6">
                     <Heading
                         variant="small"
-                        title="Profile information"
-                        description="Update your name and email address"
+                        title="Informações do perfil"
+                        description="Atualize suas informações"
                     />
 
                     <Form
@@ -61,7 +61,7 @@ export default function Profile({
                                         name="tipo_usuario"
                                         defaultValue={auth.user.tipo_usuario}
                                     />
-                                    <Label htmlFor="email">Email address</Label>
+                                    <Label htmlFor="email">Endereço de email</Label>
                                     <Input
                                         id="email"
                                         type="email"
@@ -70,7 +70,7 @@ export default function Profile({
                                         name="email"
                                         required
                                         autoComplete="username"
-                                        placeholder="Email address"
+                                        placeholder="Endereço de email"
                                     />
 
                                     <InputError
@@ -81,31 +81,31 @@ export default function Profile({
                                     { tipo == 'instituicao' && (
                                         <>
                                             <Label htmlFor="email">Nome Fantasia</Label>
-                                            <Input 
+                                            <Input
                                                 name="nome_fantasia"
-                                                defaultValue={auth.user.instituicao?.nome_fantasia} 
+                                                defaultValue={auth.user.instituicao?.nome_fantasia}
                                                 placeholder="Nome Fantasia"
                                             />
                                             <Label htmlFor="email">Razão social</Label>
-                                            <Input 
+                                            <Input
                                                 name="razao_social"
                                                 defaultValue={auth.user.instituicao?.razao_social}
                                                 placeholder="Razão social"
                                             />
                                             <Label htmlFor="email">CNPJ</Label>
-                                            <Input 
+                                            <Input
                                                 name="cnpj"
                                                 defaultValue={auth.user.instituicao?.cnpj}
                                                 placeholder="CNPJ"
                                             />
                                             <Label htmlFor="email">Telefone</Label>
-                                            <Input 
+                                            <Input
                                                 name="telefone_inst"
                                                 defaultValue={auth.user.instituicao?.telefone}
                                                 placeholder="Telefone"
                                             />
                                             <Label htmlFor="email">Endereço</Label>
-                                            <Input 
+                                            <Input
                                                 name="endereco_completo"
                                                 defaultValue={auth.user.instituicao?.endereco_completo}
                                                 placeholder="Endereço"
@@ -149,7 +149,7 @@ export default function Profile({
                                         disabled={processing}
                                         data-test="update-profile-button"
                                     >
-                                        Save
+                                        Salvar
                                     </Button>
 
                                     <Transition
@@ -160,7 +160,7 @@ export default function Profile({
                                         leaveTo="opacity-0"
                                     >
                                         <p className="text-sm text-neutral-600">
-                                            Saved
+                                            Salvo
                                         </p>
                                     </Transition>
                                 </div>
