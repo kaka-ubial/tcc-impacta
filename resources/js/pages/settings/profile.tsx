@@ -15,7 +15,7 @@ import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Profile settings',
+        title: 'Perfil',
         href: edit(),
     },
 ];
@@ -40,8 +40,8 @@ export default function Profile({
                 <div className="space-y-6">
                     <Heading
                         variant="small"
-                        title="Profile information"
-                        description="Update your name and email address"
+                        title="Informações do perfil"
+                        description="Atualize suas informações"
                     />
 
                     <Form
@@ -61,7 +61,7 @@ export default function Profile({
                                         name="tipo_usuario"
                                         defaultValue={auth.user.tipo_usuario}
                                     />
-                                    <Label htmlFor="email">Email address</Label>
+                                    <Label htmlFor="email">Endereço de email</Label>
                                     <Input
                                         id="email"
                                         type="email"
@@ -70,7 +70,7 @@ export default function Profile({
                                         name="email"
                                         required
                                         autoComplete="username"
-                                        placeholder="Email address"
+                                        placeholder="Endereço de email"
                                     />
 
                                     <InputError
@@ -171,7 +171,7 @@ export default function Profile({
                                         disabled={processing}
                                         data-test="update-profile-button"
                                     >
-                                        Save
+                                        Salvar
                                     </Button>
 
                                     <Transition
@@ -182,7 +182,7 @@ export default function Profile({
                                         leaveTo="opacity-0"
                                     >
                                         <p className="text-sm text-neutral-600">
-                                            Saved
+                                            Salvo
                                         </p>
                                     </Transition>
                                 </div>
