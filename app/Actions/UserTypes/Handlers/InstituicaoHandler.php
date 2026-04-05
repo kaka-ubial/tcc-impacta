@@ -25,12 +25,17 @@ class InstituicaoHandler implements UserTypeHandler {
 
     public function update(User $user, array $data): void
     {
-        $user->instituicao()->update([
-            'nome_fantasia' => $data['nome_fantasia'],
-            'razao_social' => $data['razao_social'],
-            'cnpj' => $data['cnpj'],
-            'telefone' => $data['telefone_inst'],
-            'endereco_completo' => $data['endereco_completo'],
-        ]);
+        $instituicao = $user->instituicao;
+        if ($instituicao) 
+        {
+            $instituicao->fill([
+                'nome_fantasia' => $data['nome_fantasia'],
+                'razao_social' => $data['razao_social'],
+                'cnpj' => $data['cnpj'],
+                'telefone' => $data['telefone_inst'],
+                'endereco_completo' => $data['endereco_completo'],
+            ]);
+            $instituicao->save();
+        }
     }
 }
