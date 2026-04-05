@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('endereco_completo');
             $table->float('latitude')->nullable();
             $table->float('longitude')->nullable();
-            $table->boolean('validada_por_admin')->default(false);
+            $table->string('status')->default('pending');
             $table->timestamps();
 
             $table->foreign('usuario_id')
