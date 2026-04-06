@@ -13,8 +13,8 @@ import { email } from '@/routes/password';
 export default function ForgotPassword({ status }: { status?: string }) {
     return (
         <AuthLayout
-            title="Forgot password"
-            description="Enter your email to receive a password reset link"
+            title="Esqueci minha senha"
+            description="Preencha seu email para receber um link de reset de senha"
         >
             <Head title="Forgot password" />
 
@@ -29,7 +29,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
                     {({ processing, errors }) => (
                         <>
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
+                                <Label htmlFor="email">Email</Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -51,7 +51,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
                                     {processing && (
                                         <LoaderCircle className="h-4 w-4 animate-spin" />
                                     )}
-                                    Email password reset link
+                                    Enviar link de recuperação de senha
                                 </Button>
                             </div>
                         </>
@@ -59,7 +59,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
                 </Form>
 
                 <div className="space-x-1 text-center text-sm text-muted-foreground">
-                    <span>Or, return to</span>
+                    <span>Ou, retorne para</span>
                     <TextLink href={login()}>log in</TextLink>
                 </div>
             </div>
