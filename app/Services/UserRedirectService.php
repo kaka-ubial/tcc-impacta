@@ -8,16 +8,15 @@ class UserRedirectService {
     public function getRedirectRoute(User $user): string
     {
         if ($user->tipo_usuario === 'instituicao' && $user->instituicao) {
-            $user->load('instituicao');
-            $status = $user->instituicao->status;
+            $instituicao = $user->instituicao;
 
-            return match ($status) {
-                'pending'=> route('waiting-validation'),
-                'rejected'=> route('profile.edit'),
-                'approved' => route('dashboard'),
-                default => route('dashboard'),
+            return match (true) {
+                $instituicao->isPending()  => route('waiting-validation'),
+                $instituicao->isRejected() => route('rejected'),
+                $instituicao->isApproved() => route('instituicoes.index'),
+                default                    => route('instituicoes.index'),
             };
         }
-        return route('dashboard');
+        return route('instituicoes.index');
     }
 }

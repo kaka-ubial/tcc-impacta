@@ -1,3 +1,59 @@
+export type Paginated<T> = {
+    data: T[];
+    current_page: number;
+    last_page: number;
+    next_page_url: string | null;
+    prev_page_url: string | null;
+    links: { url: string | null; label: string; active: boolean }[];
+};
+
+export type SimplePaginated<T> = {
+    data: T[];
+    current_page: number;
+    next_page_url: string | null;
+    prev_page_url: string | null;
+};
+
+export type Causa = {
+    id: number;
+    nome: string;
+    icone: string | null;
+};
+
+export type NecessidadeAtiva = {
+    id: number;
+    descricao: string | null;
+    quantidade_objetivo: number;
+    quantidade_atual: number;
+    prioridade: 'alta' | 'media' | 'baixa';
+    categoria: { id: number; nome: string };
+};
+
+export type InstituicaoListItem = {
+    usuario_id: number;
+    nome_fantasia: string;
+    endereco_completo: string;
+    verificada: boolean;
+    causas: Causa[];
+    necessidades_ativas_count: number;
+};
+
+export type InstituicaoDetalhe = {
+    usuario_id: number;
+    nome_fantasia: string;
+    razao_social: string;
+    verificada: boolean;
+    cnpj: string;
+    telefone: string;
+    endereco_completo: string;
+    descricao: string | null;
+    latitude: number | null;
+    longitude: number | null;
+    causas: Causa[];
+    necessidades_ativas: NecessidadeAtiva[];
+};
+
+
 export type Doador = {
     nome_completo: string;
     cpf: string;
