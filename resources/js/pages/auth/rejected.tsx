@@ -2,7 +2,12 @@ import { Head, router, Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 
-export default function Rejected() {
+interface Props {
+    motivo ?: string;
+}
+
+export default function Rejected({motivo}: Props) {
+   
     return (
         <div className="flex min-h-screen items-center justify-center bg-muted p-6">
             <Head title="Conta rejeitada" />
@@ -20,11 +25,9 @@ export default function Rejected() {
                         Conta rejeitada
                     </h1>
                     <p className="text-sm text-muted-foreground">
-                        Sua instituição foi analisada, mas infelizmente não foi aprovada.
+                        Você poderá fazer novas tentativas de cadastro após corrigir as informações:
                     </p>
-                    <p className="text-sm text-muted-foreground">
-                        Você poderá fazer novas tentativas de cadastro após corrigir as informações.
-                    </p>
+                    <p className="text-sm .fw-semibold">{motivo}</p>
                 </div>
 
                 <div className="flex flex-col gap-2">

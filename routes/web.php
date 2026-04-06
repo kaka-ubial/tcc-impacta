@@ -28,8 +28,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
             : Inertia::render('auth/waiting-approval');
     })->name('waiting-validation');
     Route::get('rejected', function () {
+        $analise = auth()->user()
+            ->instituicao
+            ->analises()
+            ->latest()
+            ->first();
         return auth()->user()->instituicao?->isRejected()
-            ? Inertia::render('auth/rejected')
+            ? Inertia::render('auth/rejected', ['motivo' => $analise?->observacoes])
             : redirect()->route('dashboard');
     })->name('rejected');    
 });

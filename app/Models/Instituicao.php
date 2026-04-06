@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['usuario_id', 'nome_fantasia', 'razao_social', 'cnpj', 'telefone', 'endereco_completo', 'latitude', 'longitude', 'status'])]
 class Instituicao extends Model
@@ -33,7 +34,7 @@ class Instituicao extends Model
 
     public function analises(): HasMany
     {
-        return $this->hasMany(Analise::class);
+        return $this->hasMany(Analise::class, 'instituicao_id', 'usuario_id');
     }
 
     public function isApproved(): bool
