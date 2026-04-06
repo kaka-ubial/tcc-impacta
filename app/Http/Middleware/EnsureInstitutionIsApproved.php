@@ -37,11 +37,6 @@ class EnsureInstitutionIsApproved
                     return redirect()->route('rejected');
                 }
                 break;
-            default:
-                if ($status === null) {
-                    return redirect()->route('waiting-validation');
-                }
-                break;
         }
         return $next($request);
     }

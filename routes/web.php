@@ -22,7 +22,7 @@ Route::get('/redirect', RedirectController::class)->middleware('auth')->name('re
 
 Route::post('/validate/register-step-one', ValidateRegisterStepOne::class);
 
-Route::middleware(['auth', 'verified', CheckInstituicao::class, EnsureInstitutionIsApproved::class])->prefix('instituicao')->name('instituicao.')->group(function () {
+Route::middleware(['auth', 'verified', CheckInstituicao::class])->prefix('instituicao')->name('instituicao.')->group(function () {
     Route::get('painel', [PainelController::class, 'index'])->name('painel');
 });
 
@@ -40,7 +40,7 @@ Route::middleware(['auth', CheckAdmin::class])->prefix('admin')->name('admin.')-
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('waiting-validation', function () {
         return auth()->user()->instituicao?->isApproved()
-            ? redirect()->route('instituicao.painel')
+            ? redirect()->route('instituicoes.index')
             : Inertia::render('auth/waiting-approval');
     })->name('waiting-validation');
     Route::get('rejected', function () {
@@ -51,7 +51,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->first();
         return auth()->user()->instituicao?->isRejected()
             ? Inertia::render('auth/rejected', ['motivo' => $analise?->observacoes])
-            : redirect()->route('instituicao.painel');
+            : redirect()->route('instituicoes.index');
     })->name('rejected');
 
 });
