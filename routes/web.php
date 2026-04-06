@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Controllers\RedirectController;
+use App\Http\Middleware\CheckDoador;
+use App\Http\Middleware\CheckInstituicao;
 use App\Http\Middleware\EnsureInstitutionIsApproved;
+use App\Http\Controllers\Instituicao\PainelController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 use App\Actions\Auth\ValidateRegisterStepOne;
@@ -19,9 +22,19 @@ Route::get('/redirect', RedirectController::class)->middleware('auth')->name('re
 
 Route::post('/validate/register-step-one', ValidateRegisterStepOne::class);
 
-Route::middleware(['auth', 'verified', EnsureInstitutionIsApproved::class])->group(function () {
+Route::middleware(['auth', 'verified', CheckInstituicao::class])->prefix('instituicao')->name('instituicao.')->group(function () {
+    Route::get('painel', [PainelController::class, 'index'])->name('painel');
+});
+
+Route::middleware(['auth', 'verified', CheckDoador::class])->group(function () {
     Route::get('instituicoes', [InstituicaoController::class, 'index'])->name('instituicoes.index');
     Route::get('instituicoes/{id}', [InstituicaoController::class, 'show'])->name('instituicoes.show');
+});
+
+Route::middleware(['auth', CheckAdmin::class])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('institutions', [InstitutionCheckController::class, 'index'])->name('institutions.index');
+    Route::post('institutions/{instituicao}/approve', [InstitutionCheckController::class, 'approve'])->name('institutions.approve');
+    Route::post('institutions/{instituicao}/reject', [InstitutionCheckController::class, 'reject'])->name('institutions.reject');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -43,10 +56,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 });
 
-Route::middleware(['auth', CheckAdmin::class])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('institutions', [InstitutionCheckController::class, 'index'])->name('institutions.index');
-    Route::post('institutions/{instituicao}/approve', [InstitutionCheckController::class, 'approve'])->name('institutions.approve');
-    Route::post('institutions/{instituicao}/reject', [InstitutionCheckController::class, 'reject'])->name('institutions.reject');
-});
+
 
 require __DIR__.'/settings.php';

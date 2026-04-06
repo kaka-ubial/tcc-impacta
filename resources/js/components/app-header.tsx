@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Menu, Search } from 'lucide-react';
+import { BookOpen, Folder, LayoutDashboard, LayoutGrid, Menu, Search } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { Breadcrumbs } from '@/components/breadcrumbs';
@@ -39,11 +39,19 @@ type Props = {
     breadcrumbs?: BreadcrumbItem[];
 };
 
-const mainNavItems: NavItem[] = [
+const doadorNavItems: NavItem[] = [
     {
         title: 'Instituições',
         href: instituicoesIndex(),
         icon: LayoutGrid,
+    },
+];
+
+const instituicaoNavItems: NavItem[] = [
+    {
+        title: 'Painel',
+        href: '/instituicao/painel',
+        icon: LayoutDashboard,
     },
 ];
 
@@ -65,9 +73,13 @@ const activeItemStyles =
 
 export function AppHeader({ breadcrumbs = [] }: Props) {
     const page = usePage();
-    const { auth } = page.props;
+    const { auth } = page.props as any;
     const getInitials = useInitials();
     const { isCurrentUrl, whenCurrentUrl } = useCurrentUrl();
+
+    const tipo: string = auth.user.tipo_usuario;
+    const mainNavItems = tipo === 'instituicao' ? instituicaoNavItems : doadorNavItems;
+    const homeHref = tipo === 'instituicao' ? '/instituicao/painel' : instituicoesIndex();
 
     return (
         <>
@@ -135,7 +147,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                     </div>
 
                     <Link
-                        href={instituicoesIndex()}
+                        href={homeHref}
                         prefetch
                         className="flex items-center space-x-2"
                     >

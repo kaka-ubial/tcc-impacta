@@ -1,6 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { ChevronLeft, ChevronRight, MapPin, Package, Search } from 'lucide-react';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { CausaBadge } from '@/components/causa-badge';
 import { VerificadaBadge } from '@/components/verificada-badge';
@@ -29,14 +29,23 @@ export default function InstituicoesIndex({ instituicoes, filters }: Props) {
     const [search, setSearch] = useState(filters.search);
     const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
+    useEffect(() => {
+        setSearch(filters.search);
+    }, [filters.search]);
+
     const handleSearch = useCallback((value: string) => {
         setSearch(value);
         clearTimeout(timer.current);
         timer.current = setTimeout(() => {
             router.get(
                 instituicoesIndex(),
-                { search: value || undefined },
-                { preserveState: true, replace: true },
+                value ? { search: value } : {},
+                {
+                    preserveState: true,
+                    preserveScroll: true,
+                    replace: true,
+                    only: ['instituicoes', 'filters'],
+                },
             );
         }, 300);
     }, []);

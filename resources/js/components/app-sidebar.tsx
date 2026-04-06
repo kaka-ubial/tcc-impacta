@@ -1,7 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid, Building2 } from 'lucide-react';
+import { Building2, LayoutGrid, LayoutDashboard } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
-import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import {
@@ -17,42 +16,45 @@ import type { NavItem } from '@/types';
 import admin from '@/routes/admin';
 import { index as instituicoesIndex } from '@/routes/instituicoes';
 
-
-const mainNavItems: NavItem[] = [
+const doadorNavItems: NavItem[] = [
     {
         title: 'Instituições',
         href: instituicoesIndex(),
         icon: LayoutGrid,
     },
+];
+
+const instituicaoNavItems: NavItem[] = [
+    {
+        title: 'Painel',
+        href: '/instituicao/painel',
+        icon: LayoutDashboard,
+    },
+];
+
+const adminNavItems: NavItem[] = [
     {
         title: 'Instituições Pendentes',
         href: admin.institutions.index(),
         icon: Building2,
-    }
+    },
 ];
-//
-// const footerNavItems: NavItem[] = [
-//     {
-//         title: 'Repository',
-//         href: 'https://github.com/laravel/react-starter-kit',
-//         icon: FolderGit2,
-//     },
-//     {
-//         title: 'Documentation',
-//         href: 'https://laravel.com/docs/starter-kits#react',
-//         icon: BookOpen,
-//     },
-// ];
 
 export function AppSidebar() {
     const { auth } = usePage().props as any;
+    const tipo: string = auth.user.tipo_usuario;
 
-    const filteredItems = mainNavItems.filter(item => {
-        if (item.title === 'Instituições Pendentes') {
-            return auth.user.tipo_usuario === 'admin';
-        }
-        return true;
-    });
+    const navItems: NavItem[] =
+        tipo === 'admin'
+            ? adminNavItems
+            : tipo === 'instituicao'
+              ? instituicaoNavItems
+              : doadorNavItems;
+
+    const homeHref =
+        tipo === 'instituicao'
+            ? '/instituicao/painel'
+            : instituicoesIndex();
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -60,7 +62,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={instituicoesIndex()} prefetch>
+                            <Link href={homeHref} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>
@@ -69,11 +71,10 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={filteredItems} />
+                <NavMain items={navItems} />
             </SidebarContent>
 
             <SidebarFooter>
-                {/*<NavFooter items={footerNavItems} className="mt-auto" />*/}
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

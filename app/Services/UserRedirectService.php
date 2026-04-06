@@ -13,8 +13,8 @@ class UserRedirectService {
             return match (true) {
                 $instituicao->isPending()  => route('waiting-validation'),
                 $instituicao->isRejected() => route('rejected'),
-                $instituicao->isApproved() => route('instituicoes.index'),
-                default                    => route('instituicoes.index'),
+                $instituicao->isApproved() => route('instituicao.painel'),
+                default                    => route('instituicao.painel'),
             };
         }
         return route('instituicoes.index');
