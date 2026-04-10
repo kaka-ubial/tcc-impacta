@@ -1,0 +1,77 @@
+# Node.js with React
+# Build a Node.js project that uses React.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+- stage: Build
+  displayName: "Build"
+  jobs:
+  - job: Build
+    steps:
+    - script: |
+        mkdir build_folder
+        echo "Project Content" > build_folder/project.txt
+        zip -r build_folder/project.zip build_folder/project.txt
+      displayName: "Creates project .zip file"
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: build_folder
+        ArtifactName: project_package
+      displayName: "Publishes for next job"
+
+- stage: Test
+  displayName: "Test"
+  dependsOn: Build
+  jobs:
+  - job: Test
+    steps:
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        artifact: project_package
+        path: $(Pipeline.Workspace)/download_folder
+      displayName: "Downloads artifact to download_folder"
+
+    - script: |
+        echo "Lists files in  download_folder:"
+        ls -R $(Pipeline.Workspace)/download_folder
+      displayName: "Debug: test workspace content"
+
+    - script: |
+        mkdir -p tested_folder
+        cp $(Pipeline.Workspace)/download_folder/project.zip tested_folder/
+      displayName: "Copies to tested_folder"
+
+    - script: |
+        if [ -f tested_folder/project.zip ]; then
+          echo "OK: file project.zip found."
+        else
+          echo "FAILED: file project.zip not found."
+          exit 1
+        fi
+      displayName: "Checks if project.zip exists in folder"
+
+- stage: Deploy
+  displayName: "Deploy"
+  dependsOn: Test
+  jobs:
+  - job: Deploy
+    steps:
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        artifact: project_package
+        path: $(Pipeline.Workspace)/download_folder
+      displayName: "Downloads artifact to download_folder"
+
+    - script: |
+        mkdir -p deploy_folder
+        cp $(Pipeline.Workspace)/download_folder/project.zip deploy_folder/
+        echo "Deploy sim: project.zip copied to deploy_folder."
+      displayName: "Deploy simulation"
