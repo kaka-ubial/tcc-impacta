@@ -11,6 +11,8 @@ use App\Actions\Auth\ValidateRegisterStepOne;
 use Inertia\Inertia;
 use App\Http\Controllers\Admin\InstitutionCheckController;
 use App\Http\Middleware\CheckAdmin;
+use App\Http\Controllers\Doador\DoacaoController;
+use App\Http\Controllers\Instituicao\HorarioController;
 use App\Http\Controllers\Instituicao\InstituicaoController;
 
 
@@ -24,11 +26,15 @@ Route::post('/validate/register-step-one', ValidateRegisterStepOne::class);
 
 Route::middleware(['auth', 'verified', CheckInstituicao::class, EnsureInstitutionIsApproved::class])->prefix('instituicao')->name('instituicao.')->group(function () {
     Route::get('painel', [PainelController::class, 'index'])->name('painel');
+    Route::get('horarios', [HorarioController::class, 'index'])->name('horarios.index');
+    Route::post('horarios', [HorarioController::class, 'store'])->name('horarios.store');
+    Route::delete('horarios/{horario}', [HorarioController::class, 'destroy'])->name('horarios.destroy');
 });
 
 Route::middleware(['auth', 'verified', CheckDoador::class])->group(function () {
     Route::get('instituicoes', [InstituicaoController::class, 'index'])->name('instituicoes.index');
     Route::get('instituicoes/{id}', [InstituicaoController::class, 'show'])->name('instituicoes.show');
+    Route::post('doacoes', [DoacaoController::class, 'store'])->name('doacoes.store');
 });
 
 Route::middleware(['auth', CheckAdmin::class])->prefix('admin')->name('admin.')->group(function () {

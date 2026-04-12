@@ -1,8 +1,9 @@
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, Building2, FileText, Heart, MapPin, Package, Phone } from 'lucide-react';
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useState } from 'react';
 
 import { CausaBadge } from '@/components/causa-badge';
+import { SolicitacaoDoacaoModal } from '@/components/doacao/SolicitacaoDoacaoModal';
 import { VerificadaBadge } from '@/components/verificada-badge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,12 +11,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/app-layout';
 import { index as instituicoesIndex, show as instituicoesShow } from '@/routes/instituicoes';
-import type { BreadcrumbItem, InstituicaoDetalhe } from '@/types';
+import type { BreadcrumbItem, CategoriaItem, InstituicaoDetalhe } from '@/types';
 
 const MapEmbed = lazy(() => import('@/components/map-embed'));
 
 type Props = {
     instituicao: InstituicaoDetalhe;
+    categorias: CategoriaItem[];
 };
 
 const prioridadeConfig: Record<string, { variant: 'destructive' | 'default' | 'secondary'; label: string }> = {
@@ -28,7 +30,7 @@ function MapSection({ lat, lng, label }: { lat: number; lng: number; label: stri
     const link = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=16/${lat}/${lng}`;
 
     return (
-        <div className="overflow-hidden rounded-xl border shadow-sm">
+        <div className="isolate overflow-hidden rounded-xl border shadow-sm">
             <div className="h-80">
                 <Suspense fallback={<div className="bg-muted h-full w-full animate-pulse" />}>
                     <MapEmbed lat={lat} lng={lng} label={label} />
@@ -82,7 +84,9 @@ function NecessidadeCard({ n }: { n: InstituicaoDetalhe['necessidades_ativas'][n
     );
 }
 
-export default function InstituicaoShow({ instituicao }: Props) {
+export default function InstituicaoShow({ instituicao, categorias }: Props) {
+    const [modalOpen, setModalOpen] = useState(false);
+
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Instituições', href: instituicoesIndex() },
         { title: instituicao.nome_fantasia, href: instituicoesShow(instituicao.usuario_id) },
@@ -133,7 +137,7 @@ export default function InstituicaoShow({ instituicao }: Props) {
                         )}
                     </div>
 
-                    <Button size="lg" className="shrink-0 gap-2 sm:mt-8">
+                    <Button size="lg" className="shrink-0 gap-2 sm:mt-8" onClick={() => setModalOpen(true)}>
                         <Heart className="size-4" />
                         Quero Doar
                     </Button>
@@ -211,6 +215,14 @@ export default function InstituicaoShow({ instituicao }: Props) {
                         </div>
                     </div>
                 </div>
+
+                <SolicitacaoDoacaoModal
+                    open={modalOpen}
+                    onClose={() => setModalOpen(false)}
+                    instituicaoId={instituicao.usuario_id}
+                    categorias={categorias}
+                    horariosDisponiveis={instituicao.horarios_disponiveis}
+                />
 
                 {/* Mapa — largura total */}
                 {hasMap && (

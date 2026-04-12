@@ -30,10 +30,10 @@ const painelItems: PainelItem[] = [
         href: null,
     },
     {
-        title: 'Agendamentos',
-        description: 'Acompanhe os agendamentos de entrega de doações.',
+        title: 'Horários disponíveis',
+        description: 'Configure os dias e horários em que aceita receber ou coletar doações.',
         icon: Calendar,
-        href: null,
+        href: '/instituicao/horarios',
     },
     {
         title: 'Doações Recebidas',
