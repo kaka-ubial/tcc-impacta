@@ -6,6 +6,7 @@ use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Instituicao;
+use App\Models\CategoriaItem;
 
 class DatabaseSeeder extends Seeder
 {
@@ -24,5 +25,6 @@ class DatabaseSeeder extends Seeder
                     Instituicao::factory()->make()->toArray()
                 );
             });
+        $this->call(CategoriaItemSeeder::class);
     }
 }
