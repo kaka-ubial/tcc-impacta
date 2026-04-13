@@ -4,6 +4,8 @@ namespace App\Concerns;
 
 use App\Models\User;
 use Illuminate\Validation\Rule;
+use App\Rules\Cpf;
+use App\Rules\Cnpj;
 
 trait ProfileValidationRules
 {
@@ -18,11 +20,21 @@ trait ProfileValidationRules
             'email'             => $this->emailRules($userId),
             'tipo_usuario'      => ['required', 'in:doador,instituicao'],
             'nome_completo'     => ['exclude_unless:tipo_usuario,doador', 'required', 'string', 'max:255'],
-            'cpf'               => ['exclude_unless:tipo_usuario,doador', 'required', 'string', 'max:14'],
+            'cpf' => [
+                'exclude_unless:tipo_usuario,doador',
+                'required',
+                'string',
+                new Cpf(),
+            ],            
             'telefone'          => ['exclude_unless:tipo_usuario,doador', 'required', 'string', 'max:20'],
             'nome_fantasia'     => ['exclude_unless:tipo_usuario,instituicao', 'required', 'string', 'max:255'],
             'razao_social'      => ['exclude_unless:tipo_usuario,instituicao', 'required', 'string', 'max:255'],
-            'cnpj'              => ['exclude_unless:tipo_usuario,instituicao', 'required', 'string', 'max:18'],
+            'cnpj' => [
+                'exclude_unless:tipo_usuario,instituicao',
+                'required',
+                'string',
+                new Cnpj(),
+            ],            
             'telefone_inst'     => ['exclude_unless:tipo_usuario,instituicao', 'required', 'string', 'max:20'],
             'endereco_completo' => ['exclude_unless:tipo_usuario,instituicao', 'required', 'string', 'max:255'],
         ];

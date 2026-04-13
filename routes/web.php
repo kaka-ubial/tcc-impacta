@@ -14,7 +14,8 @@ use App\Http\Middleware\CheckAdmin;
 use App\Http\Controllers\Doador\DoacaoController;
 use App\Http\Controllers\Instituicao\HorarioController;
 use App\Http\Controllers\Instituicao\InstituicaoController;
-
+use App\Http\Controllers\NecessidadeController;
+use App\Http\Middleware\CheckNecessidadeOwnership;
 
 Route::inertia('/', 'welcome', [
     'canRegister' => Features::enabled(Features::registration()),
@@ -29,6 +30,11 @@ Route::middleware(['auth', 'verified', CheckInstituicao::class, EnsureInstitutio
     Route::get('horarios', [HorarioController::class, 'index'])->name('horarios.index');
     Route::post('horarios', [HorarioController::class, 'store'])->name('horarios.store');
     Route::delete('horarios/{horario}', [HorarioController::class, 'destroy'])->name('horarios.destroy');
+    Route::get('necessidades', [NecessidadeController::class, 'index'])->name('necessidades.index');
+    Route::post('necessidades', [NecessidadeController::class, 'store'])->name('necessidades.store');
+    Route::get('necessidades/create', [NecessidadeController::class, 'create'])->name('necessidades.create');
+    Route::put('necessidades/{id}', [NecessidadeController::class, 'update'])->name('necessidades.update')->middleware(CheckNecessidadeOwnership::class);
+    Route::delete('necessidades/{id}', [NecessidadeController::class, 'destroy'])->name('necessidades.destroy')->middleware(CheckNecessidadeOwnership::class);
 });
 
 Route::middleware(['auth', 'verified', CheckDoador::class])->group(function () {

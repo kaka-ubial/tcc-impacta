@@ -1,6 +1,5 @@
-import { Head, usePage } from '@inertiajs/react';
+import { Head, usePage, Link } from '@inertiajs/react';
 import { Calendar, ChevronRight, Gift, Package, UserCog } from 'lucide-react';
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
@@ -13,7 +12,7 @@ type PainelItem = {
     title: string;
     description: string;
     icon: React.ElementType;
-    href: string | null;
+    href?: string | null;
 };
 
 const painelItems: PainelItem[] = [
@@ -27,7 +26,7 @@ const painelItems: PainelItem[] = [
         title: 'Necessidades',
         description: 'Gerencie as necessidades de doação ativas da sua instituição.',
         icon: Package,
-        href: null,
+        href: '/instituicao/necessidades',
     },
     {
         title: 'Horários disponíveis',
@@ -99,9 +98,9 @@ export default function Painel() {
 
                         if (isAvailable) {
                             return (
-                                <a key={item.title} href={item.href!}>
+                                <Link key={item.title} href={item.href!}>
                                     {content}
-                                </a>
+                                </Link>
                             );
                         }
 
