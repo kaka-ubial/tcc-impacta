@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Building2, LayoutGrid, LayoutDashboard } from 'lucide-react';
+import { Building2, Gift, LayoutGrid, LayoutDashboard, Box, Calendar } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/sidebar';
 import type { NavItem } from '@/types';
 import admin from '@/routes/admin';
+import { index as doacoesIndex } from '@/routes/doacoes';
 import { index as instituicoesIndex } from '@/routes/instituicoes';
 
 const doadorNavItems: NavItem[] = [
@@ -21,6 +22,11 @@ const doadorNavItems: NavItem[] = [
         title: 'Instituições',
         href: instituicoesIndex(),
         icon: LayoutGrid,
+    },
+    {
+        title: 'Minhas Doações',
+        href: doacoesIndex(),
+        icon: Gift,
     },
 ];
 
@@ -30,6 +36,21 @@ const instituicaoNavItems: NavItem[] = [
         href: '/instituicao/painel',
         icon: LayoutDashboard,
     },
+    {
+        title: 'Necessidades',
+        href: '/instituicao/necessidades',
+        icon: Box,
+    },
+    {
+        title: 'Horários Disponíveis',
+        href: '/instituicao/horarios',
+        icon: Calendar,
+    },
+    {
+        title: 'Doações Recebidas',
+        href: '/instituicao/doacoes',
+        icon: Gift,
+    }
 ];
 
 const adminNavItems: NavItem[] = [

@@ -29,16 +29,16 @@ const painelItems: PainelItem[] = [
         href: '/instituicao/necessidades',
     },
     {
-        title: 'Agendamentos',
-        description: 'Acompanhe os agendamentos de entrega de doações.',
+        title: 'Horários disponíveis',
+        description: 'Configure os dias e horários em que aceita receber ou coletar doações.',
         icon: Calendar,
-        href: null,
+        href: '/instituicao/horarios',
     },
     {
         title: 'Doações Recebidas',
-        description: 'Veja o histórico de doações recebidas e seus detalhes.',
+        description: 'Avalie as solicitações de doação pendentes.',
         icon: Gift,
-        href: null,
+        href: '/instituicao/doacoes',
     },
 ];
 

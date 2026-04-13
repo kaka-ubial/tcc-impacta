@@ -70,4 +70,9 @@ class Instituicao extends Model
         return $this->hasMany(Necessidade::class, 'instituicao_id', 'usuario_id');
     }
 
+    public function horarios(): HasMany
+    {
+        return $this->hasMany(HorarioDisponivel::class, 'instituicao_id', 'usuario_id');
+    }
+
 }

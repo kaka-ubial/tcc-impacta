@@ -1,8 +1,10 @@
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, Building2, FileText, Heart, MapPin, Package, Phone } from 'lucide-react';
-import { lazy, Suspense } from 'react';
+import { ArrowLeft, Building2, FileText, Heart, MapPin, Package, Phone, HandHeart } from 'lucide-react';
+import { lazy, Suspense, useState } from 'react';
 
 import { CausaBadge } from '@/components/causa-badge';
+import { DoacaoNecessidadesModal } from '@/components/doacao/DoacaoNecessidadesModal';
+import { SolicitacaoDoacaoModal } from '@/components/doacao/SolicitacaoDoacaoModal';
 import { VerificadaBadge } from '@/components/verificada-badge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,12 +12,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/app-layout';
 import { index as instituicoesIndex, show as instituicoesShow } from '@/routes/instituicoes';
-import type { BreadcrumbItem, InstituicaoDetalhe } from '@/types';
+import type { BreadcrumbItem, CategoriaItem, InstituicaoDetalhe } from '@/types';
 
 const MapEmbed = lazy(() => import('@/components/map-embed'));
 
 type Props = {
     instituicao: InstituicaoDetalhe;
+    categorias: CategoriaItem[];
 };
 
 const prioridadeConfig: Record<string, { variant: 'destructive' | 'default' | 'secondary'; label: string }> = {
@@ -25,10 +28,11 @@ const prioridadeConfig: Record<string, { variant: 'destructive' | 'default' | 's
 };
 
 function MapSection({ lat, lng, label }: { lat: number; lng: number; label: string }) {
+    
     const link = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=16/${lat}/${lng}`;
 
     return (
-        <div className="overflow-hidden rounded-xl border shadow-sm">
+        <div className="isolate overflow-hidden rounded-xl border shadow-sm">
             <div className="h-80">
                 <Suspense fallback={<div className="bg-muted h-full w-full animate-pulse" />}>
                     <MapEmbed lat={lat} lng={lng} label={label} />
@@ -49,9 +53,16 @@ function MapSection({ lat, lng, label }: { lat: number; lng: number; label: stri
     );
 }
 
-function NecessidadeCard({ n }: { n: InstituicaoDetalhe['necessidades_ativas'][number] }) {
+function NecessidadeCard({
+    n,
+    onAtender,
+}: {
+    n: InstituicaoDetalhe['necessidades_ativas'][number];
+    onAtender: () => void;
+}) {
     const pct = Math.min(100, Math.round((n.quantidade_atual / n.quantidade_objetivo) * 100));
     const cfg = prioridadeConfig[n.prioridade];
+    const isFull = n.quantidade_atual >= n.quantidade_objetivo;
 
     return (
         <div className="flex flex-col gap-2 rounded-lg border p-4">
@@ -78,11 +89,21 @@ function NecessidadeCard({ n }: { n: InstituicaoDetalhe['necessidades_ativas'][n
                     />
                 </div>
             </div>
+
+            {!isFull && (
+                <Button size="sm" variant="outline" className="mt-1 gap-1.5 self-end" onClick={onAtender}>
+                    <HandHeart className="size-3.5" />
+                    Atender necessidade
+                </Button>
+            )}
         </div>
     );
 }
 
-export default function InstituicaoShow({ instituicao }: Props) {
+export default function InstituicaoShow({ instituicao, categorias }: Props) {
+    const [modalOpen, setModalOpen] = useState(false);
+    const [necessidadeModalId, setNecessidadeModalId] = useState<number | null>(null);
+
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Instituições', href: instituicoesIndex() },
         { title: instituicao.nome_fantasia, href: instituicoesShow(instituicao.usuario_id) },
@@ -107,21 +128,24 @@ export default function InstituicaoShow({ instituicao }: Props) {
                             Voltar para lista
                         </Link>
 
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 mt-3">
                             <div className="bg-primary/10 text-primary flex size-12 shrink-0 items-center justify-center rounded-xl">
                                 <Building2 className="size-6" />
                             </div>
-                            <div className="flex flex-col gap-1">
-                                <h1 className="text-2xl font-bold leading-tight">
-                                    {instituicao.nome_fantasia}
-                                </h1>
-                                {instituicao.razao_social !== instituicao.nome_fantasia && (
+                            <div className="flex flex-col md:flex-row items-start md:items-center gap-2">
+                                     <h1 className="text-2xl font-bold leading-tight">
+                                        {instituicao.nome_fantasia}
+                                     </h1>
+                                     <VerificadaBadge verificada={instituicao.verificada} variant="full" />
+                            </div>
+                        </div>
+
+                        <div>
+                                  {instituicao.razao_social !== instituicao.nome_fantasia && (
                                     <p className="text-muted-foreground text-sm">
                                         {instituicao.razao_social}
                                     </p>
                                 )}
-                                <VerificadaBadge verificada={instituicao.verificada} variant="full" />
-                            </div>
                         </div>
 
                         {instituicao.causas.length > 0 && (
@@ -133,18 +157,18 @@ export default function InstituicaoShow({ instituicao }: Props) {
                         )}
                     </div>
 
-                    <Button size="lg" className="shrink-0 gap-2 sm:mt-8">
-                        <Heart className="size-4" />
-                        Quero Doar
-                    </Button>
+                    <div className="flex shrink-0 flex-col gap-2 sm:mt-8 sm:flex-row">
+                        <Button size="lg" className="gap-2" onClick={() => setModalOpen(true)}>
+                            <Heart className="size-4" />
+                            Quero Doar
+                        </Button>
+                    </div>
                 </div>
 
                 <Separator />
 
-                {/* Conteúdo principal */}
                 <div className="grid gap-6 lg:grid-cols-5">
 
-                    {/* Coluna esquerda — informações de contato */}
                     <div className="lg:col-span-2">
                         <Card>
                             <CardHeader className="pb-3">
@@ -169,7 +193,6 @@ export default function InstituicaoShow({ instituicao }: Props) {
                         </Card>
                     </div>
 
-                    {/* Coluna direita — descrição + necessidades */}
                     <div className="flex flex-col gap-6 lg:col-span-3">
 
                         {instituicao.descricao && (
@@ -204,13 +227,30 @@ export default function InstituicaoShow({ instituicao }: Props) {
                             ) : (
                                 <div className="flex flex-col gap-3">
                                     {instituicao.necessidades_ativas.map((n) => (
-                                        <NecessidadeCard key={n.id} n={n} />
+                                        <NecessidadeCard key={n.id} n={n} onAtender={() => setNecessidadeModalId(n.id)} />
                                     ))}
                                 </div>
                             )}
                         </div>
                     </div>
                 </div>
+
+                <SolicitacaoDoacaoModal
+                    open={modalOpen}
+                    onClose={() => setModalOpen(false)}
+                    instituicaoId={instituicao.usuario_id}
+                    categorias={categorias}
+                    horariosDisponiveis={instituicao.horarios_disponiveis}
+                />
+
+                <DoacaoNecessidadesModal
+                    open={necessidadeModalId !== null}
+                    onClose={() => setNecessidadeModalId(null)}
+                    instituicaoId={instituicao.usuario_id}
+                    necessidades={instituicao.necessidades_ativas}
+                    horariosDisponiveis={instituicao.horarios_disponiveis}
+                    initialNecessidadeId={necessidadeModalId ?? undefined}
+                />
 
                 {/* Mapa — largura total */}
                 {hasMap && (

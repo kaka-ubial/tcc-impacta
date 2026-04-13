@@ -20,6 +20,19 @@ export type Causa = {
     icone: string | null;
 };
 
+export type CategoriaItem = {
+    id: number;
+    nome: string;
+};
+
+export type HorarioDisponivel = {
+    id: number;
+    dia_semana: number; // 0=domingo … 6=sábado
+    hora_inicio: string; // "HH:MM:SS"
+    hora_fim: string;
+    tipo: 'coleta' | 'entrega';
+};
+
 export type NecessidadeAtiva = {
     id: number;
     descricao: string | null;
@@ -51,6 +64,7 @@ export type InstituicaoDetalhe = {
     longitude: number | null;
     causas: Causa[];
     necessidades_ativas: NecessidadeAtiva[];
+    horarios_disponiveis: HorarioDisponivel[];
 };
 
 
