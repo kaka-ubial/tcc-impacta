@@ -1,5 +1,5 @@
 import { Transition } from '@headlessui/react';
-import { Form, Head, Link, usePage } from '@inertiajs/react';
+import { Form, Head, Link, usePage, useForm } from '@inertiajs/react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import DeleteUser from '@/components/delete-user';
 import Heading from '@/components/heading';
@@ -15,7 +15,7 @@ import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Profile settings',
+        title: 'Perfil',
         href: edit(),
     },
 ];
@@ -28,6 +28,7 @@ export default function Profile({
     status?: string;
 }) {
     const { auth } = usePage().props;
+    const tipo = auth.user.tipo_usuario;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -39,8 +40,8 @@ export default function Profile({
                 <div className="space-y-6">
                     <Heading
                         variant="small"
-                        title="Profile information"
-                        description="Update your name and email address"
+                        title="Informações do perfil"
+                        description="Atualize suas informações"
                     />
 
                     <Form
@@ -50,11 +51,17 @@ export default function Profile({
                         }}
                         className="space-y-6"
                     >
-                        {({ processing, recentlySuccessful, errors }) => (
+                        {({ processing, recentlySuccessful, errors }) => {
+                            if (Object.keys(errors).length > 0) console.log('Erros:', errors);
+                        return (
                             <>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="email">Email address</Label>
-
+                                    <Input
+                                        type="hidden"
+                                        name="tipo_usuario"
+                                        defaultValue={auth.user.tipo_usuario}
+                                    />
+                                    <Label htmlFor="email">Endereço de email</Label>
                                     <Input
                                         id="email"
                                         type="email"
@@ -63,13 +70,73 @@ export default function Profile({
                                         name="email"
                                         required
                                         autoComplete="username"
-                                        placeholder="Email address"
+                                        placeholder="Endereço de email"
                                     />
 
                                     <InputError
                                         className="mt-2"
                                         message={errors.email}
                                     />
+
+                                    { tipo == 'instituicao' && (
+                                        <>
+                                            <Label htmlFor="email">Nome Fantasia</Label>
+                                            <Input
+                                                name="nome_fantasia"
+                                                defaultValue={auth.user.instituicao?.nome_fantasia}
+                                                placeholder="Nome Fantasia"
+                                            />
+                                            <Label htmlFor="email">Razão social</Label>
+                                            <Input
+                                                name="razao_social"
+                                                defaultValue={auth.user.instituicao?.razao_social}
+                                                placeholder="Razão social"
+                                            />
+                                            <Label htmlFor="email">CNPJ</Label>
+                                            <Input
+                                                name="cnpj"
+                                                defaultValue={auth.user.instituicao?.cnpj}
+                                                placeholder="CNPJ"
+                                            />
+                                            <Label htmlFor="email">Telefone</Label>
+                                            <Input
+                                                name="telefone_inst"
+                                                defaultValue={auth.user.instituicao?.telefone}
+                                                placeholder="Telefone"
+                                            />
+                                            <Label htmlFor="email">Endereço</Label>
+                                            <Input
+                                                name="endereco_completo"
+                                                defaultValue={auth.user.instituicao?.endereco_completo}
+                                                placeholder="Endereço"
+                                            />
+
+                                        </>
+                                    )}
+
+                                    { tipo === 'doador' && (
+                                        <>
+                                            <Label htmlFor='nome_completo'>Nome Completo</Label>
+                                            <Input
+                                                name='nome_completo'
+                                                defaultValue={auth.user.doador?.nome_completo}
+                                                placeholder='Nome completo'
+                                            />
+                                            <Label htmlFor='cpf'>CPF</Label>
+                                            <Input
+                                                name='cpf'
+                                                defaultValue={auth.user.doador?.cpf}
+                                                placeholder='CPF'
+                                            />
+                                            <Label htmlFor='telefone'>Telefone</Label>
+                                            <Input
+                                                name='telefone'
+                                                defaultValue={auth.user.doador?.telefone}
+                                                placeholder='Telefone'
+                                            />
+
+                                        </>
+                                    )}
                                 </div>
 
                                 {mustVerifyEmail &&
@@ -104,7 +171,7 @@ export default function Profile({
                                         disabled={processing}
                                         data-test="update-profile-button"
                                     >
-                                        Save
+                                        Salvar
                                     </Button>
 
                                     <Transition
@@ -115,12 +182,12 @@ export default function Profile({
                                         leaveTo="opacity-0"
                                     >
                                         <p className="text-sm text-neutral-600">
-                                            Saved
+                                            Salvo
                                         </p>
                                     </Transition>
                                 </div>
                             </>
-                        )}
+                        )}}
                     </Form>
                 </div>
 

@@ -15,13 +15,22 @@ import { cn } from '@/lib/utils';
 
 type TipoUsuario = 'doador' | 'instituicao' | null;
 
-const stepLabels = ['Acesso', 'Tipo de conta', 'Seus dados'];
+const stepLabels = ['Conta', 'Perfil', 'Informações', 'Causas'];
 
-export default function Register() {
-    const [step, setStep] = useState<1 | 2 | 3>(1);
+export default function Register({causas}: { causas: any[] }) {
+    const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
     const [tipo, setTipo] = useState<TipoUsuario>(null);
 
-    const { data, setData, post, processing, errors, reset } = useForm({
+    const toggleCausa = (id: number) => {
+        const current = data.causas_apoiadas
+        if (current.includes(id)) {
+            setData('causas_apoiadas', current.filter((item => item !== id)));
+        } else {
+            setData('causas_apoiadas', [...current, id]);
+        }
+    }
+
+    const { data, setData, post, processing, errors, reset, clearErrors    } = useForm({
         email: '',
         password: '',
         password_confirmation: '',
@@ -34,6 +43,7 @@ export default function Register() {
         cnpj: '',
         telefone_inst: '',
         endereco_completo: '',
+        causas_apoiadas: [] as number[],
     });
 
     function handleTipo(t: 'doador' | 'instituicao') {
@@ -41,12 +51,21 @@ export default function Register() {
         setData('tipo_usuario', t);
     }
 
+    function handleStepOne() {
+        clearErrors();
+        post('/validate/register-step-one', {
+            preserveScroll: true,
+            onSuccess: () => {setStep(2)},
+        });           
+    }
+
+
     function nextStep() {
-        setStep((s) => (s < 3 ? ((s + 1) as 2 | 3) : s));
+        setStep((s) => (s < 4 ? ((s + 1) as any) : s));
     }
 
     function prevStep() {
-        setStep((s) => (s > 1 ? ((s - 1) as 1 | 2) : s));
+        setStep((s) => (s > 1 ? ((s - 1) as any) : s));
     }
 
     function submit(e: React.FormEvent) {
@@ -168,7 +187,7 @@ export default function Register() {
                                         <Button
                                             type="button"
                                             className="w-full"
-                                            onClick={nextStep}
+                                            onClick={handleStepOne}
                                             disabled={!data.email || !data.password || !data.password_confirmation}
                                         >
                                             Continuar
@@ -304,12 +323,13 @@ export default function Register() {
                                                 Voltar
                                             </Button>
                                             <Button
-                                                type="submit"
+                                                type="button"
                                                 className="flex-1"
+                                                onClick={nextStep}
                                                 disabled={processing}
                                             >
                                                 {processing && <Spinner />}
-                                                Criar conta
+                                                Próximo
                                             </Button>
                                         </div>
                                     </div>
@@ -389,12 +409,59 @@ export default function Register() {
                                                 Voltar
                                             </Button>
                                             <Button
-                                                type="submit"
+                                                type="button"
                                                 className="flex-1"
-                                                disabled={processing}
+                                                onClick={nextStep}
                                             >
                                                 {processing && <Spinner />}
-                                                Criar conta
+                                                Próximo
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Step 4 — Causas Apoiadas */}
+                                {step === 4 && (
+                                    <div className="grid gap-4 animate-in fade-in slide-in-from-right-4 duration-300">
+                                        <p className="text-sm text-muted-foreground text-center">Quais causas você deseja apoiar?</p>
+                                        <div className="grid grid-cols-2 gap-2 overflow-y-auto p-1 border rounded-md">
+                                        {causas?.map((causa) => {
+                                            const isSelected = data.causas_apoiadas.includes(causa.id);
+                                            
+                                            return (
+                                                <button
+                                                key={causa.id || `causa-${causa.nome}`}
+                                                    type="button"
+                                                    onClick={() => toggleCausa(causa.id)}
+                                                    className={cn(
+                                                        "flex items-center justify-between rounded-xl border-2 p-3 text-left transition-all duration-200",
+                                                        isSelected 
+                                                            ? "border-primary bg-primary/5 ring-1 ring-primary" 
+                                                            : "border-muted hover:border-muted-foreground/30 bg-card"
+                                                    )}
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={cn(
+                                                            "flex h-5 w-5 items-center justify-center rounded-full border transition-colors",
+                                                            isSelected ? "bg-primary border-primary" : "border-muted-foreground/40"
+                                                        )}>
+                                                            {isSelected && <div className="h-2 w-2 rounded-full bg-white" />}
+                                                        </div>
+                                                        <span className={cn(
+                                                            "text-sm font-medium",
+                                                            isSelected ? "text-foreground" : "text-muted-foreground"
+                                                        )}>
+                                                            {causa.nome}
+                                                        </span>
+                                                    </div>
+                                                </button>
+                                            );
+                                        })}
+                                        </div>
+                                        <div className="flex gap-2 pt-2">
+                                            <Button type="button" variant="ghost" className="flex-1" onClick={prevStep}>Voltar</Button>
+                                            <Button type="submit" className="flex-1" disabled={processing || data.causas_apoiadas.length === 0}>
+                                                {processing ? 'Criando...' : 'Finalizar Cadastro'}
                                             </Button>
                                         </div>
                                     </div>
