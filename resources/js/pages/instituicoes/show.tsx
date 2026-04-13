@@ -3,6 +3,7 @@ import { ArrowLeft, Building2, FileText, Heart, MapPin, Package, Phone } from 'l
 import { lazy, Suspense, useState } from 'react';
 
 import { CausaBadge } from '@/components/causa-badge';
+import { DoacaoNecessidadesModal } from '@/components/doacao/DoacaoNecessidadesModal';
 import { SolicitacaoDoacaoModal } from '@/components/doacao/SolicitacaoDoacaoModal';
 import { VerificadaBadge } from '@/components/verificada-badge';
 import { Badge } from '@/components/ui/badge';
@@ -86,6 +87,7 @@ function NecessidadeCard({ n }: { n: InstituicaoDetalhe['necessidades_ativas'][n
 
 export default function InstituicaoShow({ instituicao, categorias }: Props) {
     const [modalOpen, setModalOpen] = useState(false);
+    const [necessidadesModalOpen, setNecessidadesModalOpen] = useState(false);
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Instituições', href: instituicoesIndex() },
@@ -137,10 +139,18 @@ export default function InstituicaoShow({ instituicao, categorias }: Props) {
                         )}
                     </div>
 
-                    <Button size="lg" className="shrink-0 gap-2 sm:mt-8" onClick={() => setModalOpen(true)}>
-                        <Heart className="size-4" />
-                        Quero Doar
-                    </Button>
+                    <div className="flex shrink-0 flex-col gap-2 sm:mt-8 sm:flex-row">
+                        {instituicao.necessidades_ativas.length > 0 && (
+                            <Button size="lg" variant="outline" className="gap-2" onClick={() => setNecessidadesModalOpen(true)}>
+                                <Package className="size-4" />
+                                Atender necessidades
+                            </Button>
+                        )}
+                        <Button size="lg" className="gap-2" onClick={() => setModalOpen(true)}>
+                            <Heart className="size-4" />
+                            Quero Doar
+                        </Button>
+                    </div>
                 </div>
 
                 <Separator />
@@ -221,6 +231,14 @@ export default function InstituicaoShow({ instituicao, categorias }: Props) {
                     onClose={() => setModalOpen(false)}
                     instituicaoId={instituicao.usuario_id}
                     categorias={categorias}
+                    horariosDisponiveis={instituicao.horarios_disponiveis}
+                />
+
+                <DoacaoNecessidadesModal
+                    open={necessidadesModalOpen}
+                    onClose={() => setNecessidadesModalOpen(false)}
+                    instituicaoId={instituicao.usuario_id}
+                    necessidades={instituicao.necessidades_ativas}
                     horariosDisponiveis={instituicao.horarios_disponiveis}
                 />
 

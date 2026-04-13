@@ -36,9 +36,9 @@ const painelItems: PainelItem[] = [
     },
     {
         title: 'Doações Recebidas',
-        description: 'Veja o histórico de doações recebidas e seus detalhes.',
+        description: 'Avalie as solicitações de doação pendentes.',
         icon: Gift,
-        href: null,
+        href: '/instituicao/doacoes',
     },
 ];
 

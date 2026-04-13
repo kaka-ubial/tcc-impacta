@@ -1,4 +1,4 @@
-import { useForm } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 import { Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -77,7 +77,8 @@ export function SolicitacaoDoacaoModal({ open, onClose, instituicaoId, categoria
     const [dataHora, setDataHora] = useState('');
     const [enderecoReferencia, setEnderecoReferencia] = useState('');
 
-    const { post, processing, errors, reset } = useForm();
+    const [processing, setProcessing] = useState(false);
+    const { errors } = usePage().props as { errors: Record<string, string> };
 
     const upcomingDates = buildUpcomingDates(horariosDisponiveis, tipo);
     const hasHorarios = upcomingDates.length > 0;
@@ -100,7 +101,6 @@ export function SolicitacaoDoacaoModal({ open, onClose, instituicaoId, categoria
         setTipo('entrega');
         setDataHora('');
         setEnderecoReferencia('');
-        reset();
         onClose();
     }
 
@@ -115,8 +115,10 @@ export function SolicitacaoDoacaoModal({ open, onClose, instituicaoId, categoria
     }
 
     function handleSubmit() {
-        post(doacoesStore().url, {
-            data: {
+        setProcessing(true);
+        router.post(
+            doacoesStore().url,
+            {
                 instituicao_id: instituicaoId,
                 itens: itens.map((it) => ({
                     categoria_id: Number(it.categoria_id),
@@ -129,8 +131,11 @@ export function SolicitacaoDoacaoModal({ open, onClose, instituicaoId, categoria
                     endereco_referencia: tipo === 'coleta' ? enderecoReferencia : null,
                 },
             },
-            onSuccess: handleClose,
-        });
+            {
+                onSuccess: () => { setProcessing(false); handleClose(); },
+                onError: () => setProcessing(false),
+            },
+        );
     }
 
     return (

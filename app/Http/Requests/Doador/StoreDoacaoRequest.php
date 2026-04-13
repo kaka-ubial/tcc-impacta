@@ -16,6 +16,7 @@ class StoreDoacaoRequest extends FormRequest
         return [
             'instituicao_id'                    => ['required', 'integer', 'exists:instituicao,usuario_id'],
             'itens'                             => ['required', 'array', 'min:1'],
+            'itens.*.necessidade_id'            => ['nullable', 'integer', 'exists:necessidades,id'],
             'itens.*.categoria_id'              => ['required', 'integer', 'exists:categorias_itens,id'],
             'itens.*.quantidade'                => ['required', 'integer', 'min:1'],
             'itens.*.descricao'                 => ['nullable', 'string', 'max:255'],

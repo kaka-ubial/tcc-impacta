@@ -27,3 +27,6 @@ yarn-error.log
 /.vscode
 /.zed
 CLAUDE.md
+.claude
+.agents
+skills-lock.json

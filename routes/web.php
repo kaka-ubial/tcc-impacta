@@ -12,6 +12,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\Admin\InstitutionCheckController;
 use App\Http\Middleware\CheckAdmin;
 use App\Http\Controllers\Doador\DoacaoController;
+use App\Http\Controllers\Instituicao\DoacaoController as InstituicaoDoacaoController;
 use App\Http\Controllers\Instituicao\HorarioController;
 use App\Http\Controllers\Instituicao\InstituicaoController;
 use App\Http\Controllers\NecessidadeController;
@@ -35,12 +36,18 @@ Route::middleware(['auth', 'verified', CheckInstituicao::class, EnsureInstitutio
     Route::get('necessidades/create', [NecessidadeController::class, 'create'])->name('necessidades.create');
     Route::put('necessidades/{id}', [NecessidadeController::class, 'update'])->name('necessidades.update')->middleware(CheckNecessidadeOwnership::class);
     Route::delete('necessidades/{id}', [NecessidadeController::class, 'destroy'])->name('necessidades.destroy')->middleware(CheckNecessidadeOwnership::class);
+    Route::get('doacoes', [InstituicaoDoacaoController::class, 'index'])->name('doacoes.index');
+    Route::post('doacoes/{doacao}/confirm', [InstituicaoDoacaoController::class, 'confirm'])->name('doacoes.confirm');
+    Route::post('doacoes/{doacao}/reject', [InstituicaoDoacaoController::class, 'reject'])->name('doacoes.reject');
+    Route::post('doacoes/{doacao}/deliver', [InstituicaoDoacaoController::class, 'deliver'])->name('doacoes.deliver');
 });
 
 Route::middleware(['auth', 'verified', CheckDoador::class])->group(function () {
     Route::get('instituicoes', [InstituicaoController::class, 'index'])->name('instituicoes.index');
     Route::get('instituicoes/{id}', [InstituicaoController::class, 'show'])->name('instituicoes.show');
+    Route::get('doacoes', [DoacaoController::class, 'index'])->name('doacoes.index');
     Route::post('doacoes', [DoacaoController::class, 'store'])->name('doacoes.store');
+    Route::post('doacoes/{doacao}/cancel', [DoacaoController::class, 'cancel'])->name('doacoes.cancel');
 });
 
 Route::middleware(['auth', CheckAdmin::class])->prefix('admin')->name('admin.')->group(function () {

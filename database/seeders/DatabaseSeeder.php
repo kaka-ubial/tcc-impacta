@@ -26,5 +26,7 @@ class DatabaseSeeder extends Seeder
                 );
             });
         $this->call(CategoriaItemSeeder::class);
+        $this->call(AdminUserSeeder::class);
+        $this->call(CausaSeeder::class);
     }
 }

@@ -11,6 +11,7 @@ class ItemDoacao extends Model
 
     protected $fillable = [
         'doacao_id',
+        'necessidade_id',
         'categoria_id',
         'descricao',
         'quantidade',
@@ -31,5 +32,10 @@ class ItemDoacao extends Model
     public function categoria(): BelongsTo
     {
         return $this->belongsTo(CategoriaItem::class, 'categoria_id');
+    }
+
+    public function necessidade(): BelongsTo
+    {
+        return $this->belongsTo(Necessidade::class, 'necessidade_id');
     }
 }
