@@ -12,19 +12,14 @@ import { Separator } from '@/components/ui/separator';
 import { store as doacoesStore } from '@/routes/doacoes';
 import type { CategoriaItem, HorarioDisponivel } from '@/types';
 
-// ─── helpers ────────────────────────────────────────────────────────────────
-
 const DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
 function fmt(hora: string) {
     return hora.slice(0, 5); // "HH:MM"
 }
 
-/**
- * Returns the next `weeks` occurrences of each (dia_semana, hora_inicio) pair.
- * Only future datetimes are included.
- */
-function buildUpcomingDates(horarios: HorarioDisponivel[], tipo: 'coleta' | 'entrega', weeks = 4) {
+
+function buildUpcomingDates(horarios: HorarioDisponivel[], tipo: 'coleta' | 'entrega', weeks = 2) {
     const filtered = horarios.filter((h) => h.tipo === tipo);
     const now = new Date();
     const results: { label: string; value: string; horarioId: number }[] = [];
@@ -32,8 +27,8 @@ function buildUpcomingDates(horarios: HorarioDisponivel[], tipo: 'coleta' | 'ent
     for (const h of filtered) {
         for (let w = 0; w < weeks; w++) {
             const d = new Date(now);
-            const diff = (h.dia_semana - d.getDay() + 7 + w * 7) % 7 || (w === 0 ? 7 : 0);
-            d.setDate(d.getDate() + diff);
+            const dayDiff = (h.dia_semana - d.getDay() + 7) % 7;
+            d.setDate(d.getDate() + dayDiff + w * 7);
             const [hh, mm] = h.hora_inicio.split(':');
             d.setHours(Number(hh), Number(mm), 0, 0);
             if (d > now) {
@@ -50,7 +45,6 @@ function buildUpcomingDates(horarios: HorarioDisponivel[], tipo: 'coleta' | 'ent
     return results.sort((a, b) => a.value.localeCompare(b.value));
 }
 
-// ─── tipos internos ──────────────────────────────────────────────────────────
 
 type Item = {
     categoria_id: string;
@@ -68,7 +62,6 @@ type Props = {
 
 const STEPS = ['Itens', 'Agendamento', 'Confirmação'] as const;
 
-// ─── componente principal ────────────────────────────────────────────────────
 
 export function SolicitacaoDoacaoModal({ open, onClose, instituicaoId, categorias, horariosDisponiveis }: Props) {
     const [step, setStep] = useState(0);
@@ -199,7 +192,7 @@ export function SolicitacaoDoacaoModal({ open, onClose, instituicaoId, categoria
                                             </button>
                                         )}
                                     </div>
-                                    <div className="grid grid-cols-2 gap-2">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                         <div className="flex flex-col gap-1">
                                             <Label className="text-xs">Categoria</Label>
                                             <Select

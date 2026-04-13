@@ -1,5 +1,5 @@
 import { router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,9 +17,9 @@ type Props = {
     instituicaoId: number;
     necessidades: NecessidadeAtiva[];
     horariosDisponiveis: HorarioDisponivel[];
+    initialNecessidadeId?: number;
 };
 
-// ─── helpers ─────────────────────────────────────────────────────────────────
 
 const DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
@@ -27,7 +27,7 @@ function fmt(hora: string) {
     return hora.slice(0, 5);
 }
 
-function buildUpcomingDates(horarios: HorarioDisponivel[], tipo: 'coleta' | 'entrega', weeks = 4) {
+function buildUpcomingDates(horarios: HorarioDisponivel[], tipo: 'coleta' | 'entrega', weeks = 2) {
     const filtered = horarios.filter((h) => h.tipo === tipo);
     const now = new Date();
     const results: { label: string; value: string }[] = [];
@@ -35,8 +35,8 @@ function buildUpcomingDates(horarios: HorarioDisponivel[], tipo: 'coleta' | 'ent
     for (const h of filtered) {
         for (let w = 0; w < weeks; w++) {
             const d = new Date(now);
-            const diff = (h.dia_semana - d.getDay() + 7 + w * 7) % 7 || (w === 0 ? 7 : 0);
-            d.setDate(d.getDate() + diff);
+            const dayDiff = (h.dia_semana - d.getDay() + 7) % 7;
+            d.setDate(d.getDate() + dayDiff + w * 7);
             const [hh, mm] = h.hora_inicio.split(':');
             d.setHours(Number(hh), Number(mm), 0, 0);
             if (d > now) {
@@ -59,11 +59,16 @@ const prioridadeConfig = {
 
 const STEPS = ['Necessidades', 'Agendamento', 'Confirmação'] as const;
 
-// ─── component ───────────────────────────────────────────────────────────────
 
-export function DoacaoNecessidadesModal({ open, onClose, instituicaoId, necessidades, horariosDisponiveis }: Props) {
+export function DoacaoNecessidadesModal({ open, onClose, instituicaoId, necessidades, horariosDisponiveis, initialNecessidadeId }: Props) {
     const [step, setStep] = useState(0);
     const [selected, setSelected] = useState<Record<number, number>>({});
+
+    useEffect(() => {
+        if (open && initialNecessidadeId !== undefined) {
+            setSelected({ [initialNecessidadeId]: 1 });
+        }
+    }, [open, initialNecessidadeId]);
     const [tipo, setTipo] = useState<'coleta' | 'entrega'>('entrega');
     const [dataHora, setDataHora] = useState('');
     const [enderecoReferencia, setEnderecoReferencia] = useState('');

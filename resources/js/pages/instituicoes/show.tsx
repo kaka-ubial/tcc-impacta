@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, Building2, FileText, Heart, MapPin, Package, Phone } from 'lucide-react';
+import { ArrowLeft, Building2, FileText, Heart, MapPin, Package, Phone, HandHeart } from 'lucide-react';
 import { lazy, Suspense, useState } from 'react';
 
 import { CausaBadge } from '@/components/causa-badge';
@@ -53,9 +53,16 @@ function MapSection({ lat, lng, label }: { lat: number; lng: number; label: stri
     );
 }
 
-function NecessidadeCard({ n }: { n: InstituicaoDetalhe['necessidades_ativas'][number] }) {
+function NecessidadeCard({
+    n,
+    onAtender,
+}: {
+    n: InstituicaoDetalhe['necessidades_ativas'][number];
+    onAtender: () => void;
+}) {
     const pct = Math.min(100, Math.round((n.quantidade_atual / n.quantidade_objetivo) * 100));
     const cfg = prioridadeConfig[n.prioridade];
+    const isFull = n.quantidade_atual >= n.quantidade_objetivo;
 
     return (
         <div className="flex flex-col gap-2 rounded-lg border p-4">
@@ -82,13 +89,20 @@ function NecessidadeCard({ n }: { n: InstituicaoDetalhe['necessidades_ativas'][n
                     />
                 </div>
             </div>
+
+            {!isFull && (
+                <Button size="sm" variant="outline" className="mt-1 gap-1.5 self-end" onClick={onAtender}>
+                    <HandHeart className="size-3.5" />
+                    Atender necessidade
+                </Button>
+            )}
         </div>
     );
 }
 
 export default function InstituicaoShow({ instituicao, categorias }: Props) {
     const [modalOpen, setModalOpen] = useState(false);
-    const [necessidadesModalOpen, setNecessidadesModalOpen] = useState(false);
+    const [necessidadeModalId, setNecessidadeModalId] = useState<number | null>(null);
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Instituições', href: instituicoesIndex() },
@@ -118,19 +132,20 @@ export default function InstituicaoShow({ instituicao, categorias }: Props) {
                             <div className="bg-primary/10 text-primary flex size-12 shrink-0 items-center justify-center rounded-xl">
                                 <Building2 className="size-6" />
                             </div>
-                            <div className="flex flex-col gap-1">
-                                <div className='flex gap-2 items-center'>
+                            <div className="flex flex-col md:flex-row items-start md:items-center gap-2">
                                      <h1 className="text-2xl font-bold leading-tight">
                                         {instituicao.nome_fantasia}
                                      </h1>
                                      <VerificadaBadge verificada={instituicao.verificada} variant="full" />
-                                </div>
-                                      {instituicao.razao_social !== instituicao.nome_fantasia && (
+                            </div>
+                        </div>
+
+                        <div>
+                                  {instituicao.razao_social !== instituicao.nome_fantasia && (
                                     <p className="text-muted-foreground text-sm">
                                         {instituicao.razao_social}
                                     </p>
                                 )}
-                            </div>
                         </div>
 
                         {instituicao.causas.length > 0 && (
@@ -143,12 +158,6 @@ export default function InstituicaoShow({ instituicao, categorias }: Props) {
                     </div>
 
                     <div className="flex shrink-0 flex-col gap-2 sm:mt-8 sm:flex-row">
-                        {instituicao.necessidades_ativas.length > 0 && (
-                            <Button size="lg" variant="outline" className="gap-2" onClick={() => setNecessidadesModalOpen(true)}>
-                                <Package className="size-4" />
-                                Atender necessidades
-                            </Button>
-                        )}
                         <Button size="lg" className="gap-2" onClick={() => setModalOpen(true)}>
                             <Heart className="size-4" />
                             Quero Doar
@@ -158,10 +167,8 @@ export default function InstituicaoShow({ instituicao, categorias }: Props) {
 
                 <Separator />
 
-                {/* Conteúdo principal */}
                 <div className="grid gap-6 lg:grid-cols-5">
 
-                    {/* Coluna esquerda — informações de contato */}
                     <div className="lg:col-span-2">
                         <Card>
                             <CardHeader className="pb-3">
@@ -186,7 +193,6 @@ export default function InstituicaoShow({ instituicao, categorias }: Props) {
                         </Card>
                     </div>
 
-                    {/* Coluna direita — descrição + necessidades */}
                     <div className="flex flex-col gap-6 lg:col-span-3">
 
                         {instituicao.descricao && (
@@ -221,7 +227,7 @@ export default function InstituicaoShow({ instituicao, categorias }: Props) {
                             ) : (
                                 <div className="flex flex-col gap-3">
                                     {instituicao.necessidades_ativas.map((n) => (
-                                        <NecessidadeCard key={n.id} n={n} />
+                                        <NecessidadeCard key={n.id} n={n} onAtender={() => setNecessidadeModalId(n.id)} />
                                     ))}
                                 </div>
                             )}
@@ -238,11 +244,12 @@ export default function InstituicaoShow({ instituicao, categorias }: Props) {
                 />
 
                 <DoacaoNecessidadesModal
-                    open={necessidadesModalOpen}
-                    onClose={() => setNecessidadesModalOpen(false)}
+                    open={necessidadeModalId !== null}
+                    onClose={() => setNecessidadeModalId(null)}
                     instituicaoId={instituicao.usuario_id}
                     necessidades={instituicao.necessidades_ativas}
                     horariosDisponiveis={instituicao.horarios_disponiveis}
+                    initialNecessidadeId={necessidadeModalId ?? undefined}
                 />
 
                 {/* Mapa — largura total */}
