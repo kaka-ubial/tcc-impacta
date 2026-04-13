@@ -28,6 +28,7 @@ const prioridadeConfig: Record<string, { variant: 'destructive' | 'default' | 's
 };
 
 function MapSection({ lat, lng, label }: { lat: number; lng: number; label: string }) {
+    
     const link = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=16/${lat}/${lng}`;
 
     return (
@@ -113,20 +114,22 @@ export default function InstituicaoShow({ instituicao, categorias }: Props) {
                             Voltar para lista
                         </Link>
 
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 mt-3">
                             <div className="bg-primary/10 text-primary flex size-12 shrink-0 items-center justify-center rounded-xl">
                                 <Building2 className="size-6" />
                             </div>
                             <div className="flex flex-col gap-1">
-                                <h1 className="text-2xl font-bold leading-tight">
-                                    {instituicao.nome_fantasia}
-                                </h1>
-                                {instituicao.razao_social !== instituicao.nome_fantasia && (
+                                <div className='flex gap-2 items-center'>
+                                     <h1 className="text-2xl font-bold leading-tight">
+                                        {instituicao.nome_fantasia}
+                                     </h1>
+                                     <VerificadaBadge verificada={instituicao.verificada} variant="full" />
+                                </div>
+                                      {instituicao.razao_social !== instituicao.nome_fantasia && (
                                     <p className="text-muted-foreground text-sm">
                                         {instituicao.razao_social}
                                     </p>
                                 )}
-                                <VerificadaBadge verificada={instituicao.verificada} variant="full" />
                             </div>
                         </div>
 

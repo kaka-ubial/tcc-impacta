@@ -314,7 +314,7 @@ export function SolicitacaoDoacaoModal({ open, onClose, instituicaoId, categoria
                             <div className="flex items-center gap-2">
                                 <span className="text-muted-foreground w-24 shrink-0">Tipo:</span>
                                 <Badge variant="outline">
-                                    {tipo === 'entrega' ? 'Entrega (eu levo)' : 'Coleta (buscam em mim)'}
+                                    {tipo === 'entrega' ? 'Entrega (eu levo)' : 'Coleta (buscam)'}
                                 </Badge>
                             </div>
                             <div className="flex flex-col gap-1">
