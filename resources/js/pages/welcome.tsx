@@ -1,7 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { login, redirect, register } from '@/routes';
 
-
+//função para a página de boas vindas, caso o usuário esteja logado, ele é redirecionado para o painel da instituição, caso contrário, ele pode escolher entre fazer login ou se registrar
 export default function Welcome({
     canRegister = true,
 }: {
