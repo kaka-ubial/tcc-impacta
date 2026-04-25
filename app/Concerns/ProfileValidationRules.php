@@ -19,24 +19,26 @@ trait ProfileValidationRules
         return [
             'email'             => $this->emailRules($userId),
             'tipo_usuario'      => ['required', 'in:doador,instituicao'],
-            'nome_completo'     => ['exclude_unless:tipo_usuario,doador', 'required', 'string', 'max:255'],
+            'nome_completo'     => ['exclude_unless:tipo_usuario,doador', 'required', 'string', 'min:2', 'max:255'],
             'cpf' => [
                 'exclude_unless:tipo_usuario,doador',
                 'required',
                 'string',
                 new Cpf(),
-            ],            
-            'telefone'          => ['exclude_unless:tipo_usuario,doador', 'required', 'string', 'max:20'],
-            'nome_fantasia'     => ['exclude_unless:tipo_usuario,instituicao', 'required', 'string', 'max:255'],
-            'razao_social'      => ['exclude_unless:tipo_usuario,instituicao', 'required', 'string', 'max:255'],
+            ],
+            'telefone'          => ['exclude_unless:tipo_usuario,doador', 'required', 'string', 'regex:/^\(\d{2}\)\s\d{4,5}-\d{4}$/'],
+            'nome_fantasia'     => ['exclude_unless:tipo_usuario,instituicao', 'required', 'string', 'min:2', 'max:255'],
+            'razao_social'      => ['exclude_unless:tipo_usuario,instituicao', 'required', 'string', 'min:2', 'max:255'],
             'cnpj' => [
                 'exclude_unless:tipo_usuario,instituicao',
                 'required',
                 'string',
                 new Cnpj(),
-            ],            
-            'telefone_inst'     => ['exclude_unless:tipo_usuario,instituicao', 'required', 'string', 'max:20'],
-            'endereco_completo' => ['exclude_unless:tipo_usuario,instituicao', 'required', 'string', 'max:255'],
+            ],
+            'telefone_inst'     => ['exclude_unless:tipo_usuario,instituicao', 'required', 'string', 'regex:/^\(\d{2}\)\s\d{4,5}-\d{4}$/'],
+            'endereco_completo' => ['exclude_unless:tipo_usuario,instituicao', 'required', 'string', 'min:10', 'max:500'],
+            'causas_apoiadas'   => ['sometimes', 'array', 'min:1'],
+            'causas_apoiadas.*' => ['integer', 'exists:causas,id'],
         ];
     }
 
