@@ -66,8 +66,6 @@ export function validateCnpj(cnpj: string): boolean {
     return rest === Number(digits[13]);
 }
 
-// ── Validação Declarativa ─────────────────────────────────────────────
-
 type ValidationRule = (value: string) => string | null;
 
 type FieldRules = Record<string, ValidationRule[]>;
@@ -86,8 +84,6 @@ export function runValidation(data: Record<string, string>, fieldRules: FieldRul
     }
     return errors;
 }
-
-// Validadores individuais (usados pelos rules e exportados para onBlur avulso)
 
 export function validatePassword(password: string): string | null {
     if (password.length < 8) return 'A senha deve ter pelo menos 8 caracteres';
