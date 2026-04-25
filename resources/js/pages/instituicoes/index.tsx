@@ -1,9 +1,10 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { ChevronLeft, ChevronRight, MapPin, Package, Search } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { ChevronLeft, ChevronRight, MapPin, Package, Search, Tag, X } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { CausaBadge } from '@/components/causa-badge';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { VerificadaBadge } from '@/components/verificada-badge';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
     Pagination,
@@ -12,10 +13,9 @@ import {
     PaginationLink,
 } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
-import { VerificadaBadge } from '@/components/verificada-badge';
 import AppLayout from '@/layouts/app-layout';
 import { index as instituicoesIndex, show as instituicoesShow } from '@/routes/instituicoes';
-import type { BreadcrumbItem, InstituicaoListItem, SimplePaginated } from '@/types';
+import type { BreadcrumbItem, Causa, InstituicaoListItem, SimplePaginated } from '@/types';
 
 type Props = {
     instituicoes: SimplePaginated<InstituicaoListItem>;
@@ -28,17 +28,58 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 function CardSkeleton() {
     return (
-        <div className="flex flex-col gap-3 rounded-xl border p-6">
-            <Skeleton className="h-5 w-3/5" />
-            <div className="flex items-start gap-1.5">
-                <Skeleton className="mt-0.5 size-4 shrink-0 rounded" />
-                <Skeleton className="h-4 w-4/5" />
+        <div className="flex flex-col gap-0 overflow-hidden rounded-2xl border border-border bg-card">
+            <div className="flex flex-col gap-3 p-5 pb-4">
+                <Skeleton className="h-5 w-3/5" />
+                <div className="flex items-center gap-1.5">
+                    <Skeleton className="size-3 rounded-full shrink-0" />
+                    <Skeleton className="h-3.5 w-4/5" />
+                </div>
+                <div className="flex gap-1.5">
+                    <Skeleton className="h-5 w-16 rounded-full" />
+                    <Skeleton className="h-5 w-20 rounded-full" />
+                </div>
             </div>
-            <div className="flex gap-1">
-                <Skeleton className="h-5 w-16 rounded-full" />
-                <Skeleton className="h-5 w-20 rounded-full" />
+            <div className="mt-auto border-t border-border px-5 py-3">
+                <Skeleton className="h-3.5 w-2/5" />
             </div>
-            <Skeleton className="h-4 w-2/5" />
+        </div>
+    );
+}
+
+function EmptyState({ hasSearch, onClear }: { hasSearch: boolean; onClear: () => void }) {
+    return (
+        <div className="flex flex-col items-center gap-5 py-20 text-center">
+            <svg
+                width="72"
+                height="72"
+                viewBox="0 0 72 72"
+                fill="none"
+                aria-hidden
+                className="text-muted-foreground/30"
+            >
+                <rect x="10" y="28" width="44" height="34" rx="6" stroke="currentColor" strokeWidth="2" />
+                <path d="M10 40 Q32 47 54 40" stroke="currentColor" strokeWidth="1.5" strokeDasharray="4 3" />
+                <circle cx="52" cy="20" r="11" stroke="currentColor" strokeWidth="2" />
+                <path d="M59.5 28L66 35" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <path d="M46 20h12M52 14v12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+            <div>
+                <p className="font-semibold text-foreground">
+                    {hasSearch ? 'Nenhuma instituição encontrada' : 'Nenhuma instituição cadastrada'}
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                    {hasSearch
+                        ? 'Tente buscar por outro nome ou limpe o filtro.'
+                        : 'Novas instituições serão listadas aqui assim que aprovadas.'}
+                </p>
+            </div>
+            {hasSearch && (
+                <Button variant="outline" size="sm" onClick={onClear}>
+                    <X className="size-3.5" />
+                    Limpar busca
+                </Button>
+            )}
         </div>
     );
 }
@@ -46,6 +87,7 @@ function CardSkeleton() {
 export default function InstituicoesIndex({ instituicoes, filters }: Props) {
     const [search, setSearch] = useState(filters.search);
     const [searching, setSearching] = useState(false);
+    const [selectedCausa, setSelectedCausa] = useState<number | null>(null);
     const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
     useEffect(() => {
@@ -53,9 +95,32 @@ export default function InstituicoesIndex({ instituicoes, filters }: Props) {
         setSearching(false);
     }, [filters.search]);
 
+    // Derive unique causas from loaded page data
+    const allCausas = useMemo<Causa[]>(() => {
+        const seen = new Set<number>();
+        const result: Causa[] = [];
+        for (const inst of instituicoes.data) {
+            for (const causa of inst.causas) {
+                if (!seen.has(causa.id)) {
+                    seen.add(causa.id);
+                    result.push(causa);
+                }
+            }
+        }
+        return result;
+    }, [instituicoes.data]);
+
+    const visibleInstitutions = useMemo(() => {
+        if (!selectedCausa) return instituicoes.data;
+        return instituicoes.data.filter((inst) =>
+            inst.causas.some((c) => c.id === selectedCausa),
+        );
+    }, [instituicoes.data, selectedCausa]);
+
     const handleSearch = useCallback((value: string) => {
         setSearch(value);
         setSearching(true);
+        setSelectedCausa(null);
         clearTimeout(timer.current);
         timer.current = setTimeout(() => {
             router.get(
@@ -73,123 +138,187 @@ export default function InstituicoesIndex({ instituicoes, filters }: Props) {
         }, 300);
     }, []);
 
-    const hasPagination = instituicoes.prev_page_url !== null || instituicoes.next_page_url !== null;
+    const hasPagination =
+        instituicoes.prev_page_url !== null || instituicoes.next_page_url !== null;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Instituições" />
 
-            <div className="flex flex-col gap-6 p-6">
-                <div className="flex flex-col gap-1">
-                    <h1 className="text-2xl font-semibold">Instituições</h1>
-                    <p className="text-muted-foreground text-sm">
-                        Encontre instituições e veja suas necessidades ativas.
-                    </p>
-                </div>
+            <div className="flex flex-col gap-0">
 
-                <div className="relative max-w-sm">
-                    <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
-                    <Input
-                        placeholder="Buscar por nome..."
-                        className="pl-9"
-                        value={search}
-                        onChange={(e) => handleSearch(e.target.value)}
-                    />
-                </div>
+                {/* ── Page header ─────────────────────────────── */}
+                <div className="border-b border-border bg-card px-6 py-8">
+                    <div className="mx-auto max-w-5xl">
+                        <h1 className="font-display text-2xl font-bold text-foreground md:text-3xl">
+                            Instituições
+                        </h1>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                            Encontre instituições verificadas e veja suas necessidades ativas.
+                        </p>
 
-                {searching ? (
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        {Array.from({ length: 6 }, (_, i) => (
-                            <CardSkeleton key={i} />
-                        ))}
+                        {/* Search */}
+                        <div className="relative mt-5 max-w-sm">
+                            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input
+                                placeholder="Buscar por nome..."
+                                className="pl-9"
+                                value={search}
+                                onChange={(e) => handleSearch(e.target.value)}
+                            />
+                            {search && (
+                                <button
+                                    className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                    onClick={() => handleSearch('')}
+                                    aria-label="Limpar busca"
+                                >
+                                    <X className="size-3.5" />
+                                </button>
+                            )}
+                        </div>
                     </div>
-                ) : instituicoes.data.length === 0 ? (
-                    <p className="text-muted-foreground py-12 text-center text-sm">
-                        Nenhuma instituição encontrada.
-                    </p>
-                ) : (
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        {instituicoes.data.map((inst) => (
-                            <Link
-                                key={inst.usuario_id}
-                                href={instituicoesShow(inst.usuario_id)}
-                                className="group"
-                            >
-                                <Card className="h-full transition-shadow group-hover:shadow-md">
-                                    <CardHeader>
-                                        <CardTitle className="flex items-center gap-1.5 text-base leading-snug">
-                                            <span>{inst.nome_fantasia}</span>
-                                            <VerificadaBadge verificada={inst.verificada} />
-                                        </CardTitle>
-                                    </CardHeader>
+                </div>
 
-                                    <CardContent className="flex flex-col gap-3">
-                                        <div className="text-muted-foreground flex items-start gap-1.5 text-sm">
-                                            <MapPin className="mt-0.5 size-4 shrink-0" />
-                                            <span className="line-clamp-2">{inst.endereco_completo}</span>
+                <div className="mx-auto w-full max-w-5xl px-6 py-6">
+
+                    {/* ── Causa filter pills ───────────────────── */}
+                    {allCausas.length > 0 && !searching && (
+                        <div className="mb-6 flex flex-wrap gap-2">
+                            <button
+                                onClick={() => setSelectedCausa(null)}
+                                className={[
+                                    'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors',
+                                    selectedCausa === null
+                                        ? 'border-brand bg-brand text-primary-foreground'
+                                        : 'border-border bg-card text-muted-foreground hover:border-brand/40 hover:text-foreground',
+                                ].join(' ')}
+                            >
+                                Todas
+                            </button>
+                            {allCausas.map((causa) => (
+                                <button
+                                    key={causa.id}
+                                    onClick={() => setSelectedCausa(
+                                        selectedCausa === causa.id ? null : causa.id,
+                                    )}
+                                    className={[
+                                        'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors',
+                                        selectedCausa === causa.id
+                                            ? 'border-brand bg-brand text-primary-foreground'
+                                            : 'border-border bg-card text-muted-foreground hover:border-brand/40 hover:text-foreground',
+                                    ].join(' ')}
+                                >
+                                    <Tag className="size-3" />
+                                    {causa.nome}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* ── Content ─────────────────────────────── */}
+                    {searching ? (
+                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            {Array.from({ length: 6 }, (_, i) => <CardSkeleton key={i} />)}
+                        </div>
+                    ) : visibleInstitutions.length === 0 ? (
+                        <EmptyState
+                            hasSearch={!!search || selectedCausa !== null}
+                            onClear={() => { handleSearch(''); setSelectedCausa(null); }}
+                        />
+                    ) : (
+                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            {visibleInstitutions.map((inst) => (
+                                <Link
+                                    key={inst.usuario_id}
+                                    href={instituicoesShow(inst.usuario_id)}
+                                    className="group focus-visible:outline-none"
+                                >
+                                    <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all duration-200 hover:border-brand/30 hover:shadow-md focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+
+                                        {/* Card body */}
+                                        <div className="flex flex-col gap-3 p-5 pb-4">
+                                            <div className="flex items-start justify-between gap-2">
+                                                <h2 className="font-semibold leading-snug text-foreground group-hover:text-brand transition-colors">
+                                                    {inst.nome_fantasia}
+                                                </h2>
+                                                <VerificadaBadge verificada={inst.verificada} />
+                                            </div>
+
+                                            {inst.endereco_completo && (
+                                                <div className="flex items-start gap-1.5 text-xs text-muted-foreground">
+                                                    <MapPin className="mt-0.5 size-3 shrink-0" />
+                                                    <span className="line-clamp-1">
+                                                        {inst.endereco_completo}
+                                                    </span>
+                                                </div>
+                                            )}
+
+                                            {inst.causas.length > 0 && (
+                                                <div className="flex flex-wrap gap-1">
+                                                    {inst.causas.map((causa) => (
+                                                        <CausaBadge key={causa.id} causa={causa} />
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
 
-                                        {inst.causas.length > 0 && (
-                                            <div className="flex flex-wrap gap-1">
-                                                {inst.causas.map((causa) => (
-                                                    <CausaBadge key={causa.id} causa={causa} />
-                                                ))}
-                                            </div>
-                                        )}
-                                    </CardContent>
-
-                                    <CardFooter className="pt-0">
-                                        <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
-                                            <Package className="size-4" />
-                                            <span>
+                                        {/* Card footer */}
+                                        <div className="mt-auto flex items-center justify-between border-t border-border px-5 py-3">
+                                            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                                <Package className="size-3.5" />
                                                 {inst.necessidades_ativas_count}{' '}
                                                 {inst.necessidades_ativas_count === 1
                                                     ? 'necessidade ativa'
                                                     : 'necessidades ativas'}
                                             </span>
+                                            <span className="flex items-center gap-0.5 text-xs font-medium text-brand opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+                                                Ver
+                                                <ChevronRight className="size-3.5" />
+                                            </span>
                                         </div>
-                                    </CardFooter>
-                                </Card>
-                            </Link>
-                        ))}
-                    </div>
-                )}
+                                    </article>
+                                </Link>
+                            ))}
+                        </div>
+                    )}
 
-                {hasPagination && (
-                    <Pagination>
-                        <PaginationContent>
-                            <PaginationItem>
-                                <PaginationLink
-                                    href={instituicoes.prev_page_url ?? '#'}
-                                    aria-disabled={!instituicoes.prev_page_url}
-                                    className={!instituicoes.prev_page_url ? 'pointer-events-none opacity-40' : ''}
-                                    size="default"
-                                >
-                                    <ChevronLeft className="size-4" />
-                                    <span className="hidden sm:block">Anterior</span>
-                                </PaginationLink>
-                            </PaginationItem>
-
-                            <PaginationItem>
-                                <span className="text-muted-foreground px-3 py-2 text-sm">
-                                    Página {instituicoes.current_page}
-                                </span>
-                            </PaginationItem>
-
-                            <PaginationItem>
-                                <PaginationLink
-                                    href={instituicoes.next_page_url ?? '#'}
-                                    aria-disabled={!instituicoes.next_page_url}
-                                    className={!instituicoes.next_page_url ? 'pointer-events-none opacity-40' : ''}
-                                    size="default"
-                                >
-                                    <span className="hidden sm:block">Próxima</span>
-                                    <ChevronRight className="size-4" />
-                                </PaginationLink>
-                            </PaginationItem>
-                        </PaginationContent>
-                    </Pagination>
-                )}
+                    {/* ── Pagination ──────────────────────────── */}
+                    {hasPagination && !searching && (
+                        <div className="mt-8">
+                            <Pagination>
+                                <PaginationContent>
+                                    <PaginationItem>
+                                        <PaginationLink
+                                            href={instituicoes.prev_page_url ?? '#'}
+                                            aria-disabled={!instituicoes.prev_page_url}
+                                            className={!instituicoes.prev_page_url ? 'pointer-events-none opacity-40' : ''}
+                                            size="default"
+                                        >
+                                            <ChevronLeft className="size-4" />
+                                            <span className="hidden sm:block">Anterior</span>
+                                        </PaginationLink>
+                                    </PaginationItem>
+                                    <PaginationItem>
+                                        <span className="px-3 py-2 text-sm text-muted-foreground">
+                                            Página {instituicoes.current_page}
+                                        </span>
+                                    </PaginationItem>
+                                    <PaginationItem>
+                                        <PaginationLink
+                                            href={instituicoes.next_page_url ?? '#'}
+                                            aria-disabled={!instituicoes.next_page_url}
+                                            className={!instituicoes.next_page_url ? 'pointer-events-none opacity-40' : ''}
+                                            size="default"
+                                        >
+                                            <span className="hidden sm:block">Próxima</span>
+                                            <ChevronRight className="size-4" />
+                                        </PaginationLink>
+                                    </PaginationItem>
+                                </PaginationContent>
+                            </Pagination>
+                        </div>
+                    )}
+                </div>
             </div>
         </AppLayout>
     );

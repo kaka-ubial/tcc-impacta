@@ -6,7 +6,8 @@
       "Bash(npm install:*)",
       "Bash(php artisan:*)",
       "Bash(npx --yes shadcn@latest add alert-dialog --yes)",
-      "Bash(npx shadcn@latest add alert-dialog)"
+      "Bash(npx shadcn@latest add alert-dialog)",
+      "Bash(node:*)"
     ]
   }
 }

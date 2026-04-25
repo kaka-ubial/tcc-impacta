@@ -74,6 +74,7 @@ export default function InstitutionsList({ instituicoes, stats }: Props) {
                                 render: () => (
                                     <Badge
                                         variant="outline"
+                                        data-badge-status="pending"
                                         className="border-pending/40 bg-pending/10 text-pending font-medium"
                                     >
                                         Pendente

@@ -1,0 +1,297 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-04-25T00:00:00Z",
+  "title": "Design System: Impacta",
+  "extensions": {
+    "colorMeta": {
+      "terracota": {
+        "role": "primary",
+        "displayName": "Terracota",
+        "canonical": "oklch(0.556 0.162 41.0)",
+        "tonalRamp": [
+          "oklch(0.15 0.100 41.0)",
+          "oklch(0.25 0.130 41.0)",
+          "oklch(0.35 0.150 41.0)",
+          "oklch(0.45 0.160 41.0)",
+          "oklch(0.556 0.162 41.0)",
+          "oklch(0.65 0.130 41.0)",
+          "oklch(0.75 0.095 41.0)",
+          "oklch(0.88 0.050 41.0)"
+        ]
+      },
+      "terracota-light": {
+        "role": "primary",
+        "displayName": "Terracota Light (dark mode)",
+        "canonical": "oklch(0.72 0.12 41.0)",
+        "tonalRamp": [
+          "oklch(0.15 0.100 41.0)",
+          "oklch(0.25 0.130 41.0)",
+          "oklch(0.35 0.150 41.0)",
+          "oklch(0.45 0.160 41.0)",
+          "oklch(0.556 0.162 41.0)",
+          "oklch(0.65 0.130 41.0)",
+          "oklch(0.72 0.12 41.0)",
+          "oklch(0.85 0.060 41.0)"
+        ]
+      },
+      "sage-green": {
+        "role": "secondary",
+        "displayName": "Sage Green",
+        "canonical": "oklch(0.571 0.071 152.0)",
+        "tonalRamp": [
+          "oklch(0.15 0.071 152.0)",
+          "oklch(0.25 0.071 152.0)",
+          "oklch(0.35 0.071 152.0)",
+          "oklch(0.45 0.071 152.0)",
+          "oklch(0.571 0.071 152.0)",
+          "oklch(0.68 0.055 152.0)",
+          "oklch(0.78 0.035 152.0)",
+          "oklch(0.90 0.018 152.0)"
+        ]
+      },
+      "pending-amber": {
+        "role": "tertiary",
+        "displayName": "Pending Amber",
+        "canonical": "oklch(0.760 0.130 73.0)",
+        "tonalRamp": [
+          "oklch(0.20 0.130 73.0)",
+          "oklch(0.32 0.130 73.0)",
+          "oklch(0.45 0.130 73.0)",
+          "oklch(0.57 0.130 73.0)",
+          "oklch(0.680 0.130 73.0)",
+          "oklch(0.760 0.130 73.0)",
+          "oklch(0.85 0.090 73.0)",
+          "oklch(0.94 0.040 73.0)"
+        ]
+      },
+      "warm-canvas": {
+        "role": "neutral",
+        "displayName": "Warm Canvas (page background)",
+        "canonical": "oklch(0.970 0.012 70.0)",
+        "tonalRamp": [
+          "oklch(0.15 0.012 70.0)",
+          "oklch(0.28 0.012 70.0)",
+          "oklch(0.42 0.012 70.0)",
+          "oklch(0.55 0.012 70.0)",
+          "oklch(0.68 0.012 70.0)",
+          "oklch(0.80 0.012 70.0)",
+          "oklch(0.91 0.012 70.0)",
+          "oklch(0.970 0.012 70.0)"
+        ]
+      },
+      "warm-stone": {
+        "role": "neutral",
+        "displayName": "Warm Stone (muted foreground)",
+        "canonical": "oklch(0.552 0.022 53.0)",
+        "tonalRamp": [
+          "oklch(0.15 0.022 53.0)",
+          "oklch(0.25 0.022 53.0)",
+          "oklch(0.35 0.022 53.0)",
+          "oklch(0.45 0.022 53.0)",
+          "oklch(0.552 0.022 53.0)",
+          "oklch(0.68 0.016 53.0)",
+          "oklch(0.80 0.010 53.0)",
+          "oklch(0.92 0.006 53.0)"
+        ]
+      },
+      "destructive": {
+        "role": "neutral",
+        "displayName": "Destructive Red",
+        "canonical": "oklch(0.577 0.245 27.325)",
+        "tonalRamp": [
+          "oklch(0.15 0.245 27.0)",
+          "oklch(0.25 0.245 27.0)",
+          "oklch(0.35 0.245 27.0)",
+          "oklch(0.45 0.245 27.0)",
+          "oklch(0.577 0.245 27.325)",
+          "oklch(0.68 0.200 27.0)",
+          "oklch(0.78 0.140 27.0)",
+          "oklch(0.90 0.070 27.0)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Landing page hero headline only. Never in the authenticated app shell."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Brand surface section headings. Instrument Sans equivalent (text-xl font-semibold) used in product shell."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Card headings, page titles, modal headers in the product register."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "All body copy, form labels, descriptions. Max 65-75ch for sustained reading."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Badge text, table column headers, helper text, microcopy."
+      }
+    },
+    "shadows": [
+      {
+        "name": "ambient-low",
+        "value": "0 1px 3px oklch(0.145 0 0 / 0.06), 0 1px 2px oklch(0.145 0 0 / 0.04)",
+        "purpose": "Cards and containers at rest (shadow-sm). Present to clarify surface separation."
+      },
+      {
+        "name": "ambient-xs",
+        "value": "0 1px 2px oklch(0.145 0 0 / 0.05)",
+        "purpose": "Buttons at rest (shadow-xs). Slight lift for interactive elements."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-standard",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Default easing for state transitions (ease-out-expo). Feels responsive without being aggressive."
+      },
+      {
+        "name": "duration-fast",
+        "value": "150ms",
+        "purpose": "Button hover, input focus ring. Instantaneous-feeling feedback."
+      },
+      {
+        "name": "duration-standard",
+        "value": "250ms",
+        "purpose": "Modal open/close, panel transitions, skeleton fade."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The main call to action. Terracota background, used for submit, confirm, and primary navigation actions.",
+      "html": "<button class=\"ds-btn-primary\">Confirmar doação</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 8px 16px; background: oklch(0.556 0.162 41.0); color: oklch(0.985 0 0); font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif; font-size: 0.875rem; font-weight: 500; border-radius: 8px; border: none; box-shadow: 0 1px 2px oklch(0.145 0 0 / 0.05); cursor: pointer; transition: background 150ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 150ms; white-space: nowrap; } .ds-btn-primary:hover { background: oklch(0.500 0.162 41.0); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 3px oklch(0.556 0.162 41.0 / 0.50); } .ds-btn-primary:disabled { opacity: 0.5; pointer-events: none; }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary action. Used alongside Primary for cancel/back, or as the sole CTA for low-commitment actions.",
+      "html": "<button class=\"ds-btn-outline\">Cancelar</button>",
+      "css": ".ds-btn-outline { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 8px 16px; background: oklch(0.970 0.012 70.0); color: oklch(0.145 0 0); font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif; font-size: 0.875rem; font-weight: 500; border-radius: 8px; border: 1px solid oklch(0.910 0.014 68.0); box-shadow: 0 1px 2px oklch(0.145 0 0 / 0.05); cursor: pointer; transition: background 150ms cubic-bezier(0.16, 1, 0.3, 1); white-space: nowrap; } .ds-btn-outline:hover { background: oklch(0.950 0.010 68.0); } .ds-btn-outline:focus-visible { outline: none; box-shadow: 0 0 0 3px oklch(0.556 0.162 41.0 / 0.50); } .ds-btn-outline:disabled { opacity: 0.5; pointer-events: none; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Tertiary action or icon-only button. No visual weight at rest; reveals background on hover.",
+      "html": "<button class=\"ds-btn-ghost\">Ver detalhes</button>",
+      "css": ".ds-btn-ghost { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 8px 16px; background: transparent; color: oklch(0.145 0 0); font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif; font-size: 0.875rem; font-weight: 500; border-radius: 8px; border: none; cursor: pointer; transition: background 150ms cubic-bezier(0.16, 1, 0.3, 1); white-space: nowrap; } .ds-btn-ghost:hover { background: oklch(0.950 0.010 68.0); } .ds-btn-ghost:focus-visible { outline: none; box-shadow: 0 0 0 3px oklch(0.556 0.162 41.0 / 0.50); }"
+    },
+    {
+      "name": "Destructive Button",
+      "kind": "button",
+      "refersTo": "button-destructive",
+      "description": "Irreversible actions only: delete, reject, remove. Must appear inside a confirmation dialog, never as the default CTA on a page.",
+      "html": "<button class=\"ds-btn-destructive\">Excluir necessidade</button>",
+      "css": ".ds-btn-destructive { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 8px 16px; background: oklch(0.577 0.245 27.325); color: oklch(0.985 0 0); font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif; font-size: 0.875rem; font-weight: 500; border-radius: 8px; border: none; box-shadow: 0 1px 2px oklch(0.145 0 0 / 0.05); cursor: pointer; transition: background 150ms cubic-bezier(0.16, 1, 0.3, 1); white-space: nowrap; } .ds-btn-destructive:hover { background: oklch(0.520 0.245 27.325); } .ds-btn-destructive:focus-visible { outline: none; box-shadow: 0 0 0 3px oklch(0.577 0.245 27.325 / 0.35); } .ds-btn-destructive:disabled { opacity: 0.5; pointer-events: none; }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card-default",
+      "description": "The primary container for grouped content: institution details, donation summaries, necessity listings.",
+      "html": "<div class=\"ds-card\"><p class=\"ds-card-title\">Alimentos não perecíveis</p><p class=\"ds-card-body\">Macarrão, arroz, feijão e enlatados em geral.</p></div>",
+      "css": ".ds-card { background: oklch(0.990 0.006 68.0); border: 1px solid oklch(0.910 0.014 68.0); border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px oklch(0.145 0 0 / 0.06), 0 1px 2px oklch(0.145 0 0 / 0.04); } .ds-card-title { font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif; font-size: 1.125rem; font-weight: 600; color: oklch(0.145 0 0); margin: 0 0 6px; } .ds-card-body { font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif; font-size: 0.875rem; color: oklch(0.552 0.022 53.0); margin: 0; line-height: 1.6; }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input-default",
+      "description": "Text input for forms — registration, search, donation descriptions.",
+      "html": "<div class=\"ds-field\"><label class=\"ds-label\" for=\"ds-input-demo\">Razão Social</label><input class=\"ds-input\" id=\"ds-input-demo\" type=\"text\" placeholder=\"Nome da instituição\" /></div>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 6px; } .ds-label { font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif; font-size: 0.875rem; font-weight: 500; color: oklch(0.145 0 0); } .ds-input { height: 36px; padding: 8px 12px; background: oklch(0.970 0.012 70.0); color: oklch(0.145 0 0); font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif; font-size: 0.875rem; border: 1px solid oklch(0.910 0.014 68.0); border-radius: 8px; outline: none; transition: border-color 150ms, box-shadow 150ms; } .ds-input::placeholder { color: oklch(0.552 0.022 53.0); } .ds-input:focus { border-color: oklch(0.556 0.162 41.0); box-shadow: 0 0 0 3px oklch(0.556 0.162 41.0 / 0.50); } .ds-input:disabled { opacity: 0.5; }"
+    },
+    {
+      "name": "Status Badge — Pendente",
+      "kind": "chip",
+      "refersTo": "badge-pending",
+      "description": "Institution awaiting approval. Appears in admin institution list and institution profile.",
+      "html": "<span class=\"ds-badge-pending\">Pendente</span>",
+      "css": ".ds-badge-pending { display: inline-flex; align-items: center; padding: 2px 10px; background: oklch(0.760 0.130 73.0 / 0.15); color: oklch(0.760 0.130 73.0); font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.01em; border-radius: 9999px; }"
+    },
+    {
+      "name": "Status Badge — Verificada",
+      "kind": "chip",
+      "refersTo": "badge-success",
+      "description": "Institution approved and verified. Appears alongside institution name in donor-facing views.",
+      "html": "<span class=\"ds-badge-verified\"><svg class=\"ds-badge-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z\"/><path d=\"m9 12 2 2 4-4\"/></svg>Instituição Verificada</span>",
+      "css": ".ds-badge-verified { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; background: oklch(0.571 0.071 152.0 / 0.12); color: oklch(0.571 0.071 152.0); font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.01em; border-radius: 9999px; border: 1px solid oklch(0.571 0.071 152.0 / 0.20); } .ds-badge-icon { width: 14px; height: 14px; flex-shrink: 0; }"
+    },
+    {
+      "name": "Alert — Success",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Feedback after successful operations (password reset sent, email verified, profile saved).",
+      "html": "<div class=\"ds-alert-success\" role=\"alert\"><svg class=\"ds-alert-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"/><polyline points=\"22 4 12 14.01 9 11.01\"/></svg><div><p class=\"ds-alert-title\">Sucesso</p><p class=\"ds-alert-body\">Suas informações foram salvas.</p></div></div>",
+      "css": ".ds-alert-success { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; background: oklch(0.571 0.071 152.0 / 0.10); border: 1px solid oklch(0.571 0.071 152.0 / 0.20); border-radius: 10px; } .ds-alert-icon { width: 16px; height: 16px; flex-shrink: 0; color: oklch(0.571 0.071 152.0); margin-top: 2px; } .ds-alert-title { font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif; font-size: 0.875rem; font-weight: 600; color: oklch(0.571 0.071 152.0); margin: 0 0 2px; } .ds-alert-body { font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif; font-size: 0.875rem; color: oklch(0.571 0.071 152.0 / 0.80); margin: 0; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Community Hearth",
+    "overview": "Impacta is a gathering place — warm and welcoming enough that a first-time donor feels at home, structured and reliable enough that an institution trusts it with their daily operations. The visual system reflects this duality: a terracota-and-areia palette that feels handmade and human, paired with a product shell that is unambiguously clear and efficient.\n\nThe system does not decorate. Every color, weight, and radius earns its place by serving a functional or emotional purpose. The terracota is used because it makes every primary action feel warm and intentional instead of corporate and cold. The sage green marks verified trust. The areia canvas is the color of paper — something made by human hands.\n\nA screen in this system should be calm on first glance and obvious on second.",
+    "keyCharacteristics": [
+      "Terracota primary on a warm areia canvas",
+      "Playfair Display for brand surfaces, Instrument Sans for the product shell",
+      "Restrained decoration — tonal contrast creates depth, not shadows",
+      "Status colors are functional, never ambient",
+      "PT-BR throughout — labels, errors, empty states"
+    ],
+    "rules": [
+      {
+        "name": "The Restraint Rule",
+        "body": "Terracota is reserved for primary actions and the brand panel. It must not appear on informational elements, backgrounds, borders, or decorative shapes in the product app. Its presence should feel deliberate every time.",
+        "section": "colors"
+      },
+      {
+        "name": "The No-Pure-White Rule",
+        "body": "Never use #ffffff or oklch(1 0 0). Every neutral must carry the warm 68–70° tint (chroma ≥ 0.005).",
+        "section": "colors"
+      },
+      {
+        "name": "The Playfair Boundary Rule",
+        "body": "Playfair Display lives in the brand register. It must not appear inside the authenticated app shell — sidebar, dashboard, tables, settings. The boundary is the login event.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat-By-Default Rule",
+        "body": "A surface is flat at rest. Shadows appear only to disambiguate layers. If adding a shadow is purely decorative, remove it.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Keep terracota to primary actions and the brand panel",
+      "Use tonal surface contrast as the primary depth signal",
+      "Use Playfair Display only on brand/landing surfaces",
+      "Write all UI copy in PT-BR",
+      "Include explicit empty states and loading skeletons for every data-driven list",
+      "Give every interactive element a visible focus ring (3px terracota ring)"
+    ],
+    "donts": [
+      "Don't use blue-and-white as a color scheme — the generic NGO look is explicitly forbidden",
+      "Don't use app-corporate-cold aesthetic: heavy enterprise shadows, gray-heavy palettes, clinical whites",
+      "Don't use marketplace density: never compete multiple CTAs, never reduce card padding for more items",
+      "Don't use border-left or border-right greater than 1px as a colored stripe accent",
+      "Don't use gradient text (background-clip: text)",
+      "Don't use glassmorphism",
+      "Don't use #ffffff or #000000 — every neutral carries the warm tint",
+      "Don't place Playfair Display in dashboards, tables, sidebars, or settings pages",
+      "Don't use pending-amber or sage-green outside their functional roles"
+    ]
+  }
+}

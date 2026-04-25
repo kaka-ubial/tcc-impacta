@@ -118,7 +118,7 @@
     --sidebar-primary: oklch(0.556 0.162 41.0);
     --sidebar-primary-foreground: oklch(0.985 0 0);
     --sidebar-accent: oklch(0.950 0.010 68.0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
+    --sidebar-accent-foreground: oklch(0.320 0.015 53.0);
     --sidebar-border: oklch(0.910 0.014 68.0);
     --sidebar-ring: oklch(0.556 0.162 41.0);
 }
@@ -169,5 +169,277 @@
 
     body {
         @apply bg-background text-foreground;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LIVING STATES — Impacta Design System
+   Unlayered CSS: higher priority than all Tailwind @layer rules.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── @property: animatable focus ring growth ─── */
+@property --impacta-ring-size {
+    syntax: '<length>';
+    inherits: false;
+    initial-value: 0px;
+}
+
+/* ─── Keyframes ─── */
+@keyframes impacta-shimmer {
+    0%   { background-position: -400% 0; }
+    100% { background-position:  400% 0; }
+}
+
+@keyframes impacta-dialog-enter {
+    from {
+        opacity: 0;
+        transform: translate(-50%, calc(-50% + 18px)) scale(0.965);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+@keyframes impacta-dialog-exit {
+    from {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translate(-50%, calc(-50% + 10px)) scale(0.975);
+    }
+}
+
+@keyframes impacta-overlay-enter {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes impacta-overlay-exit {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+}
+
+/* ─── 1. Dialog / AlertDialog — @starting-style warm entrance ─── */
+[data-slot="dialog-overlay"],
+[data-slot="alert-dialog-overlay"] {
+    background: oklch(0.145 0 0 / 0.52);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+[data-slot="dialog-overlay"][data-state="open"],
+[data-slot="alert-dialog-overlay"][data-state="open"] {
+    animation: impacta-overlay-enter 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+[data-slot="dialog-overlay"][data-state="closed"],
+[data-slot="alert-dialog-overlay"][data-state="closed"] {
+    animation: impacta-overlay-exit 160ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+[data-slot="dialog-content"],
+[data-slot="alert-dialog-content"] {
+    border-radius: 16px;
+    border-color: var(--warm-border, oklch(0.910 0.014 68.0));
+    box-shadow:
+        0 0 0 1px oklch(0.145 0 0 / 0.04),
+        0 8px 40px oklch(0.145 0 0 / 0.10),
+        0 2px 8px oklch(0.145 0 0 / 0.06);
+}
+
+[data-slot="dialog-content"][data-state="open"],
+[data-slot="alert-dialog-content"][data-state="open"] {
+    animation: impacta-dialog-enter 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+[data-slot="dialog-content"][data-state="closed"],
+[data-slot="alert-dialog-content"][data-state="closed"] {
+    animation: impacta-dialog-exit 180ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+/* ─── 2. Input / Textarea / Select — 0px → 3px animated focus ring ─── */
+[data-slot="input"],
+[data-slot="textarea"],
+[data-slot="select-trigger"] {
+    background-color: var(--warm-neutral, oklch(0.970 0.012 70.0));
+    border-color: var(--warm-border, oklch(0.910 0.014 68.0));
+    box-shadow: 0 0 0 var(--impacta-ring-size) oklch(0.556 0.162 41.0 / 0.35);
+    transition:
+        border-color 150ms cubic-bezier(0.16, 1, 0.3, 1),
+        --impacta-ring-size 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-slot="input"]:focus-visible,
+[data-slot="textarea"]:focus-visible,
+[data-slot="select-trigger"]:focus-visible {
+    --impacta-ring-size: 3px;
+    border-color: var(--ring);
+    outline: none;
+}
+
+/* ─── 3. Badge — animated entrance via @starting-style ─── */
+[data-slot="badge"] {
+    border-radius: 9999px;
+    font-size: 0.715rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    opacity: 1;
+    transform: scale(1);
+    transition:
+        opacity 220ms cubic-bezier(0.16, 1, 0.3, 1),
+        transform 260ms cubic-bezier(0.16, 1, 0.3, 1),
+        background-color 400ms cubic-bezier(0.16, 1, 0.3, 1),
+        color 400ms cubic-bezier(0.16, 1, 0.3, 1),
+        border-color 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@starting-style {
+    [data-slot="badge"] {
+        opacity: 0;
+        transform: scale(0.82);
+    }
+}
+
+/* ─── 4. Sidebar nav — sliding active indicator on entry + navigation ─── */
+[data-slot="sidebar-menu-button"] {
+    transition:
+        background-color 200ms cubic-bezier(0.16, 1, 0.3, 1),
+        color 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-slot="sidebar-menu-button"] > svg,
+[data-slot="sidebar-menu-button"] > span:last-child {
+    transition: transform 280ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-slot="sidebar-menu-button"][data-active="true"] {
+    background: oklch(0.556 0.162 41.0 / 0.11);
+    color: oklch(0.556 0.162 41.0);
+    font-weight: 500;
+}
+
+[data-slot="sidebar-menu-button"][data-active="true"] > svg,
+[data-slot="sidebar-menu-button"][data-active="true"] > span:last-child {
+    transform: translateX(2px);
+}
+
+@starting-style {
+    [data-slot="sidebar-menu-button"][data-active="true"] {
+        background: transparent;
+    }
+
+    [data-slot="sidebar-menu-button"][data-active="true"] > svg,
+    [data-slot="sidebar-menu-button"][data-active="true"] > span:last-child {
+        transform: translateX(-8px);
+    }
+}
+
+.dark [data-slot="sidebar-menu-button"][data-active="true"] {
+    background: oklch(0.72 0.12 41.0 / 0.18);
+    color: oklch(0.72 0.12 41.0);
+}
+
+/* ─── 5. DataTable Skeleton — shimmer instead of pulse ─── */
+[data-slot="skeleton"] {
+    background:
+        linear-gradient(
+            90deg,
+            oklch(0.910 0.014 68.0) 0%,
+            oklch(0.948 0.009 68.0) 38%,
+            oklch(0.962 0.007 67.0) 50%,
+            oklch(0.948 0.009 68.0) 62%,
+            oklch(0.910 0.014 68.0) 100%
+        );
+    background-size: 400% 100%;
+    animation: impacta-shimmer 1.8s ease-in-out infinite;
+    border-radius: 6px;
+}
+
+.dark [data-slot="skeleton"] {
+    background:
+        linear-gradient(
+            90deg,
+            oklch(0.220 0 0) 0%,
+            oklch(0.290 0 0) 38%,
+            oklch(0.310 0 0) 50%,
+            oklch(0.290 0 0) 62%,
+            oklch(0.220 0 0) 100%
+        );
+    background-size: 400% 100%;
+}
+
+/* ─── Supporting: Button press, Card elevation, Select shadow ─── */
+[data-slot="button"]:not([disabled]):not([aria-disabled="true"]):active {
+    transform: scale(0.97);
+    transition: transform 80ms ease-out;
+}
+
+[data-slot="card"] {
+    border-color: var(--warm-border, oklch(0.910 0.014 68.0));
+    box-shadow:
+        0 1px 3px oklch(0.145 0 0 / 0.05),
+        0 1px 2px oklch(0.145 0 0 / 0.04);
+}
+
+[data-slot="select-content"] {
+    border-color: var(--warm-border, oklch(0.910 0.014 68.0));
+    border-radius: 10px;
+    box-shadow:
+        0 4px 24px oklch(0.145 0 0 / 0.08),
+        0 1px 4px oklch(0.145 0 0 / 0.05);
+}
+
+[data-slot="tooltip-content"] {
+    border-radius: 8px;
+    font-size: 0.8rem;
+}
+
+/* ─── prefers-reduced-motion ─── */
+@media (prefers-reduced-motion: reduce) {
+    [data-slot="dialog-content"],
+    [data-slot="dialog-overlay"],
+    [data-slot="alert-dialog-content"],
+    [data-slot="alert-dialog-overlay"] {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    [data-slot="skeleton"] {
+        animation: none;
+        background: oklch(0.910 0.014 68.0);
+    }
+
+    .dark [data-slot="skeleton"] {
+        background: oklch(0.220 0 0);
+    }
+
+    [data-slot="sidebar-menu-button"],
+    [data-slot="sidebar-menu-button"] > svg,
+    [data-slot="sidebar-menu-button"] > span {
+        transition: none;
+    }
+
+    [data-slot="sidebar-menu-button"][data-active="true"] > svg,
+    [data-slot="sidebar-menu-button"][data-active="true"] > span:last-child {
+        transform: none;
+    }
+
+    [data-slot="button"]:active {
+        transform: none;
+    }
+
+    [data-slot="input"],
+    [data-slot="textarea"],
+    [data-slot="select-trigger"] {
+        transition: none;
+    }
+
+    [data-slot="badge"] {
+        transition: none;
+        opacity: 1;
+        transform: none;
     }
 }
