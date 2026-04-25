@@ -6,7 +6,7 @@ import { use, useEffect } from 'react';
 
 export default function WaitingApproval() {
     function handleRefresh() {
-        router.visit('/dashboard', {preserveScroll: true});
+        router.visit('/redirect', {preserveScroll: true});
     }
 
     useEffect(() => { 
