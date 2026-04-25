@@ -31,6 +31,7 @@ function buildUpcomingDates(horarios: HorarioDisponivel[], tipo: 'coleta' | 'ent
             d.setDate(d.getDate() + dayDiff + w * 7);
             const [hh, mm] = h.hora_inicio.split(':');
             d.setHours(Number(hh), Number(mm), 0, 0);
+
             if (d > now) {
                 const dateStr = d.toISOString().slice(0, 16); // "YYYY-MM-DDTHH:MM"
                 results.push({
@@ -102,8 +103,14 @@ export function SolicitacaoDoacaoModal({ open, onClose, instituicaoId, categoria
     }
 
     function canAdvanceStep2() {
-        if (!dataHora) return false;
-        if (tipo === 'coleta' && !enderecoReferencia.trim()) return false;
+        if (!dataHora) {
+return false;
+}
+
+        if (tipo === 'coleta' && !enderecoReferencia.trim()) {
+return false;
+}
+
         return true;
     }
 
@@ -125,7 +132,9 @@ export function SolicitacaoDoacaoModal({ open, onClose, instituicaoId, categoria
                 },
             },
             {
-                onSuccess: () => { setProcessing(false); handleClose(); },
+                onSuccess: () => {
+ setProcessing(false); handleClose(); 
+},
                 onError: () => setProcessing(false),
             },
         );
@@ -315,6 +324,7 @@ export function SolicitacaoDoacaoModal({ open, onClose, instituicaoId, categoria
                                 <ul className="list-inside list-disc space-y-0.5 pl-1">
                                     {itens.map((it, i) => {
                                         const cat = categorias.find((c) => String(c.id) === it.categoria_id);
+
                                         return (
                                             <li key={i}>
                                                 {it.quantidade}× {cat?.nome ?? '—'}

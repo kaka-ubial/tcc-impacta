@@ -1,4 +1,15 @@
-import { router, Link } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
+import { useState } from 'react';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
@@ -25,6 +36,8 @@ type Props = {
 };
 
 export function NecessidadeCard({ onEdit, necessidade, variant = 'doador' }: Props) {
+    const [confirmOpen, setConfirmOpen] = useState(false);
+
     const isAtiva = necessidade.quantidade_atual < necessidade.quantidade_objetivo;
 
     const pct = Math.min(
@@ -35,9 +48,7 @@ export function NecessidadeCard({ onEdit, necessidade, variant = 'doador' }: Pro
     const cfg = prioridadeConfig[necessidade.prioridade];
 
     function handleDelete() {
-        if (confirm('Tem certeza?')) {
-            router.delete(`/instituicao/necessidades/${necessidade.id}`);    
-        }
+        router.delete(`/instituicao/necessidades/${necessidade.id}`);
     }
 
     return (
@@ -49,12 +60,12 @@ export function NecessidadeCard({ onEdit, necessidade, variant = 'doador' }: Pro
                         {necessidade.categoria.nome}
                     </span>
 
-                    <Badge variant={cfg.variant} className="text-xs">
+                    <Badge variant={cfg.variant as any} className="text-xs">
                         {cfg.label}
                     </Badge>
                 </div>
 
-                <Badge className="align-items-end" variant={isAtiva ? 'default' : 'secondary'}>
+                <Badge className="self-start" variant={isAtiva ? 'default' : 'secondary'}>
                     {isAtiva ? 'Ativa' : 'Concluída'}
                 </Badge>
             </div>
@@ -93,12 +104,14 @@ export function NecessidadeCard({ onEdit, necessidade, variant = 'doador' }: Pro
                         Editar
                     </Button>
 
-                    <button
-                        onClick={handleDelete}
-                        className="text-destructive text-sm"
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => setConfirmOpen(true)}
                     >
                         Deletar
-                    </button>
+                    </Button>
                 </div>
             )}
 
@@ -107,6 +120,28 @@ export function NecessidadeCard({ onEdit, necessidade, variant = 'doador' }: Pro
                     Quero doar
                 </Button>
             )}
+
+            <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Deletar necessidade</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Tem certeza que deseja deletar a necessidade{' '}
+                            <strong>{necessidade.categoria.nome}</strong>? Esta ação não
+                            pode ser desfeita.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            onClick={handleDelete}
+                        >
+                            Deletar
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

@@ -1,4 +1,7 @@
 import { Head } from '@inertiajs/react';
+import { useForm } from '@inertiajs/react';
+import { Heart } from 'lucide-react';
+import { useState } from 'react';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import TextLink from '@/components/text-link';
@@ -6,12 +9,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import { cn } from '@/lib/utils';
 import { login } from '@/routes';
 import { store } from '@/routes/register';
-import { useState } from 'react';
-import { useForm } from '@inertiajs/react';
-import { Heart } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 type TipoUsuario = 'doador' | 'instituicao' | null;
 
@@ -23,6 +23,7 @@ export default function Register({causas}: { causas: any[] }) {
 
     const toggleCausa = (id: number) => {
         const current = data.causas_apoiadas
+
         if (current.includes(id)) {
             setData('causas_apoiadas', current.filter((item => item !== id)));
         } else {
@@ -55,7 +56,9 @@ export default function Register({causas}: { causas: any[] }) {
         clearErrors();
         post('/validate/register-step-one', {
             preserveScroll: true,
-            onSuccess: () => {setStep(2)},
+            onSuccess: () => {
+setStep(2)
+},
         });           
     }
 
@@ -112,6 +115,7 @@ export default function Register({causas}: { causas: any[] }) {
                                     const n = i + 1;
                                     const done = step > n;
                                     const active = step === n;
+
                                     return (
                                         <div key={n} className="flex flex-1 flex-col items-center gap-1">
                                             <div
@@ -481,23 +485,24 @@ export default function Register({causas}: { causas: any[] }) {
                 </div>
             </div>
 
-            {/* Coluna direita — imagem decorativa */}
-            <div className="relative hidden bg-muted lg:block">
-                <img
-                    src="/placeholder.svg"
-                    alt="Impacta"
-                    className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-                />
-                {/* Overlay com mensagem */}
-                <div className="absolute inset-0 flex flex-col justify-end p-10">
-                    <div className="space-y-2 rounded-xl bg-background/80 p-6 backdrop-blur-sm">
-                        <p className="text-lg font-semibold leading-snug">
-                            Conectando quem quer ajudar<br />com quem precisa.
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                            Faça parte da rede Impacta e transforme intenções em impacto real.
-                        </p>
+            {/* Coluna direita — painel decorativo */}
+            <div className="relative hidden bg-brand lg:flex lg:flex-col lg:items-center lg:justify-center lg:p-12">
+                <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                    <div className="absolute -top-20 -right-20 h-64 w-64 rounded-full bg-brand-soft/20 blur-3xl" />
+                    <div className="absolute -bottom-20 -left-20 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
+                </div>
+                <div className="relative z-10 max-w-sm text-center text-primary-foreground">
+                    <div className="mb-6 flex justify-center">
+                        <div className="flex size-16 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm">
+                            <span className="text-3xl">🤝</span>
+                        </div>
                     </div>
+                    <h2 className="font-display text-3xl font-bold leading-tight">
+                        Conectando quem quer ajudar com quem precisa.
+                    </h2>
+                    <p className="mt-4 text-primary-foreground/80">
+                        Faça parte da rede Impacta e transforme intenções em impacto real.
+                    </p>
                 </div>
             </div>
         </div>

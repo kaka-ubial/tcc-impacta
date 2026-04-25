@@ -3,7 +3,6 @@ import { ChevronLeft, ChevronRight, MapPin, Package, Search } from 'lucide-react
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { CausaBadge } from '@/components/causa-badge';
-import { VerificadaBadge } from '@/components/verificada-badge';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import {
@@ -12,6 +11,8 @@ import {
     PaginationItem,
     PaginationLink,
 } from '@/components/ui/pagination';
+import { Skeleton } from '@/components/ui/skeleton';
+import { VerificadaBadge } from '@/components/verificada-badge';
 import AppLayout from '@/layouts/app-layout';
 import { index as instituicoesIndex, show as instituicoesShow } from '@/routes/instituicoes';
 import type { BreadcrumbItem, InstituicaoListItem, SimplePaginated } from '@/types';
@@ -25,16 +26,36 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Instituições', href: instituicoesIndex() },
 ];
 
+function CardSkeleton() {
+    return (
+        <div className="flex flex-col gap-3 rounded-xl border p-6">
+            <Skeleton className="h-5 w-3/5" />
+            <div className="flex items-start gap-1.5">
+                <Skeleton className="mt-0.5 size-4 shrink-0 rounded" />
+                <Skeleton className="h-4 w-4/5" />
+            </div>
+            <div className="flex gap-1">
+                <Skeleton className="h-5 w-16 rounded-full" />
+                <Skeleton className="h-5 w-20 rounded-full" />
+            </div>
+            <Skeleton className="h-4 w-2/5" />
+        </div>
+    );
+}
+
 export default function InstituicoesIndex({ instituicoes, filters }: Props) {
     const [search, setSearch] = useState(filters.search);
+    const [searching, setSearching] = useState(false);
     const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
     useEffect(() => {
         setSearch(filters.search);
+        setSearching(false);
     }, [filters.search]);
 
     const handleSearch = useCallback((value: string) => {
         setSearch(value);
+        setSearching(true);
         clearTimeout(timer.current);
         timer.current = setTimeout(() => {
             router.get(
@@ -45,6 +66,8 @@ export default function InstituicoesIndex({ instituicoes, filters }: Props) {
                     preserveScroll: true,
                     replace: true,
                     only: ['instituicoes', 'filters'],
+                    onSuccess: () => setSearching(false),
+                    onError: () => setSearching(false),
                 },
             );
         }, 300);
@@ -74,7 +97,13 @@ export default function InstituicoesIndex({ instituicoes, filters }: Props) {
                     />
                 </div>
 
-                {instituicoes.data.length === 0 ? (
+                {searching ? (
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        {Array.from({ length: 6 }, (_, i) => (
+                            <CardSkeleton key={i} />
+                        ))}
+                    </div>
+                ) : instituicoes.data.length === 0 ? (
                     <p className="text-muted-foreground py-12 text-center text-sm">
                         Nenhuma instituição encontrada.
                     </p>

@@ -8,11 +8,13 @@ type Props = {
 };
 
 export function VerificadaBadge({ verificada, variant = 'icon' }: Props) {
-    if (!verificada) return null;
+    if (!verificada) {
+return null;
+}
 
     if (variant === 'full') {
         return (
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-emerald-600/20 dark:bg-emerald-950 dark:text-emerald-400 dark:ring-emerald-500/30">
+            <span className="inline-flex items-center gap-1 rounded-full border border-success/20 bg-success/10 px-2 py-0.5 text-xs font-medium text-success">
                 <BadgeCheck className="size-3.5" />
                 Instituição Verificada
             </span>
@@ -22,7 +24,7 @@ export function VerificadaBadge({ verificada, variant = 'icon' }: Props) {
     return (
         <Tooltip>
             <TooltipTrigger asChild>
-                <BadgeCheck className="size-4 shrink-0 text-emerald-500" aria-label="Instituição Verificada" />
+                <BadgeCheck className="size-4 shrink-0 text-success" aria-label="Instituição Verificada" />
             </TooltipTrigger>
             <TooltipContent side="top">
                 <p>Instituição Verificada</p>

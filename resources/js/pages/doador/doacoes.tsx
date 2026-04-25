@@ -31,6 +31,7 @@ const DIAS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
 function formatDataHora(iso: string) {
     const d = new Date(iso);
+
     return `${DIAS[d.getDay()]}, ${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
 }
 
@@ -61,7 +62,10 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
     const canCancel = doacao.status === 'pendente' || doacao.status === 'confirmada';
 
     function handleCancel() {
-        if (!confirm('Deseja cancelar esta solicitação?')) return;
+        if (!confirm('Deseja cancelar esta solicitação?')) {
+return;
+}
+
         setProcessing(true);
         router.post(cancelRoute(doacao.id).url, {}, {
             onFinish: () => setProcessing(false),

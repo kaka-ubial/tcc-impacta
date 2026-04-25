@@ -157,7 +157,7 @@ export default function Security({
                                         leave="transition ease-in-out"
                                         leaveTo="opacity-0"
                                     >
-                                        <p className="text-sm text-neutral-600">
+                                        <p className="text-sm text-muted-foreground">
                                             Salvo
                                         </p>
                                     </Transition>
@@ -230,7 +230,7 @@ export default function Security({
                                                     type="submit"
                                                     disabled={processing}
                                                 >
-                                                    Enable 2FA
+                                                    Ativar 2FA
                                                 </Button>
                                             )}
                                         </Form>

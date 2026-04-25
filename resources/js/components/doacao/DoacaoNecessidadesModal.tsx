@@ -39,6 +39,7 @@ function buildUpcomingDates(horarios: HorarioDisponivel[], tipo: 'coleta' | 'ent
             d.setDate(d.getDate() + dayDiff + w * 7);
             const [hh, mm] = h.hora_inicio.split(':');
             d.setHours(Number(hh), Number(mm), 0, 0);
+
             if (d > now) {
                 results.push({
                     label: `${DIAS[h.dia_semana]}, ${d.toLocaleDateString('pt-BR')} — ${fmt(h.hora_inicio)} às ${fmt(h.hora_fim)}`,
@@ -82,8 +83,10 @@ export function DoacaoNecessidadesModal({ open, onClose, instituicaoId, necessid
             if (prev[n.id] !== undefined) {
                 const next = { ...prev };
                 delete next[n.id];
+
                 return next;
             }
+
             return { ...prev, [n.id]: 1 };
         });
     }
@@ -113,6 +116,7 @@ export function DoacaoNecessidadesModal({ open, onClose, instituicaoId, necessid
 
         const itens = selectedIds.map((id) => {
             const n = necessidades.find((x) => x.id === id)!;
+
             return {
                 necessidade_id: n.id,
                 categoria_id: n.categoria.id,
@@ -133,7 +137,9 @@ export function DoacaoNecessidadesModal({ open, onClose, instituicaoId, necessid
                 },
             },
             {
-                onSuccess: () => { setProcessing(false); handleClose(); },
+                onSuccess: () => {
+ setProcessing(false); handleClose(); 
+},
                 onError: () => setProcessing(false),
             },
         );
@@ -322,6 +328,7 @@ export function DoacaoNecessidadesModal({ open, onClose, instituicaoId, necessid
                                 <ul className="list-inside list-disc space-y-0.5 pl-1">
                                     {selectedIds.map((id) => {
                                         const n = necessidades.find((x) => x.id === id)!;
+
                                         return (
                                             <li key={id}>
                                                 {selected[id]}× {n.categoria.nome}

@@ -2,6 +2,7 @@ import { Form, Head } from '@inertiajs/react';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import TextLink from '@/components/text-link';
+import AlertSuccess from '@/components/ui/alert-success';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -28,7 +29,13 @@ export default function Login({
             title="Entre na sua conta"
             description="Preencha o email e a senha para entrar"
         >
-            <Head title="Log in" />
+            <Head title="Entrar" />
+
+            {status && (
+                <div className="mb-4">
+                    <AlertSuccess message={status} />
+                </div>
+            )}
 
             <Form
                 {...store.form()}
@@ -100,7 +107,7 @@ export default function Login({
 
                         {canRegister && (
                             <div className="text-center text-sm text-muted-foreground">
-                                Não tem uma conta? {' '}
+                                Não tem uma conta?{' '}
                                 <TextLink href={register()} tabIndex={5}>
                                     Registre-se
                                 </TextLink>
@@ -109,12 +116,6 @@ export default function Login({
                     </>
                 )}
             </Form>
-
-            {status && (
-                <div className="mb-4 text-center text-sm font-medium text-green-600">
-                    {status}
-                </div>
-            )}
         </AuthLayout>
     );
 }
