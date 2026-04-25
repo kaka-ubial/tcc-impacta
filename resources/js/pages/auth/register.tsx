@@ -14,7 +14,7 @@ import { Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
     maskCpf, maskCnpj, maskPhone,
-    validateCpf, validateCnpj, validatePassword, validateName, validatePhone,
+    runValidation, rules,
     buildEnderecoCompleto, type EnderecoFields,
 } from '@/lib/validators';
 import EnderecoCepFields from '@/components/endereco-cep-fields';
@@ -62,10 +62,13 @@ export default function Register({causas}: { causas: any[] }) {
     }
 
     function handleStepOne() {
-        const errs: Record<string, string> = {};
-        const pwErr = validatePassword(data.password);
-        if (pwErr) errs.password = pwErr;
-        if (data.password !== data.password_confirmation) errs.password_confirmation = 'As senhas não coincidem';
+        const errs = runValidation(
+            { password: data.password, password_confirmation: data.password_confirmation },
+            {
+                password: [rules.password()],
+                password_confirmation: [() => data.password !== data.password_confirmation ? 'As senhas não coincidem' : null],
+            },
+        );
 
         if (Object.keys(errs).length > 0) {
             setClientErrors(errs);
@@ -80,47 +83,41 @@ export default function Register({causas}: { causas: any[] }) {
         });
     }
 
-    function validateStep3Doador(): boolean {
-        const errs: Record<string, string> = {};
-        const nameErr = validateName(data.nome_completo, 'Nome completo');
-        if (nameErr) errs.nome_completo = nameErr;
-        if (!validateCpf(data.cpf)) errs.cpf = 'CPF inválido';
-        const phoneErr = validatePhone(data.telefone);
-        if (phoneErr) errs.telefone = phoneErr;
-
-        setClientErrors(errs);
-        return Object.keys(errs).length === 0;
-    }
-
     function handleEnderecoChange(fields: EnderecoFields) {
         setEndereco(fields);
         setData('endereco_completo', buildEnderecoCompleto(fields));
     }
 
-    function validateStep3Instituicao(): boolean {
-        const errs: Record<string, string> = {};
-        const nfErr = validateName(data.nome_fantasia, 'Nome fantasia');
-        if (nfErr) errs.nome_fantasia = nfErr;
-        const rsErr = validateName(data.razao_social, 'Razão social');
-        if (rsErr) errs.razao_social = rsErr;
-        if (!validateCnpj(data.cnpj)) errs.cnpj = 'CNPJ inválido';
-        const phoneErr = validatePhone(data.telefone_inst);
-        if (phoneErr) errs.telefone_inst = phoneErr;
-        if (!endereco.cep || endereco.cep.replace(/\D/g, '').length !== 8) errs.endereco_completo = 'CEP é obrigatório';
-        else if (!endereco.logradouro) errs.endereco_completo = 'Logradouro é obrigatório';
-        else if (!endereco.numero) errs.endereco_completo = 'Número é obrigatório';
-        else if (!endereco.bairro) errs.endereco_completo = 'Bairro é obrigatório';
-        else if (!endereco.cidade || !endereco.uf) errs.endereco_completo = 'Cidade e UF são obrigatórios';
+    const step3Rules = {
+        doador: {
+            nome_completo: [rules.name('Nome completo')],
+            cpf: [rules.cpf()],
+            telefone: [rules.phone()],
+        },
+        instituicao: {
+            nome_fantasia: [rules.name('Nome fantasia')],
+            razao_social: [rules.name('Razão social')],
+            cnpj: [rules.cnpj()],
+            telefone_inst: [rules.phone()],
+            cep: [rules.cep()],
+            logradouro: [rules.required('Logradouro')],
+            numero: [rules.required('Número')],
+            bairro: [rules.required('Bairro')],
+            cidade: [rules.required('Cidade')],
+            uf: [rules.required('UF')],
+        },
+    };
 
+    function validateStep3(): boolean {
+        const fieldRules = tipo === 'doador' ? step3Rules.doador : step3Rules.instituicao;
+        const fieldData = { ...data, ...endereco } as Record<string, string>;
+        const errs = runValidation(fieldData, fieldRules);
         setClientErrors(errs);
         return Object.keys(errs).length === 0;
     }
 
     function nextStep() {
-        if (step === 3) {
-            const valid = tipo === 'doador' ? validateStep3Doador() : validateStep3Instituicao();
-            if (!valid) return;
-        }
+        if (step === 3 && !validateStep3()) return;
         setStep((s) => (s < 4 ? ((s + 1) as any) : s));
     }
 
@@ -455,8 +452,15 @@ export default function Register({causas}: { causas: any[] }) {
                                         <EnderecoCepFields
                                             value={endereco}
                                             onChange={handleEnderecoChange}
+                                            errors={{
+                                                cep: clientErrors.cep,
+                                                logradouro: clientErrors.logradouro,
+                                                numero: clientErrors.numero,
+                                                bairro: clientErrors.bairro,
+                                                cidade: clientErrors.cidade,
+                                            }}
                                         />
-                                        <InputError message={clientErrors.endereco_completo || errors.endereco_completo} />
+                                        <InputError message={errors.endereco_completo} />
 
                                         <div className="flex gap-2">
                                             <Button

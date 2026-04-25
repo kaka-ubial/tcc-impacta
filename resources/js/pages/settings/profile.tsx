@@ -14,7 +14,7 @@ import SettingsLayout from '@/layouts/settings/layout';
 import { edit } from '@/routes/profile';
 import { send } from '@/routes/verification';
 import type { BreadcrumbItem } from '@/types';
-import { maskCpf, maskCnpj, maskPhone, validateCpf, validateCnpj, validatePhone, validateName, buildEnderecoCompleto, parseEnderecoCompleto, type EnderecoFields } from '@/lib/validators';
+import { maskCpf, maskCnpj, maskPhone, runValidation, rules, buildEnderecoCompleto, parseEnderecoCompleto, type EnderecoFields } from '@/lib/validators';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -41,11 +41,18 @@ export default function Profile({
 
     const [clientErrors, setClientErrors] = useState<Record<string, string>>({});
 
-    function setFieldError(field: string, msg: string) {
-        setClientErrors((prev) => ({ ...prev, [field]: msg }));
+    function validateField(field: string, value: string, fieldRules: ((v: string) => string | null)[]) {
+        const errs = runValidation({ [field]: value }, { [field]: fieldRules });
+        setClientErrors((prev) => {
+            const next = { ...prev };
+            if (errs[field]) next[field] = errs[field];
+            else delete next[field];
+            return next;
+        });
     }
-    function clearFieldError(field: string) {
-        setClientErrors((prev) => { const next = { ...prev }; delete next[field]; return next; });
+
+    function clearField(field: string) {
+        setClientErrors((prev) => { const { [field]: _, ...rest } = prev; return rest; });
     }
 
     function handleEnderecoChange(fields: EnderecoFields) {
@@ -111,11 +118,8 @@ export default function Profile({
                                                 placeholder="Nome Fantasia"
                                                 required
                                                 minLength={2}
-                                                onBlur={(e) => {
-                                                    const err = validateName(e.target.value, 'Nome fantasia');
-                                                    err ? setFieldError('nome_fantasia', err) : clearFieldError('nome_fantasia');
-                                                }}
-                                                onChange={() => clearFieldError('nome_fantasia')}
+                                                onBlur={(e) => validateField('nome_fantasia', e.target.value, [rules.name('Nome fantasia')])}
+                                                onChange={() => clearField('nome_fantasia')}
                                             />
                                             <InputError message={clientErrors.nome_fantasia || errors.nome_fantasia} />
 
@@ -126,11 +130,8 @@ export default function Profile({
                                                 placeholder="Razão social"
                                                 required
                                                 minLength={2}
-                                                onBlur={(e) => {
-                                                    const err = validateName(e.target.value, 'Razão social');
-                                                    err ? setFieldError('razao_social', err) : clearFieldError('razao_social');
-                                                }}
-                                                onChange={() => clearFieldError('razao_social')}
+                                                onBlur={(e) => validateField('razao_social', e.target.value, [rules.name('Razão social')])}
+                                                onChange={() => clearField('razao_social')}
                                             />
                                             <InputError message={clientErrors.razao_social || errors.razao_social} />
 
@@ -141,14 +142,8 @@ export default function Profile({
                                                 placeholder="00.000.000/0000-00"
                                                 maxLength={18}
                                                 required
-                                                onChange={(e) => { e.target.value = maskCnpj(e.target.value); clearFieldError('cnpj'); }}
-                                                onBlur={(e) => {
-                                                    if (e.target.value && !validateCnpj(e.target.value)) {
-                                                        setFieldError('cnpj', 'CNPJ inválido');
-                                                    } else {
-                                                        clearFieldError('cnpj');
-                                                    }
-                                                }}
+                                                onChange={(e) => { e.target.value = maskCnpj(e.target.value); clearField('cnpj'); }}
+                                                onBlur={(e) => validateField('cnpj', e.target.value, [rules.cnpj()])}
                                             />
                                             <InputError message={clientErrors.cnpj || errors.cnpj} />
 
@@ -159,11 +154,8 @@ export default function Profile({
                                                 placeholder="(00) 00000-0000"
                                                 maxLength={15}
                                                 required
-                                                onChange={(e) => { e.target.value = maskPhone(e.target.value); clearFieldError('telefone_inst'); }}
-                                                onBlur={(e) => {
-                                                    const err = validatePhone(e.target.value);
-                                                    err ? setFieldError('telefone_inst', err) : clearFieldError('telefone_inst');
-                                                }}
+                                                onChange={(e) => { e.target.value = maskPhone(e.target.value); clearField('telefone_inst'); }}
+                                                onBlur={(e) => validateField('telefone_inst', e.target.value, [rules.phone()])}
                                             />
                                             <InputError message={clientErrors.telefone_inst || errors.telefone_inst} />
                                             <input type="hidden" name="endereco_completo" value={enderecoCompleto} />
@@ -184,12 +176,8 @@ export default function Profile({
                                                 placeholder='Nome completo'
                                                 required
                                                 minLength={2}
-                                                title="Nome deve ter pelo menos 2 caracteres"
-                                                onBlur={(e) => {
-                                                    const err = validateName(e.target.value, 'Nome');
-                                                    err ? setFieldError('nome_completo', err) : clearFieldError('nome_completo');
-                                                }}
-                                                onChange={() => clearFieldError('nome_completo')}
+                                                onBlur={(e) => validateField('nome_completo', e.target.value, [rules.name('Nome')])}
+                                                onChange={() => clearField('nome_completo')}
                                             />
                                             <InputError message={clientErrors.nome_completo || errors.nome_completo} />
 
@@ -200,14 +188,8 @@ export default function Profile({
                                                 placeholder='000.000.000-00'
                                                 maxLength={14}
                                                 required
-                                                onChange={(e) => { e.target.value = maskCpf(e.target.value); clearFieldError('cpf'); }}
-                                                onBlur={(e) => {
-                                                    if (e.target.value && !validateCpf(e.target.value)) {
-                                                        setFieldError('cpf', 'CPF inválido');
-                                                    } else {
-                                                        clearFieldError('cpf');
-                                                    }
-                                                }}
+                                                onChange={(e) => { e.target.value = maskCpf(e.target.value); clearField('cpf'); }}
+                                                onBlur={(e) => validateField('cpf', e.target.value, [rules.cpf()])}
                                             />
                                             <InputError message={clientErrors.cpf || errors.cpf} />
 
@@ -218,11 +200,8 @@ export default function Profile({
                                                 placeholder='(00) 00000-0000'
                                                 maxLength={15}
                                                 required
-                                                onChange={(e) => { e.target.value = maskPhone(e.target.value); clearFieldError('telefone'); }}
-                                                onBlur={(e) => {
-                                                    const err = validatePhone(e.target.value);
-                                                    err ? setFieldError('telefone', err) : clearFieldError('telefone');
-                                                }}
+                                                onChange={(e) => { e.target.value = maskPhone(e.target.value); clearField('telefone'); }}
+                                                onBlur={(e) => validateField('telefone', e.target.value, [rules.phone()])}
                                             />
                                             <InputError message={clientErrors.telefone || errors.telefone} />
 

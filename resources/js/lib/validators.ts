@@ -66,6 +66,29 @@ export function validateCnpj(cnpj: string): boolean {
     return rest === Number(digits[13]);
 }
 
+// ── Validação Declarativa ─────────────────────────────────────────────
+
+type ValidationRule = (value: string) => string | null;
+
+type FieldRules = Record<string, ValidationRule[]>;
+
+export function runValidation(data: Record<string, string>, fieldRules: FieldRules): Record<string, string> {
+    const errors: Record<string, string> = {};
+    for (const [field, validators] of Object.entries(fieldRules)) {
+        const value = data[field] ?? '';
+        for (const validate of validators) {
+            const error = validate(value);
+            if (error) {
+                errors[field] = error;
+                break;
+            }
+        }
+    }
+    return errors;
+}
+
+// Validadores individuais (usados pelos rules e exportados para onBlur avulso)
+
 export function validatePassword(password: string): string | null {
     if (password.length < 8) return 'A senha deve ter pelo menos 8 caracteres';
     if (!/[a-z]/.test(password)) return 'A senha deve conter pelo menos uma letra minúscula';
@@ -74,36 +97,46 @@ export function validatePassword(password: string): string | null {
     return null;
 }
 
-export function validateName(name: string, label = 'Nome'): string | null {
+function validateName(name: string, label = 'Nome'): string | null {
     const trimmed = name.trim();
     if (trimmed.length < 2) return `${label} deve ter pelo menos 2 caracteres`;
     if (!/[a-zA-ZÀ-ÿ].*[a-zA-ZÀ-ÿ]/.test(trimmed)) return `${label} deve conter pelo menos 2 letras`;
     return null;
 }
 
-export function validateEmail(email: string): string | null {
-    if (!email.trim()) return 'O email é obrigatório';
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Email inválido';
-    return null;
-}
-
-export function validatePhone(phone: string): string | null {
+function validatePhone(phone: string): string | null {
     const digits = phone.replace(/\D/g, '');
     if (digits.length < 10 || digits.length > 11) return 'Telefone inválido. Use (00) 00000-0000';
     return null;
 }
 
-export function validateRequired(value: string, label: string): string | null {
-    if (!value.trim()) return `${label} é obrigatório`;
-    return null;
-}
+// Rule factories — uso: rules.cpf(), rules.name('Label'), rules.required('Label')
 
-export function validateMinLength(value: string, min: number, label: string): string | null {
-    if (value.trim().length < min) return `${label} deve ter pelo menos ${min} caracteres`;
-    return null;
-}
+export const rules = {
+    required: (label: string): ValidationRule =>
+        (v) => !v.trim() ? `${label} é obrigatório` : null,
 
-// ── CEP ──────────────────────────────────────────────────────────────
+    minLength: (min: number, label: string): ValidationRule =>
+        (v) => v.trim().length < min ? `${label} deve ter pelo menos ${min} caracteres` : null,
+
+    name: (label: string): ValidationRule =>
+        (v) => validateName(v, label),
+
+    cpf: (): ValidationRule =>
+        (v) => !validateCpf(v) ? 'CPF inválido' : null,
+
+    cnpj: (): ValidationRule =>
+        (v) => !validateCnpj(v) ? 'CNPJ inválido' : null,
+
+    phone: (): ValidationRule =>
+        (v) => validatePhone(v),
+
+    password: (): ValidationRule =>
+        (v) => validatePassword(v),
+
+    cep: (): ValidationRule =>
+        (v) => v.replace(/\D/g, '').length !== 8 ? 'CEP deve ter 8 dígitos' : null,
+};
 
 export function maskCep(value: string): string {
     const digits = value.replace(/\D/g, '').slice(0, 8);
