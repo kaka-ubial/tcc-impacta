@@ -138,7 +138,11 @@ export default function Horarios({ horarios }: Props) {
                                     </div>
                                 </div>
 
-                                <Button type="submit" disabled={processing}>
+                                {data.hora_inicio && data.hora_fim && data.hora_fim <= data.hora_inicio && (
+                                    <p className="text-destructive text-xs">Horário de fim deve ser depois do horário de início</p>
+                                )}
+
+                                <Button type="submit" disabled={processing || !data.tipo || !data.dia_semana || !data.hora_inicio || !data.hora_fim || data.hora_fim <= data.hora_inicio}>
                                     Adicionar
                                 </Button>
                             </form>
