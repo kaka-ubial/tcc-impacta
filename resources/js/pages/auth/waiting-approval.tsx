@@ -6,7 +6,7 @@ import { Spinner } from '@/components/ui/spinner';
 
 export default function WaitingApproval() {
     function handleRefresh() {
-        router.visit('/dashboard', {preserveScroll: true});
+        router.visit('/redirect', {preserveScroll: true});
     }
 
     useEffect(() => { 

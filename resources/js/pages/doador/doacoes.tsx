@@ -4,6 +4,16 @@ import { useMemo, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/app-layout';
 import { cancel as cancelRoute, index as doacoesIndex } from '@/routes/doacoes';
@@ -75,7 +85,6 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
     const canCancel = doacao.status === 'pendente' || doacao.status === 'confirmada';
 
     function handleCancel() {
-        if (!confirm('Deseja cancelar esta solicitação?')) return;
         setProcessing(true);
         router.post(cancelRoute(doacao.id).url, {}, {
             onFinish: () => setProcessing(false),
@@ -165,18 +174,44 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
             {canCancel && (
                 <>
                     <Separator />
-                    <div className="px-5 py-3">
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-auto gap-1.5 px-0 text-xs text-destructive hover:bg-transparent hover:text-destructive/80"
-                            onClick={handleCancel}
-                            disabled={processing}
-                        >
-                            <X className="size-3.5" />
-                            Cancelar solicitação
-                        </Button>
-                    </div>
+                    <CardFooter className="pt-4">
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="gap-1.5 text-destructive hover:text-destructive"
+                                >
+                                    <X className="size-3.5" />
+                                    Cancelar solicitação
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogTitle>Cancelar doação</DialogTitle>
+                                <DialogDescription>
+                                    Tem certeza que deseja cancelar a doação para{' '}
+                                    <span className="font-medium text-foreground">{doacao.instituicao.nome_fantasia}</span>?
+                                    {doacao.status === 'confirmada' && (
+                                        <span className="mt-2 block text-destructive font-medium">
+                                            Esta doação já foi confirmada pela instituição.
+                                        </span>
+                                    )}
+                                </DialogDescription>
+                                <DialogFooter className="gap-2">
+                                    <DialogClose asChild>
+                                        <Button variant="secondary">Voltar</Button>
+                                    </DialogClose>
+                                    <Button
+                                        variant="destructive"
+                                        onClick={handleCancel}
+                                        disabled={processing}
+                                    >
+                                        {processing ? 'Cancelando...' : 'Confirmar cancelamento'}
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+                    </CardFooter>
                 </>
             )}
         </article>

@@ -38,11 +38,9 @@ export default function Login({ status, canResetPassword, canRegister }: Props) 
                 </Link>
             </header>
 
-            {/* Centered form */}
             <div className="flex flex-1 items-center justify-center px-6 py-12">
                 <div className="w-full max-w-[420px]">
 
-                    {/* Heading */}
                     <div className="mb-8">
                         <h1 className="font-display text-2xl font-bold text-foreground md:text-3xl">
                             Entre na sua conta
@@ -107,6 +105,7 @@ export default function Login({ status, canResetPassword, canRegister }: Props) 
                                             tabIndex={2}
                                             autoComplete="current-password"
                                             placeholder="Sua senha"
+                                            className='h-11'
                                         />
                                         <InputError message={errors.password} />
                                     </div>

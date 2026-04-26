@@ -2,6 +2,7 @@ import { Transition } from '@headlessui/react';
 import { Form, Head } from '@inertiajs/react';
 import { ShieldCheck } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { validatePassword } from '@/lib/validators';
 import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -49,6 +50,7 @@ export default function Security({
         errors,
     } = useTwoFactorAuth();
     const [showSetupModal, setShowSetupModal] = useState<boolean>(false);
+    const [passwordClientError, setPasswordClientError] = useState<string>('');
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -119,9 +121,14 @@ export default function Security({
                                         className="mt-1 block w-full"
                                         autoComplete="new-password"
                                         placeholder="Nova senha"
+                                        onBlur={(e) => {
+                                            const err = e.target.value ? validatePassword(e.target.value) : '';
+                                            setPasswordClientError(err || '');
+                                        }}
+                                        onChange={() => setPasswordClientError('')}
                                     />
 
-                                    <InputError message={errors.password} />
+                                    <InputError message={passwordClientError || errors.password} />
                                 </div>
 
                                 <div className="grid gap-2">

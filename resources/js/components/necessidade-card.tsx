@@ -1,17 +1,16 @@
 import { router } from '@inertiajs/react';
 import { useState } from 'react';
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
 
 type Necessidade = {
     id: number;
@@ -36,8 +35,7 @@ type Props = {
 };
 
 export function NecessidadeCard({ onEdit, necessidade, variant = 'doador' }: Props) {
-    const [confirmOpen, setConfirmOpen] = useState(false);
-
+    const [deleting, setDeleting] = useState(false);
     const isAtiva = necessidade.quantidade_atual < necessidade.quantidade_objetivo;
 
     const pct = Math.min(
@@ -48,7 +46,10 @@ export function NecessidadeCard({ onEdit, necessidade, variant = 'doador' }: Pro
     const cfg = prioridadeConfig[necessidade.prioridade];
 
     function handleDelete() {
-        router.delete(`/instituicao/necessidades/${necessidade.id}`);
+        setDeleting(true);
+        router.delete(`/instituicao/necessidades/${necessidade.id}`, {
+            onFinish: () => setDeleting(false),
+        });
     }
 
     return (
@@ -104,14 +105,36 @@ export function NecessidadeCard({ onEdit, necessidade, variant = 'doador' }: Pro
                         Editar
                     </Button>
 
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                        onClick={() => setConfirmOpen(true)}
-                    >
-                        Deletar
-                    </Button>
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                                Deletar
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogTitle>Excluir necessidade</DialogTitle>
+                            <DialogDescription>
+                                Tem certeza que deseja excluir a necessidade{' '}
+                                <span className="font-medium text-foreground">{necessidade.categoria.nome}</span>
+                                {necessidade.descricao && (
+                                    <> — <span className="italic">{necessidade.descricao}</span></>
+                                )}
+                                ? Esta ação não pode ser desfeita.
+                            </DialogDescription>
+                            <DialogFooter className="gap-2">
+                                <DialogClose asChild>
+                                    <Button variant="secondary">Cancelar</Button>
+                                </DialogClose>
+                                <Button
+                                    variant="destructive"
+                                    onClick={handleDelete}
+                                    disabled={deleting}
+                                >
+                                    {deleting ? 'Excluindo...' : 'Excluir'}
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
                 </div>
             )}
 
@@ -120,28 +143,6 @@ export function NecessidadeCard({ onEdit, necessidade, variant = 'doador' }: Pro
                     Quero doar
                 </Button>
             )}
-
-            <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Deletar necessidade</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Tem certeza que deseja deletar a necessidade{' '}
-                            <strong>{necessidade.categoria.nome}</strong>? Esta ação não
-                            pode ser desfeita.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            onClick={handleDelete}
-                        >
-                            Deletar
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
         </div>
     );
 }

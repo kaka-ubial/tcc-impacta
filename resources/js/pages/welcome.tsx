@@ -91,7 +91,6 @@ export default function Welcome({
 
             <div className="min-h-screen bg-warm-neutral text-foreground">
 
-                {/* ── Nav ─────────────────────────────────────────── */}
                 <header className="sticky top-0 z-40 border-b border-border bg-warm-neutral/90 backdrop-blur-sm">
                     <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
                         <div className="flex items-center gap-2 font-semibold">
@@ -121,11 +120,9 @@ export default function Welcome({
                     </div>
                 </header>
 
-                {/* ── Hero ────────────────────────────────────────── */}
                 <section className="mx-auto max-w-6xl px-6 py-20 md:py-28 lg:py-32">
                     <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-[1fr_320px]">
 
-                        {/* Copy */}
                         <div className="max-w-2xl">
                             <p className="text-xs font-semibold uppercase tracking-[0.15em] text-brand">
                                 Plataforma de doações solidárias
@@ -156,7 +153,6 @@ export default function Welcome({
                             </div>
                         </div>
 
-                        {/* Decorative stat cluster — desktop only */}
                         <div className="relative hidden h-80 w-80 shrink-0 lg:block" aria-hidden>
                             <div className="absolute inset-0 rounded-full bg-brand-soft" />
                             <div className="absolute -right-2 top-10 h-20 w-20 rounded-full bg-brand/10" />
@@ -180,7 +176,6 @@ export default function Welcome({
                     </div>
                 </section>
 
-                {/* ── Como funciona ───────────────────────────────── */}
                 <section id="como-funciona" className="border-y border-border bg-card">
                     <div className="mx-auto max-w-6xl px-6 py-20">
                         <div className="mb-14">
@@ -197,12 +192,10 @@ export default function Welcome({
                                 const Icon = step.icon;
                                 return (
                                     <div key={i} className="relative md:pr-12">
-                                        {/* Top accent line */}
                                         <div className="mb-6 flex items-center">
                                             <div className="h-0.5 w-10 bg-brand" />
                                             <div className="h-px flex-1 bg-border" />
                                         </div>
-                                        {/* Large ordinal — decorative */}
                                         <span
                                             aria-hidden
                                             className="font-display pointer-events-none select-none text-[5.5rem] font-bold leading-none text-brand/[0.07]"
@@ -225,7 +218,6 @@ export default function Welcome({
                     </div>
                 </section>
 
-                {/* ── Stats ───────────────────────────────────────── */}
                 <section ref={statsRef} className="py-24">
                     <div className="mx-auto max-w-6xl px-6">
                         <div className="mb-14 max-w-lg">
@@ -263,7 +255,6 @@ export default function Welcome({
                     </div>
                 </section>
 
-                {/* ── CTA ─────────────────────────────────────────── */}
                 {canRegister && !auth.user && (
                     <section className="bg-brand">
                         <div className="mx-auto max-w-6xl px-6 py-24">
@@ -300,14 +291,11 @@ export default function Welcome({
                     </section>
                 )}
 
-                {/* ── Footer ──────────────────────────────────────── */}
                 <footer className="bg-[oklch(0.17_0.012_41.0)]">
                     <div className="mx-auto max-w-6xl px-6 py-16">
 
-                        {/* Three-column grid — brand wider, link cols equal */}
                         <div className="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-[2fr_1fr_1fr]">
 
-                            {/* Brand column */}
                             <div>
                                 <div className="flex items-center gap-2">
                                     {/* <div className="flex size-7 items-center justify-center rounded-md bg-brand text-primary-foreground">
@@ -325,10 +313,8 @@ export default function Welcome({
                                 </p>
                             </div>
 
-                            {/* Link columns — side-by-side on mobile, individual cells on lg */}
                             <div className="grid grid-cols-2 gap-8 lg:contents">
 
-                                {/* Plataforma */}
                                 <div>
                                     <p className="text-[0.625rem] font-semibold uppercase tracking-[0.14em] text-[oklch(0.48_0.012_41.0)]">
                                         Plataforma
@@ -341,7 +327,6 @@ export default function Welcome({
                                     </ul>
                                 </div>
 
-                                {/* Institucional */}
                                 <div>
                                     <p className="text-[0.625rem] font-semibold uppercase tracking-[0.14em] text-[oklch(0.48_0.012_41.0)]">
                                         Institucional
@@ -356,7 +341,6 @@ export default function Welcome({
                             </div>
                         </div>
 
-                        {/* Bottom bar */}
                         <div className="mt-12 flex flex-col items-start justify-between gap-2 border-t border-white/8 pt-8 text-xs text-[oklch(0.43_0.010_41.0)] sm:flex-row sm:items-center">
                             <p>© {new Date().getFullYear()} Impacta</p>
                             <p>Plataforma de doações solidárias. Comprometida com a LGPD.</p>

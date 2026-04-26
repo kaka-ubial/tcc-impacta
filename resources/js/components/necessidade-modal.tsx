@@ -115,11 +115,17 @@ export function NecessidadeCreateModal({ categorias, open, setOpen, initialData 
                                 setData('descricao', e.target.value)
                             }
                             placeholder="Descreva a necessidade..."
+                            minLength={5}
                         />
 
                         {errors.descricao && (
                             <span className="text-destructive text-xs">
                                 {errors.descricao}
+                            </span>
+                        )}
+                        {!errors.descricao && data.descricao.length > 0 && data.descricao.length < 5 && (
+                            <span className="text-destructive text-xs">
+                                Descrição deve ter pelo menos 5 caracteres
                             </span>
                         )}
                     </div>
@@ -179,7 +185,7 @@ export function NecessidadeCreateModal({ categorias, open, setOpen, initialData 
 
                         <Button
                             type="submit"
-                            disabled={processing || !data.categoria_id || !data.quantidade_objetivo}
+                            disabled={processing || !data.categoria_id || !data.quantidade_objetivo || data.descricao.length < 5}
                         >
                             {isEdit ? 'Editar' : 'Criar'}
                         </Button>

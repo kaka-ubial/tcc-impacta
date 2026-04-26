@@ -1,6 +1,7 @@
 import { router } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 
+import EnderecoCepFields from '@/components/endereco-cep-fields';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -8,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { buildEnderecoCompleto, type EnderecoFields } from '@/lib/validators';
 import { store as doacoesStore } from '@/routes/doacoes';
 import type { HorarioDisponivel, NecessidadeAtiva } from '@/types';
 
@@ -73,6 +75,9 @@ export function DoacaoNecessidadesModal({ open, onClose, instituicaoId, necessid
     const [tipo, setTipo] = useState<'coleta' | 'entrega'>('entrega');
     const [dataHora, setDataHora] = useState('');
     const [enderecoReferencia, setEnderecoReferencia] = useState('');
+    const [enderecoColeta, setEnderecoColeta] = useState<EnderecoFields>({
+        cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', uf: '',
+    });
     const [processing, setProcessing] = useState(false);
 
     const abertas = necessidades.filter((n) => n.quantidade_atual < n.quantidade_objetivo);
@@ -98,18 +103,24 @@ export function DoacaoNecessidadesModal({ open, onClose, instituicaoId, necessid
         setSelected((prev) => ({ ...prev, [id]: qty }));
     }
 
+    function handleEnderecoColetaChange(fields: EnderecoFields) {
+        setEnderecoColeta(fields);
+        setEnderecoReferencia(buildEnderecoCompleto(fields));
+    }
+
     function handleClose() {
         setStep(0);
         setSelected({});
         setTipo('entrega');
         setDataHora('');
         setEnderecoReferencia('');
+        setEnderecoColeta({ cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', uf: '' });
         onClose();
     }
 
     const selectedIds = Object.keys(selected).map(Number);
     const canAdvanceStep1 = selectedIds.length > 0;
-    const canAdvanceStep2 = dataHora !== '' && (tipo !== 'coleta' || enderecoReferencia.trim() !== '');
+    const canAdvanceStep2 = dataHora !== '' && (tipo !== 'coleta' || (enderecoColeta.cep.replace(/\D/g, '').length === 8 && !!enderecoColeta.logradouro && !!enderecoColeta.numero));
 
     function handleSubmit() {
         setProcessing(true);
@@ -294,10 +305,9 @@ export function DoacaoNecessidadesModal({ open, onClose, instituicaoId, necessid
                                 {tipo === 'coleta' && (
                                     <div className="flex flex-col gap-1">
                                         <Label>Seu endereço para coleta</Label>
-                                        <Input
-                                            placeholder="Rua, número, bairro, cidade"
-                                            value={enderecoReferencia}
-                                            onChange={(e) => setEnderecoReferencia(e.target.value)}
+                                        <EnderecoCepFields
+                                            value={enderecoColeta}
+                                            onChange={handleEnderecoColetaChange}
                                         />
                                     </div>
                                 )}
