@@ -95,9 +95,9 @@ export default function Welcome({
                 <header className="sticky top-0 z-40 border-b border-border bg-warm-neutral/90 backdrop-blur-sm">
                     <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
                         <div className="flex items-center gap-2 font-semibold">
-                            <div className="flex size-7 items-center justify-center rounded-md bg-brand text-primary-foreground">
+                            {/* <div className="flex size-7 items-center justify-center rounded-md bg-brand text-primary-foreground">
                                 <Heart className="size-4" />
-                            </div>
+                            </div> */}
                             <span>Impacta</span>
                         </div>
                         <nav className="flex items-center gap-2">
@@ -310,9 +310,9 @@ export default function Welcome({
                             {/* Brand column */}
                             <div>
                                 <div className="flex items-center gap-2">
-                                    <div className="flex size-7 items-center justify-center rounded-md bg-brand text-primary-foreground">
+                                    {/* <div className="flex size-7 items-center justify-center rounded-md bg-brand text-primary-foreground">
                                         <Heart className="size-4" />
-                                    </div>
+                                    </div> */}
                                     <span className="font-semibold text-[oklch(0.88_0.02_41.0)]">
                                         Impacta
                                     </span>
