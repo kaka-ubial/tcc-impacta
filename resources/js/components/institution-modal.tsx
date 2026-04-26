@@ -57,7 +57,7 @@ export function InstitutionModal({ institution, isOpen, onClose }: Props) {
 
                     <div className="flex gap-2">
                         <button
-                            className="rounded-md bg-destructive px-4 py-2 text-sm text-white font-medium text-destructive-foreground hover:bg-destructive-90 disabled:opacity-70"
+                            className="rounded-md bg-destructive px-4 py-2 text-sm text-white font-medium text-destructive-foreground hover:bg-destructive-90 disabled:opacity-50"
                             onClick={handleReject}
                             disabled={processing || data.motivo.length < 10}
                         >

@@ -24,7 +24,7 @@ class NecessidadeRequest extends FormRequest
     {
         return [
             'categoria_id' => 'required|exists:categorias_itens,id',
-            'descricao' => 'required|string|max:255',
+            'descricao' => 'required|string|min:5|max:255',
             'quantidade_objetivo' => 'required|integer|min:1',
             'prioridade' => 'required|in:baixa,media,alta',        
         ];

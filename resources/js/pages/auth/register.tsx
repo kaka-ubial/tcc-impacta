@@ -12,6 +12,12 @@ import { useState } from 'react';
 import { useForm } from '@inertiajs/react';
 import { Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+    maskCpf, maskCnpj, maskPhone,
+    runValidation, rules,
+    buildEnderecoCompleto, type EnderecoFields,
+} from '@/lib/validators';
+import EnderecoCepFields from '@/components/endereco-cep-fields';
 
 type TipoUsuario = 'doador' | 'instituicao' | null;
 
@@ -20,6 +26,10 @@ const stepLabels = ['Conta', 'Perfil', 'Informações', 'Causas'];
 export default function Register({causas}: { causas: any[] }) {
     const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
     const [tipo, setTipo] = useState<TipoUsuario>(null);
+    const [clientErrors, setClientErrors] = useState<Record<string, string>>({});
+    const [endereco, setEndereco] = useState<EnderecoFields>({
+        cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', uf: '',
+    });
 
     const toggleCausa = (id: number) => {
         const current = data.causas_apoiadas
@@ -52,19 +62,67 @@ export default function Register({causas}: { causas: any[] }) {
     }
 
     function handleStepOne() {
+        const errs = runValidation(
+            { password: data.password, password_confirmation: data.password_confirmation },
+            {
+                password: [rules.password()],
+                password_confirmation: [() => data.password !== data.password_confirmation ? 'As senhas não coincidem' : null],
+            },
+        );
+
+        if (Object.keys(errs).length > 0) {
+            setClientErrors(errs);
+            return;
+        }
+
+        setClientErrors({});
         clearErrors();
         post('/validate/register-step-one', {
             preserveScroll: true,
             onSuccess: () => {setStep(2)},
-        });           
+        });
     }
 
+    function handleEnderecoChange(fields: EnderecoFields) {
+        setEndereco(fields);
+        setData('endereco_completo', buildEnderecoCompleto(fields));
+    }
+
+    const step3Rules = {
+        doador: {
+            nome_completo: [rules.name('Nome completo')],
+            cpf: [rules.cpf()],
+            telefone: [rules.phone()],
+        },
+        instituicao: {
+            nome_fantasia: [rules.name('Nome fantasia')],
+            razao_social: [rules.name('Razão social')],
+            cnpj: [rules.cnpj()],
+            telefone_inst: [rules.phone()],
+            cep: [rules.cep()],
+            logradouro: [rules.required('Logradouro')],
+            numero: [rules.required('Número')],
+            bairro: [rules.required('Bairro')],
+            cidade: [rules.required('Cidade')],
+            uf: [rules.required('UF')],
+        },
+    };
+
+    function validateStep3(): boolean {
+        const fieldRules = tipo === 'doador' ? step3Rules.doador : step3Rules.instituicao;
+        const fieldData = { ...data, ...endereco } as Record<string, string>;
+        const errs = runValidation(fieldData, fieldRules);
+        setClientErrors(errs);
+        return Object.keys(errs).length === 0;
+    }
 
     function nextStep() {
+        if (step === 3 && !validateStep3()) return;
         setStep((s) => (s < 4 ? ((s + 1) as any) : s));
     }
 
     function prevStep() {
+        setClientErrors({});
         setStep((s) => (s > 1 ? ((s - 1) as any) : s));
     }
 
@@ -168,7 +226,7 @@ export default function Register({causas}: { causas: any[] }) {
                                                 onChange={(e) => setData('password', e.target.value)}
                                                 placeholder="Senha"
                                             />
-                                            <InputError message={errors.password} />
+                                            <InputError message={clientErrors.password || errors.password} />
                                         </div>
 
                                         <div className="flex flex-col gap-2">
@@ -181,7 +239,7 @@ export default function Register({causas}: { causas: any[] }) {
                                                 onChange={(e) => setData('password_confirmation', e.target.value)}
                                                 placeholder="Confirme sua senha"
                                             />
-                                            <InputError message={errors.password_confirmation} />
+                                            <InputError message={clientErrors.password_confirmation || errors.password_confirmation} />
                                         </div>
 
                                         <Button
@@ -286,7 +344,7 @@ export default function Register({causas}: { causas: any[] }) {
                                                 onChange={(e) => setData('nome_completo', e.target.value)}
                                                 placeholder="Seu nome completo"
                                             />
-                                            <InputError message={errors.nome_completo} />
+                                            <InputError message={clientErrors.nome_completo || errors.nome_completo} />
                                         </div>
 
                                         <div className="flex flex-col gap-2">
@@ -295,10 +353,11 @@ export default function Register({causas}: { causas: any[] }) {
                                                 id="cpf"
                                                 type="text"
                                                 value={data.cpf}
-                                                onChange={(e) => setData('cpf', e.target.value)}
+                                                onChange={(e) => setData('cpf', maskCpf(e.target.value))}
                                                 placeholder="000.000.000-00"
+                                                maxLength={14}
                                             />
-                                            <InputError message={errors.cpf} />
+                                            <InputError message={clientErrors.cpf || errors.cpf} />
                                         </div>
 
                                         <div className="flex flex-col gap-2">
@@ -307,10 +366,11 @@ export default function Register({causas}: { causas: any[] }) {
                                                 id="telefone"
                                                 type="tel"
                                                 value={data.telefone}
-                                                onChange={(e) => setData('telefone', e.target.value)}
+                                                onChange={(e) => setData('telefone', maskPhone(e.target.value))}
                                                 placeholder="(00) 00000-0000"
+                                                maxLength={15}
                                             />
-                                            <InputError message={errors.telefone} />
+                                            <InputError message={clientErrors.telefone || errors.telefone} />
                                         </div>
 
                                         <div className="flex gap-2">
@@ -326,7 +386,7 @@ export default function Register({causas}: { causas: any[] }) {
                                                 type="button"
                                                 className="flex-1"
                                                 onClick={nextStep}
-                                                disabled={processing}
+                                                disabled={processing || !data.nome_completo || !data.cpf || !data.telefone}
                                             >
                                                 {processing && <Spinner />}
                                                 Próximo
@@ -348,7 +408,7 @@ export default function Register({causas}: { causas: any[] }) {
                                                 onChange={(e) => setData('nome_fantasia', e.target.value)}
                                                 placeholder="Nome da instituição"
                                             />
-                                            <InputError message={errors.nome_fantasia} />
+                                            <InputError message={clientErrors.nome_fantasia || errors.nome_fantasia} />
                                         </div>
 
                                         <div className="flex flex-col gap-2">
@@ -360,7 +420,7 @@ export default function Register({causas}: { causas: any[] }) {
                                                 onChange={(e) => setData('razao_social', e.target.value)}
                                                 placeholder="Razão social"
                                             />
-                                            <InputError message={errors.razao_social} />
+                                            <InputError message={clientErrors.razao_social || errors.razao_social} />
                                         </div>
 
                                         <div className="flex flex-col gap-2">
@@ -369,10 +429,11 @@ export default function Register({causas}: { causas: any[] }) {
                                                 id="cnpj"
                                                 type="text"
                                                 value={data.cnpj}
-                                                onChange={(e) => setData('cnpj', e.target.value)}
+                                                onChange={(e) => setData('cnpj', maskCnpj(e.target.value))}
                                                 placeholder="00.000.000/0000-00"
+                                                maxLength={18}
                                             />
-                                            <InputError message={errors.cnpj} />
+                                            <InputError message={clientErrors.cnpj || errors.cnpj} />
                                         </div>
 
                                         <div className="flex flex-col gap-2">
@@ -381,23 +442,25 @@ export default function Register({causas}: { causas: any[] }) {
                                                 id="telefone_inst"
                                                 type="tel"
                                                 value={data.telefone_inst}
-                                                onChange={(e) => setData('telefone_inst', e.target.value)}
+                                                onChange={(e) => setData('telefone_inst', maskPhone(e.target.value))}
                                                 placeholder="(00) 00000-0000"
+                                                maxLength={15}
                                             />
-                                            <InputError message={errors.telefone} />
+                                            <InputError message={clientErrors.telefone_inst || errors.telefone} />
                                         </div>
 
-                                        <div className="flex flex-col gap-2">
-                                            <Label htmlFor="endereco_completo">Endereço completo</Label>
-                                            <Input
-                                                id="endereco_completo"
-                                                type="text"
-                                                value={data.endereco_completo}
-                                                onChange={(e) => setData('endereco_completo', e.target.value)}
-                                                placeholder="Rua, número, bairro, cidade"
-                                            />
-                                            <InputError message={errors.endereco_completo} />
-                                        </div>
+                                        <EnderecoCepFields
+                                            value={endereco}
+                                            onChange={handleEnderecoChange}
+                                            errors={{
+                                                cep: clientErrors.cep,
+                                                logradouro: clientErrors.logradouro,
+                                                numero: clientErrors.numero,
+                                                bairro: clientErrors.bairro,
+                                                cidade: clientErrors.cidade,
+                                            }}
+                                        />
+                                        <InputError message={errors.endereco_completo} />
 
                                         <div className="flex gap-2">
                                             <Button
@@ -412,6 +475,7 @@ export default function Register({causas}: { causas: any[] }) {
                                                 type="button"
                                                 className="flex-1"
                                                 onClick={nextStep}
+                                                disabled={!data.nome_fantasia || !data.razao_social || !data.cnpj || !data.telefone_inst || !endereco.cep || !endereco.logradouro || !endereco.numero}
                                             >
                                                 {processing && <Spinner />}
                                                 Próximo

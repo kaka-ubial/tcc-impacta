@@ -1,7 +1,9 @@
 import { Transition } from '@headlessui/react';
 import { Form, Head, Link, usePage, useForm } from '@inertiajs/react';
+import { useState } from 'react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import DeleteUser from '@/components/delete-user';
+import EnderecoCepFields from '@/components/endereco-cep-fields';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -12,6 +14,7 @@ import SettingsLayout from '@/layouts/settings/layout';
 import { edit } from '@/routes/profile';
 import { send } from '@/routes/verification';
 import type { BreadcrumbItem } from '@/types';
+import { maskCpf, maskCnpj, maskPhone, runValidation, rules, buildEnderecoCompleto, parseEnderecoCompleto, type EnderecoFields } from '@/lib/validators';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -29,6 +32,33 @@ export default function Profile({
 }) {
     const { auth } = usePage().props;
     const tipo = auth.user.tipo_usuario;
+    const [endereco, setEndereco] = useState<EnderecoFields>(
+        () => parseEnderecoCompleto(auth.user.instituicao?.endereco_completo || '')
+    );
+    const [enderecoCompleto, setEnderecoCompleto] = useState(
+        auth.user.instituicao?.endereco_completo || ''
+    );
+
+    const [clientErrors, setClientErrors] = useState<Record<string, string>>({});
+
+    function validateField(field: string, value: string, fieldRules: ((v: string) => string | null)[]) {
+        const errs = runValidation({ [field]: value }, { [field]: fieldRules });
+        setClientErrors((prev) => {
+            const next = { ...prev };
+            if (errs[field]) next[field] = errs[field];
+            else delete next[field];
+            return next;
+        });
+    }
+
+    function clearField(field: string) {
+        setClientErrors((prev) => { const { [field]: _, ...rest } = prev; return rest; });
+    }
+
+    function handleEnderecoChange(fields: EnderecoFields) {
+        setEndereco(fields);
+        setEnderecoCompleto(buildEnderecoCompleto(fields));
+    }
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -71,6 +101,7 @@ export default function Profile({
                                         required
                                         autoComplete="username"
                                         placeholder="Endereço de email"
+                                        disabled={tipo === 'admin'}
                                     />
 
                                     <InputError
@@ -80,35 +111,57 @@ export default function Profile({
 
                                     { tipo == 'instituicao' && (
                                         <>
-                                            <Label htmlFor="email">Nome Fantasia</Label>
+                                            <Label htmlFor="nome_fantasia">Nome Fantasia</Label>
                                             <Input
                                                 name="nome_fantasia"
                                                 defaultValue={auth.user.instituicao?.nome_fantasia}
                                                 placeholder="Nome Fantasia"
+                                                required
+                                                minLength={2}
+                                                onBlur={(e) => validateField('nome_fantasia', e.target.value, [rules.name('Nome fantasia')])}
+                                                onChange={() => clearField('nome_fantasia')}
                                             />
-                                            <Label htmlFor="email">Razão social</Label>
+                                            <InputError message={clientErrors.nome_fantasia || errors.nome_fantasia} />
+
+                                            <Label htmlFor="razao_social">Razão social</Label>
                                             <Input
                                                 name="razao_social"
                                                 defaultValue={auth.user.instituicao?.razao_social}
                                                 placeholder="Razão social"
+                                                required
+                                                minLength={2}
+                                                onBlur={(e) => validateField('razao_social', e.target.value, [rules.name('Razão social')])}
+                                                onChange={() => clearField('razao_social')}
                                             />
-                                            <Label htmlFor="email">CNPJ</Label>
+                                            <InputError message={clientErrors.razao_social || errors.razao_social} />
+
+                                            <Label htmlFor="cnpj">CNPJ</Label>
                                             <Input
                                                 name="cnpj"
                                                 defaultValue={auth.user.instituicao?.cnpj}
-                                                placeholder="CNPJ"
+                                                placeholder="00.000.000/0000-00"
+                                                maxLength={18}
+                                                required
+                                                onChange={(e) => { e.target.value = maskCnpj(e.target.value); clearField('cnpj'); }}
+                                                onBlur={(e) => validateField('cnpj', e.target.value, [rules.cnpj()])}
                                             />
-                                            <Label htmlFor="email">Telefone</Label>
+                                            <InputError message={clientErrors.cnpj || errors.cnpj} />
+
+                                            <Label htmlFor="telefone_inst">Telefone</Label>
                                             <Input
                                                 name="telefone_inst"
                                                 defaultValue={auth.user.instituicao?.telefone}
-                                                placeholder="Telefone"
+                                                placeholder="(00) 00000-0000"
+                                                maxLength={15}
+                                                required
+                                                onChange={(e) => { e.target.value = maskPhone(e.target.value); clearField('telefone_inst'); }}
+                                                onBlur={(e) => validateField('telefone_inst', e.target.value, [rules.phone()])}
                                             />
-                                            <Label htmlFor="email">Endereço</Label>
-                                            <Input
-                                                name="endereco_completo"
-                                                defaultValue={auth.user.instituicao?.endereco_completo}
-                                                placeholder="Endereço"
+                                            <InputError message={clientErrors.telefone_inst || errors.telefone_inst} />
+                                            <input type="hidden" name="endereco_completo" value={enderecoCompleto} />
+                                            <EnderecoCepFields
+                                                value={endereco}
+                                                onChange={handleEnderecoChange}
                                             />
 
                                         </>
@@ -121,19 +174,36 @@ export default function Profile({
                                                 name='nome_completo'
                                                 defaultValue={auth.user.doador?.nome_completo}
                                                 placeholder='Nome completo'
+                                                required
+                                                minLength={2}
+                                                onBlur={(e) => validateField('nome_completo', e.target.value, [rules.name('Nome')])}
+                                                onChange={() => clearField('nome_completo')}
                                             />
+                                            <InputError message={clientErrors.nome_completo || errors.nome_completo} />
+
                                             <Label htmlFor='cpf'>CPF</Label>
                                             <Input
                                                 name='cpf'
                                                 defaultValue={auth.user.doador?.cpf}
-                                                placeholder='CPF'
+                                                placeholder='000.000.000-00'
+                                                maxLength={14}
+                                                required
+                                                onChange={(e) => { e.target.value = maskCpf(e.target.value); clearField('cpf'); }}
+                                                onBlur={(e) => validateField('cpf', e.target.value, [rules.cpf()])}
                                             />
+                                            <InputError message={clientErrors.cpf || errors.cpf} />
+
                                             <Label htmlFor='telefone'>Telefone</Label>
                                             <Input
                                                 name='telefone'
                                                 defaultValue={auth.user.doador?.telefone}
-                                                placeholder='Telefone'
+                                                placeholder='(00) 00000-0000'
+                                                maxLength={15}
+                                                required
+                                                onChange={(e) => { e.target.value = maskPhone(e.target.value); clearField('telefone'); }}
+                                                onBlur={(e) => validateField('telefone', e.target.value, [rules.phone()])}
                                             />
+                                            <InputError message={clientErrors.telefone || errors.telefone} />
 
                                         </>
                                     )}

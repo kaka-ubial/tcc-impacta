@@ -1,6 +1,16 @@
-import { router, Link } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
 
 type Necessidade = {
     id: number;
@@ -25,6 +35,7 @@ type Props = {
 };
 
 export function NecessidadeCard({ onEdit, necessidade, variant = 'doador' }: Props) {
+    const [deleting, setDeleting] = useState(false);
     const isAtiva = necessidade.quantidade_atual < necessidade.quantidade_objetivo;
 
     const pct = Math.min(
@@ -35,9 +46,10 @@ export function NecessidadeCard({ onEdit, necessidade, variant = 'doador' }: Pro
     const cfg = prioridadeConfig[necessidade.prioridade];
 
     function handleDelete() {
-        if (confirm('Tem certeza?')) {
-            router.delete(`/instituicao/necessidades/${necessidade.id}`);    
-        }
+        setDeleting(true);
+        router.delete(`/instituicao/necessidades/${necessidade.id}`, {
+            onFinish: () => setDeleting(false),
+        });
     }
 
     return (
@@ -93,12 +105,36 @@ export function NecessidadeCard({ onEdit, necessidade, variant = 'doador' }: Pro
                         Editar
                     </Button>
 
-                    <button
-                        onClick={handleDelete}
-                        className="text-destructive text-sm"
-                    >
-                        Deletar
-                    </button>
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                                Deletar
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogTitle>Excluir necessidade</DialogTitle>
+                            <DialogDescription>
+                                Tem certeza que deseja excluir a necessidade{' '}
+                                <span className="font-medium text-foreground">{necessidade.categoria.nome}</span>
+                                {necessidade.descricao && (
+                                    <> — <span className="italic">{necessidade.descricao}</span></>
+                                )}
+                                ? Esta ação não pode ser desfeita.
+                            </DialogDescription>
+                            <DialogFooter className="gap-2">
+                                <DialogClose asChild>
+                                    <Button variant="secondary">Cancelar</Button>
+                                </DialogClose>
+                                <Button
+                                    variant="destructive"
+                                    onClick={handleDelete}
+                                    disabled={deleting}
+                                >
+                                    {deleting ? 'Excluindo...' : 'Excluir'}
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
                 </div>
             )}
 
