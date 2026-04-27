@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Instituicao;
 
 use App\Http\Controllers\Controller;
 use App\Models\CategoriaItem;
+use App\Models\Causa;
 use App\Models\Instituicao;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -13,12 +14,21 @@ class InstituicaoController extends Controller
 {
     public function index(Request $request): Response
     {
+        $search = $request->string('search')->trim()->value();
+        $causaId = $request->integer('causa') ?: null;
+
         $instituicoes = Instituicao::with('causas')
             ->withCount(['necessidades as necessidades_ativas_count' => function ($query) {
                 $query->whereColumn('quantidade_atual', '<', 'quantidade_objetivo');
             }])
             ->visible()
-            ->when($request->search, fn ($q) => $q->where('nome_fantasia', 'like', '%'.$request->search.'%'))
+            ->when($search, fn ($q) => $q->where(function ($q) use ($search) {
+                $term = '%'.$search.'%';
+                $q->where('nome_fantasia', 'ilike', $term)
+                    ->orWhere('endereco_completo', 'ilike', $term)
+                    ->orWhereHas('causas', fn ($q) => $q->where('nome', 'ilike', $term));
+            }))
+            ->when($causaId, fn ($q) => $q->whereHas('causas', fn ($q) => $q->where('causas.id', $causaId)))
             ->orderBy('nome_fantasia')
             ->simplePaginate(12)
             ->through(fn ($inst) => [
@@ -32,7 +42,11 @@ class InstituicaoController extends Controller
 
         return Inertia::render('instituicoes/index', [
             'instituicoes' => $instituicoes,
-            'filters' => ['search' => $request->search ?? ''],
+            'causas' => Causa::orderBy('nome')->get(['id', 'nome', 'icone']),
+            'filters' => [
+                'search' => $search,
+                'causa' => $causaId,
+            ],
         ]);
     }
 
@@ -49,31 +63,31 @@ class InstituicaoController extends Controller
 
         return Inertia::render('instituicoes/show', [
             'instituicao' => [
-                'usuario_id'        => $instituicao->usuario_id,
-                'nome_fantasia'     => $instituicao->nome_fantasia,
-                'razao_social'      => $instituicao->razao_social,
-                'verificada'        => $instituicao->isApproved(),
-                'cnpj'              => $instituicao->cnpj,
-                'telefone'          => $instituicao->telefone,
+                'usuario_id' => $instituicao->usuario_id,
+                'nome_fantasia' => $instituicao->nome_fantasia,
+                'razao_social' => $instituicao->razao_social,
+                'verificada' => $instituicao->isApproved(),
+                'cnpj' => $instituicao->cnpj,
+                'telefone' => $instituicao->telefone,
                 'endereco_completo' => $instituicao->endereco_completo,
-                'descricao'         => $instituicao->descricao,
-                'latitude'          => $instituicao->latitude,
-                'longitude'         => $instituicao->longitude,
-                'causas'            => $instituicao->causas->map(fn ($c) => ['id' => $c->id, 'nome' => $c->nome, 'icone' => $c->icone]),
+                'descricao' => $instituicao->descricao,
+                'latitude' => $instituicao->latitude,
+                'longitude' => $instituicao->longitude,
+                'causas' => $instituicao->causas->map(fn ($c) => ['id' => $c->id, 'nome' => $c->nome, 'icone' => $c->icone]),
                 'necessidades_ativas' => $instituicao->necessidades->map(fn ($n) => [
-                    'id'                 => $n->id,
-                    'descricao'          => $n->descricao,
+                    'id' => $n->id,
+                    'descricao' => $n->descricao,
                     'quantidade_objetivo' => $n->quantidade_objetivo,
-                    'quantidade_atual'   => $n->quantidade_atual,
-                    'prioridade'         => $n->prioridade,
-                    'categoria'          => ['id' => $n->categoria->id, 'nome' => $n->categoria->nome],
+                    'quantidade_atual' => $n->quantidade_atual,
+                    'prioridade' => $n->prioridade,
+                    'categoria' => ['id' => $n->categoria->id, 'nome' => $n->categoria->nome],
                 ])->values(),
                 'horarios_disponiveis' => $instituicao->horarios->map(fn ($h) => [
-                    'id'          => $h->id,
-                    'dia_semana'  => $h->dia_semana,
+                    'id' => $h->id,
+                    'dia_semana' => $h->dia_semana,
                     'hora_inicio' => $h->hora_inicio,
-                    'hora_fim'    => $h->hora_fim,
-                    'tipo'        => $h->tipo,
+                    'hora_fim' => $h->hora_fim,
+                    'tipo' => $h->tipo,
                 ])->values(),
             ],
             'categorias' => $categorias,

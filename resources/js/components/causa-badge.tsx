@@ -28,8 +28,12 @@ const iconMap: Record<string, LucideIcon> = {
 };
 
 function CausaIcon({ nome }: { nome: string | null }) {
-    if (!nome) return <Tag className="size-3" />;
+    if (!nome) {
+return <Tag className="size-3" />;
+}
+
     const Icon = iconMap[nome] ?? Tag;
+
     return <Icon className="size-3" />;
 }
 

@@ -7,13 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/app-layout';
+import { painel } from '@/routes/instituicao';
 import {
     confirm as confirmRoute,
     deliver as deliverRoute,
     index as doacoesIndex,
     reject as rejectRoute,
 } from '@/routes/instituicao/doacoes';
-import { painel } from '@/routes/instituicao';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -54,6 +54,7 @@ const DIAS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
 function formatDataHora(iso: string) {
     const d = new Date(iso);
+
     return `${DIAS[d.getDay()]}, ${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
 }
 
@@ -186,7 +187,10 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
 // ─── section ─────────────────────────────────────────────────────────────────
 
 function Section({ title, items }: { title: string; items: Doacao[] }) {
-    if (items.length === 0) return null;
+    if (items.length === 0) {
+return null;
+}
+
     return (
         <section className="flex flex-col gap-3">
             <h2 className="text-muted-foreground text-sm font-semibold uppercase tracking-wide">

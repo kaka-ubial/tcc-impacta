@@ -17,6 +17,7 @@ const DIAS = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quint
 
 const HORAS = Array.from({ length: 24 }, (_, i) => {
     const h = String(i).padStart(2, '0');
+
     return [`${h}:00`, `${h}:30`];
 }).flat();
 

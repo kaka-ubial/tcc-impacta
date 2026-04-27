@@ -1,8 +1,8 @@
-// Components
 import { Form, Head } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
+import AlertSuccess from '@/components/ui/alert-success';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,13 +14,13 @@ export default function ForgotPassword({ status }: { status?: string }) {
     return (
         <AuthLayout
             title="Esqueci minha senha"
-            description="Preencha seu email para receber um link de reset de senha"
+            description="Preencha seu email para receber um link de redefinição de senha"
         >
-            <Head title="Forgot password" />
+            <Head title="Esqueci minha senha" />
 
             {status && (
-                <div className="mb-4 text-center text-sm font-medium text-green-600">
-                    {status}
+                <div className="mb-4">
+                    <AlertSuccess message={status} />
                 </div>
             )}
 
@@ -60,7 +60,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
 
                 <div className="space-x-1 text-center text-sm text-muted-foreground">
                     <span>Ou, retorne para</span>
-                    <TextLink href={login()}>log in</TextLink>
+                    <TextLink href={login()}>entrar</TextLink>
                 </div>
             </div>
         </AuthLayout>

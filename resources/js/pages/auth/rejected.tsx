@@ -1,6 +1,6 @@
 import { Head, router, Link } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface Props {
     motivo ?: string;
@@ -27,7 +27,7 @@ export default function Rejected({motivo}: Props) {
                     <p className="text-sm text-muted-foreground">
                         Você poderá fazer novas tentativas de cadastro após corrigir as informações:
                     </p>
-                    <p className="text-sm .fw-semibold">{motivo}</p>
+                    <p className="text-sm font-semibold">{motivo}</p>
                 </div>
 
                 <div className="flex flex-col gap-2">

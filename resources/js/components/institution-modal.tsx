@@ -1,4 +1,15 @@
 import { useForm } from '@inertiajs/react';
+import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import type { Instituicao } from '@/types/instituicao';
 
 interface Props {
@@ -29,13 +40,15 @@ export function InstitutionModal({ institution, isOpen, onClose }: Props) {
         });
     };
 
-
-    if (!isOpen) return null;
-
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-            <div className="w-full max-w-lg rounded-xl bg-background p-6 shadow-xl border border-border">
-                <h2 className="text-xl font-bold mb-4">Detalhes da Instituição</h2>
+        <Dialog open={isOpen} onOpenChange={(open) => !open && closeModal()}>
+            <DialogContent className="sm:max-w-lg">
+                <DialogHeader>
+                    <DialogTitle>Detalhes da Instituição</DialogTitle>
+                    <DialogDescription>
+                        Revise as informações antes de aprovar ou reprovar o cadastro.
+                    </DialogDescription>
+                </DialogHeader>
 
                 <div className="space-y-3 text-sm">
                     <p><strong>Razão Social:</strong> {institution.razao_social}</p>
@@ -44,36 +57,43 @@ export function InstitutionModal({ institution, isOpen, onClose }: Props) {
                     <p><strong>Telefone:</strong> {institution.telefone}</p>
                 </div>
 
-                <div className="mt-6">
-                    <textarea
-                        className="w-full rounded-md border px-3 py-2"
+                <div className="space-y-2">
+                    <Label htmlFor="motivo">
+                        Motivo (obrigatório para reprovar, mín. 10 caracteres)
+                    </Label>
+                    <Textarea
+                        id="motivo"
+                        placeholder="Descreva o motivo da reprovação..."
                         value={data.motivo}
-                        onChange={e => setData('motivo', e.target.value)}
+                        onChange={(e) => setData('motivo', e.target.value)}
+                        rows={3}
                     />
                 </div>
 
-                <div className="mt-6 flex justify-between ">
-                    <button onClick={closeModal}>Cancelar</button>
+                <DialogFooter className="flex-col-reverse gap-2 sm:flex-row sm:justify-between">
+                    <Button variant="outline" onClick={closeModal} disabled={processing}>
+                        Cancelar
+                    </Button>
 
                     <div className="flex gap-2">
-                        <button
-                            className="rounded-md bg-destructive px-4 py-2 text-sm text-white font-medium text-destructive-foreground hover:bg-destructive-90 disabled:opacity-50"
+                        <Button
+                            variant="destructive"
                             onClick={handleReject}
                             disabled={processing || data.motivo.length < 10}
                         >
                             Reprovar
-                        </button>
+                        </Button>
 
-                        <button
-                            className="rounded-md bg-green-700 px-4 py-2 text-sm font-medium text-white hover:bg-green-900 disabled:opacity-70"
+                        <Button
+                            className="bg-brand-green text-success-foreground hover:opacity-90"
                             onClick={handleApprove}
                             disabled={processing}
                         >
                             Aprovar
-                        </button>
+                        </Button>
                     </div>
-                </div>
-            </div>
-        </div>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     );
 }

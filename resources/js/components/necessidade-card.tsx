@@ -61,12 +61,12 @@ export function NecessidadeCard({ onEdit, necessidade, variant = 'doador' }: Pro
                         {necessidade.categoria.nome}
                     </span>
 
-                    <Badge variant={cfg.variant} className="text-xs">
+                    <Badge variant={cfg.variant as any} className="text-xs">
                         {cfg.label}
                     </Badge>
                 </div>
 
-                <Badge className="align-items-end" variant={isAtiva ? 'default' : 'secondary'}>
+                <Badge className="self-start" variant={isAtiva ? 'default' : 'secondary'}>
                     {isAtiva ? 'Ativa' : 'Concluída'}
                 </Badge>
             </div>
