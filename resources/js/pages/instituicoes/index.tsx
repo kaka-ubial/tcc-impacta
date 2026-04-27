@@ -1,6 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { ChevronLeft, ChevronRight, MapPin, Package, Search, Tag, X } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { CausaBadge } from '@/components/causa-badge';
 import { VerificadaBadge } from '@/components/verificada-badge';
@@ -19,7 +19,8 @@ import type { BreadcrumbItem, Causa, InstituicaoListItem, SimplePaginated } from
 
 type Props = {
     instituicoes: SimplePaginated<InstituicaoListItem>;
-    filters: { search: string };
+    causas: Causa[];
+    filters: { search: string; causa: number | null };
 };
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -84,10 +85,9 @@ function EmptyState({ hasSearch, onClear }: { hasSearch: boolean; onClear: () =>
     );
 }
 
-export default function InstituicoesIndex({ instituicoes, filters }: Props) {
+export default function InstituicoesIndex({ instituicoes, causas, filters }: Props) {
     const [search, setSearch] = useState(filters.search);
     const [searching, setSearching] = useState(false);
-    const [selectedCausa, setSelectedCausa] = useState<number | null>(null);
     const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
     useEffect(() => {
@@ -95,48 +95,41 @@ export default function InstituicoesIndex({ instituicoes, filters }: Props) {
         setSearching(false);
     }, [filters.search]);
 
-    // Derive unique causas from loaded page data
-    const allCausas = useMemo<Causa[]>(() => {
-        const seen = new Set<number>();
-        const result: Causa[] = [];
-        for (const inst of instituicoes.data) {
-            for (const causa of inst.causas) {
-                if (!seen.has(causa.id)) {
-                    seen.add(causa.id);
-                    result.push(causa);
-                }
-            }
-        }
-        return result;
-    }, [instituicoes.data]);
+    const navigate = useCallback((params: { search?: string; causa?: number | null }) => {
+        const merged = {
+            search: params.search ?? filters.search,
+            causa: params.causa !== undefined ? params.causa : filters.causa,
+        };
 
-    const visibleInstitutions = useMemo(() => {
-        if (!selectedCausa) return instituicoes.data;
-        return instituicoes.data.filter((inst) =>
-            inst.causas.some((c) => c.id === selectedCausa),
+        const query: Record<string, string> = {};
+        if (merged.search) query.search = merged.search;
+        if (merged.causa) query.causa = String(merged.causa);
+
+        router.get(
+            instituicoesIndex(),
+            query,
+            {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+                only: ['instituicoes', 'filters'],
+                onSuccess: () => setSearching(false),
+                onError: () => setSearching(false),
+            },
         );
-    }, [instituicoes.data, selectedCausa]);
+    }, [filters.search, filters.causa]);
 
     const handleSearch = useCallback((value: string) => {
         setSearch(value);
         setSearching(true);
-        setSelectedCausa(null);
         clearTimeout(timer.current);
-        timer.current = setTimeout(() => {
-            router.get(
-                instituicoesIndex(),
-                value ? { search: value } : {},
-                {
-                    preserveState: true,
-                    preserveScroll: true,
-                    replace: true,
-                    only: ['instituicoes', 'filters'],
-                    onSuccess: () => setSearching(false),
-                    onError: () => setSearching(false),
-                },
-            );
-        }, 300);
-    }, []);
+        timer.current = setTimeout(() => navigate({ search: value }), 300);
+    }, [navigate]);
+
+    const handleCausa = useCallback((id: number | null) => {
+        setSearching(true);
+        navigate({ causa: id });
+    }, [navigate]);
 
     const hasPagination =
         instituicoes.prev_page_url !== null || instituicoes.next_page_url !== null;
@@ -161,7 +154,7 @@ export default function InstituicoesIndex({ instituicoes, filters }: Props) {
                         <div className="relative mt-5 max-w-sm">
                             <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
                             <Input
-                                placeholder="Buscar por nome..."
+                                placeholder="Buscar por nome, cidade, causa..."
                                 className="pl-9"
                                 value={search}
                                 onChange={(e) => handleSearch(e.target.value)}
@@ -182,28 +175,28 @@ export default function InstituicoesIndex({ instituicoes, filters }: Props) {
                 <div className="mx-auto w-full max-w-5xl px-6 py-6">
 
                     {/* ── Causa filter pills ───────────────────── */}
-                    {allCausas.length > 0 && !searching && (
+                    {causas.length > 0 && (
                         <div className="mb-6 flex flex-wrap gap-2">
                             <button
-                                onClick={() => setSelectedCausa(null)}
+                                onClick={() => handleCausa(null)}
                                 className={[
                                     'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors',
-                                    selectedCausa === null
+                                    filters.causa === null
                                         ? 'border-brand bg-brand text-primary-foreground'
                                         : 'border-border bg-card text-muted-foreground hover:border-brand/40 hover:text-foreground',
                                 ].join(' ')}
                             >
                                 Todas
                             </button>
-                            {allCausas.map((causa) => (
+                            {causas.map((causa) => (
                                 <button
                                     key={causa.id}
-                                    onClick={() => setSelectedCausa(
-                                        selectedCausa === causa.id ? null : causa.id,
+                                    onClick={() => handleCausa(
+                                        filters.causa === causa.id ? null : causa.id,
                                     )}
                                     className={[
                                         'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors',
-                                        selectedCausa === causa.id
+                                        filters.causa === causa.id
                                             ? 'border-brand bg-brand text-primary-foreground'
                                             : 'border-border bg-card text-muted-foreground hover:border-brand/40 hover:text-foreground',
                                     ].join(' ')}
@@ -220,14 +213,14 @@ export default function InstituicoesIndex({ instituicoes, filters }: Props) {
                         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             {Array.from({ length: 6 }, (_, i) => <CardSkeleton key={i} />)}
                         </div>
-                    ) : visibleInstitutions.length === 0 ? (
+                    ) : instituicoes.data.length === 0 ? (
                         <EmptyState
-                            hasSearch={!!search || selectedCausa !== null}
-                            onClear={() => { handleSearch(''); setSelectedCausa(null); }}
+                            hasSearch={!!search || filters.causa !== null}
+                            onClear={() => { handleSearch(''); handleCausa(null); }}
                         />
                     ) : (
                         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                            {visibleInstitutions.map((inst) => (
+                            {instituicoes.data.map((inst) => (
                                 <Link
                                     key={inst.usuario_id}
                                     href={instituicoesShow(inst.usuario_id)}
