@@ -1,4 +1,5 @@
 import { Form, Head } from '@inertiajs/react';
+import { useState } from 'react';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import { Button } from '@/components/ui/button';
@@ -7,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import AuthLayout from '@/layouts/auth-layout';
 import { update } from '@/routes/password';
+import { validatePassword } from '@/lib/validators';
 
 type Props = {
     token: string;
@@ -14,12 +16,14 @@ type Props = {
 };
 
 export default function ResetPassword({ token, email }: Props) {
+    const [passwordClientError, setPasswordClientError] = useState<string>('');
+
     return (
         <AuthLayout
-            title="Reset password"
-            description="Please enter your new password below"
+            title="Redefinir senha"
+            description="Digite sua nova senha abaixo"
         >
-            <Head title="Reset password" />
+            <Head title="Redefinir senha" />
 
             <Form
                 {...update.form()}
@@ -46,28 +50,33 @@ export default function ResetPassword({ token, email }: Props) {
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="password">Password</Label>
+                            <Label htmlFor="password">Nova senha</Label>
                             <PasswordInput
                                 id="password"
                                 name="password"
                                 autoComplete="new-password"
                                 className="mt-1 block w-full"
                                 autoFocus
-                                placeholder="Password"
+                                placeholder="Nova senha"
+                                onBlur={(e) => {
+                                    const err = e.target.value ? validatePassword(e.target.value) : '';
+                                    setPasswordClientError(err || '');
+                                }}
+                                onChange={() => setPasswordClientError('')}
                             />
-                            <InputError message={errors.password} />
+                            <InputError message={passwordClientError || errors.password} />
                         </div>
 
                         <div className="grid gap-2">
                             <Label htmlFor="password_confirmation">
-                                Confirm password
+                                Confirmar senha
                             </Label>
                             <PasswordInput
                                 id="password_confirmation"
                                 name="password_confirmation"
                                 autoComplete="new-password"
                                 className="mt-1 block w-full"
-                                placeholder="Confirm password"
+                                placeholder="Confirmar senha"
                             />
                             <InputError
                                 message={errors.password_confirmation}
@@ -82,7 +91,7 @@ export default function ResetPassword({ token, email }: Props) {
                             data-test="reset-password-button"
                         >
                             {processing && <Spinner />}
-                            Reset password
+                            Redefinir senha
                         </Button>
                     </div>
                 )}

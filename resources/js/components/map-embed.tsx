@@ -21,7 +21,9 @@ export default function MapEmbed({ lat, lng, label }: Props) {
     const mapRef = useRef<L.Map | null>(null);
 
     useEffect(() => {
-        if (!containerRef.current || mapRef.current) return;
+        if (!containerRef.current || mapRef.current) {
+return;
+}
 
         const map = L.map(containerRef.current, {
             center: [lat, lng],

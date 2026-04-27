@@ -1,18 +1,19 @@
 import { Head, router, Link } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
-import { Spinner } from '@/components/ui/spinner';
 import { Clock } from 'lucide-react';
 import { use, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 
 export default function WaitingApproval() {
     function handleRefresh() {
-        router.visit('/dashboard', {preserveScroll: true});
+        router.visit('/redirect', {preserveScroll: true});
     }
 
     useEffect(() => { 
         const interval = setInterval(() => {
             handleRefresh(); 
         }, 5000);
+
         return () => clearInterval(interval);
     }, []);
 
