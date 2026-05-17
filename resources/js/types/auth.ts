@@ -31,6 +31,7 @@ export type HorarioDisponivel = {
     hora_inicio: string; // "HH:MM:SS"
     hora_fim: string;
     tipo: 'coleta' | 'entrega';
+    pode_excluir?: boolean;
 };
 
 export type NecessidadeAtiva = {

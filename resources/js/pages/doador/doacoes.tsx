@@ -16,7 +16,12 @@ import {
 } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/app-layout';
-import { cancel as cancelRoute, index as doacoesIndex } from '@/routes/doacoes';
+import {
+    aceitarSugestao as aceitarRoute,
+    cancel as cancelRoute,
+    index as doacoesIndex,
+    recusarSugestao as recusarRoute,
+} from '@/routes/doacoes';
 import { index as instituicoesIndex } from '@/routes/instituicoes';
 import type { BreadcrumbItem } from '@/types';
 
@@ -59,6 +64,7 @@ const DIAS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
 function formatDataHora(iso: string) {
     const d = new Date(iso);
+
     return `${DIAS[d.getDay()]}, ${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
 }
 
@@ -68,6 +74,8 @@ type Agendamento = {
     data_hora: string;
     tipo: 'coleta' | 'entrega';
     endereco_referencia: string | null;
+    status: 'confirmado' | 'alteracao_sugerida';
+    data_hora_sugerida: string | null;
 };
 
 type Doacao = {
@@ -85,12 +93,23 @@ type Props = { doacoes: Doacao[] };
 
 function DoacaoCard({ doacao }: { doacao: Doacao }) {
     const [processing, setProcessing] = useState(false);
-    const cfg = statusConfig[doacao.status] ?? statusConfig.pendente;
+    const temSugestao = doacao.agendamento?.status === 'alteracao_sugerida';
+    const cfg = temSugestao
+        ? { label: 'Aguardando sua resposta', className: 'border-pending/30 bg-pending/10 text-pending' }
+        : (statusConfig[doacao.status] ?? statusConfig.pendente);
     const canCancel = doacao.status === 'pendente' || doacao.status === 'confirmada';
 
     function handleCancel() {
         setProcessing(true);
         router.post(cancelRoute(doacao.id).url, {}, {
+            onFinish: () => setProcessing(false),
+        });
+    }
+
+    function handleSugestao(url: string) {
+        setProcessing(true);
+        router.post(url, {}, {
+            preserveScroll: true,
             onFinish: () => setProcessing(false),
         });
     }
@@ -170,6 +189,34 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
                                 </p>
                             )}
                         </div>
+
+                        {doacao.agendamento.status === 'alteracao_sugerida' && doacao.agendamento.data_hora_sugerida && (
+                            <div className="mt-2 rounded-xl border border-pending/30 bg-pending/10 px-4 py-3">
+                                <p className="text-sm text-foreground">
+                                    A instituição sugeriu uma nova data:{' '}
+                                    <span className="font-semibold">
+                                        {formatDataHora(doacao.agendamento.data_hora_sugerida)}
+                                    </span>
+                                </p>
+                                <div className="mt-2 flex gap-2">
+                                    <Button
+                                        size="sm"
+                                        disabled={processing}
+                                        onClick={() => handleSugestao(aceitarRoute(doacao.id).url)}
+                                    >
+                                        Aceitar
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        disabled={processing}
+                                        onClick={() => handleSugestao(recusarRoute(doacao.id).url)}
+                                    >
+                                        Recusar
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
@@ -178,7 +225,7 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
             {canCancel && (
                 <>
                     <Separator />
-                    <CardFooter className="pt-4">
+                    <CardFooter className="px-5 pt-4 pb-5">
                         <Dialog>
                             <DialogTrigger asChild>
                                 <Button
@@ -274,8 +321,13 @@ export default function MinhasDoacoes({ doacoes }: Props) {
     // Derive unique institution names they've donated to
     const instituicoesDoadas = useMemo(() => {
         const seen = new Set<number>();
+
         return doacoes
-            .filter((d) => { const ok = !seen.has(d.instituicao.id); seen.add(d.instituicao.id); return ok; })
+            .filter((d) => {
+ const ok = !seen.has(d.instituicao.id); seen.add(d.instituicao.id);
+
+ return ok; 
+})
             .map((d) => d.instituicao);
     }, [doacoes]);
 

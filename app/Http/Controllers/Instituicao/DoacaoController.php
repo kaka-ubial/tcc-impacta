@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Instituicao;
 
 use App\Http\Controllers\Controller;
 use App\Models\Doacao;
+use App\Models\Notificacao;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -57,6 +58,12 @@ class DoacaoController extends Controller
             }
         });
 
+        Notificacao::enviar(
+            $doacao->doador_id,
+            'Doação confirmada',
+            auth()->user()->instituicao->nome_fantasia.' confirmou a sua solicitação de doação.'
+        );
+
         return back();
     }
 
@@ -67,6 +74,12 @@ class DoacaoController extends Controller
 
         $doacao->update(['status' => 'recusada']);
 
+        Notificacao::enviar(
+            $doacao->doador_id,
+            'Doação recusada',
+            auth()->user()->instituicao->nome_fantasia.' recusou a sua solicitação de doação.'
+        );
+
         return back();
     }
 
@@ -76,6 +89,12 @@ class DoacaoController extends Controller
         abort_if($doacao->status !== 'confirmada', 422);
 
         $doacao->update(['status' => 'entregue']);
+
+        Notificacao::enviar(
+            $doacao->doador_id,
+            'Doação concluída',
+            auth()->user()->instituicao->nome_fantasia.' marcou a sua doação como entregue.'
+        );
 
         return back();
     }
@@ -93,6 +112,12 @@ class DoacaoController extends Controller
             }
             $doacao->update(['status' => 'nao_entregue']);
         });
+
+        Notificacao::enviar(
+            $doacao->doador_id,
+            'Doação não entregue',
+            auth()->user()->instituicao->nome_fantasia.' marcou a sua doação como não entregue.'
+        );
 
         return back();
     }

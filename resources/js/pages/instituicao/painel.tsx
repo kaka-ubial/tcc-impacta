@@ -1,5 +1,5 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { ArrowRight, Calendar, Gift, Package, UserCog } from 'lucide-react';
+import { ArrowRight, Calendar, CalendarClock, Gift, Package, UserCog } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 
@@ -40,6 +40,14 @@ const painelItems: PainelItem[] = [
         href: '/instituicao/horarios',
         accent: 'bg-pending/10',
         accentText: 'text-pending',
+    },
+    {
+        title: 'Agenda',
+        description: 'Visualize as doações agendadas no calendário e sugira novas datas.',
+        icon: CalendarClock,
+        href: '/instituicao/agenda',
+        accent: 'bg-brand/10',
+        accentText: 'text-brand',
     },
     {
         title: 'Perfil da Instituição',

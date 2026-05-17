@@ -14,8 +14,10 @@ use App\Http\Middleware\CheckAdmin;
 use App\Http\Controllers\Doador\DoacaoController;
 use App\Http\Controllers\Instituicao\DoacaoController as InstituicaoDoacaoController;
 use App\Http\Controllers\Instituicao\HorarioController;
+use App\Http\Controllers\Instituicao\AgendaController;
 use App\Http\Controllers\Instituicao\InstituicaoController;
 use App\Http\Controllers\NecessidadeController;
+use App\Http\Controllers\NotificacaoController;
 use App\Http\Middleware\CheckNecessidadeOwnership;
 
 Route::inertia('/', 'welcome', [
@@ -33,6 +35,9 @@ Route::middleware(['auth', 'verified', CheckInstituicao::class, EnsureInstitutio
     Route::get('horarios', [HorarioController::class, 'index'])->name('horarios.index');
     Route::post('horarios', [HorarioController::class, 'store'])->name('horarios.store');
     Route::delete('horarios/{horario}', [HorarioController::class, 'destroy'])->name('horarios.destroy');
+
+    Route::get('agenda', [AgendaController::class, 'index'])->name('agenda.index');
+    Route::post('agendamentos/{agendamento}/sugerir', [AgendaController::class, 'sugerirAlteracao'])->name('agenda.sugerir');
 
     Route::get('necessidades', [NecessidadeController::class, 'index'])->name('necessidades.index');
     Route::post('necessidades', [NecessidadeController::class, 'store'])->name('necessidades.store');
@@ -55,6 +60,8 @@ Route::middleware(['auth', 'verified', CheckDoador::class])->group(function () {
     Route::get('doacoes', [DoacaoController::class, 'index'])->name('doacoes.index');
     Route::post('doacoes', [DoacaoController::class, 'store'])->name('doacoes.store');
     Route::post('doacoes/{doacao}/cancel', [DoacaoController::class, 'cancel'])->name('doacoes.cancel');
+    Route::post('doacoes/{doacao}/sugestao/aceitar', [DoacaoController::class, 'aceitarSugestao'])->name('doacoes.aceitarSugestao');
+    Route::post('doacoes/{doacao}/sugestao/recusar', [DoacaoController::class, 'recusarSugestao'])->name('doacoes.recusarSugestao');
 
 });
 
@@ -67,6 +74,8 @@ Route::middleware(['auth', CheckAdmin::class])->prefix('admin')->name('admin.')-
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('notificacoes', [NotificacaoController::class, 'index'])->name('notificacoes.index');
+
     Route::get('waiting-validation', function () {
         return auth()->user()->instituicao?->isApproved()
             ? redirect()->route('instituicao.painel')

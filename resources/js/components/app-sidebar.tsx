@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Building2, Gift, LayoutGrid, LayoutDashboard, Box, Calendar } from 'lucide-react';
+import { Building2, Gift, LayoutGrid, LayoutDashboard, Box, Calendar, CalendarClock, Bell } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -47,6 +47,11 @@ const instituicaoNavItems: NavItem[] = [
         icon: Calendar,
     },
     {
+        title: 'Agenda',
+        href: '/instituicao/agenda',
+        icon: CalendarClock,
+    },
+    {
         title: 'Doações Recebidas',
         href: '/instituicao/doacoes',
         icon: Gift,
@@ -62,15 +67,28 @@ const adminNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
-    const { auth } = usePage().props as any;
+    const { auth, notificacoes_nao_lidas } = usePage().props as any;
     const tipo: string = auth.user.tipo_usuario;
+    const naoLidas: number = notificacoes_nao_lidas ?? 0;
 
-    const navItems: NavItem[] =
+    const baseItems: NavItem[] =
         tipo === 'admin'
             ? adminNavItems
             : tipo === 'instituicao'
               ? instituicaoNavItems
               : doadorNavItems;
+
+    const navItems: NavItem[] =
+        tipo === 'admin'
+            ? baseItems
+            : [
+                  ...baseItems,
+                  {
+                      title: naoLidas > 0 ? `Notificações (${naoLidas})` : 'Notificações',
+                      href: '/notificacoes',
+                      icon: Bell,
+                  },
+              ];
 
     const homeHref =
         tipo === 'instituicao'

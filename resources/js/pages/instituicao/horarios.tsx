@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import AppLayout from '@/layouts/app-layout';
 import { index as painelIndex } from '@/routes/instituicao';
 import { destroy as destroyHorario, store as storeHorario } from '@/routes/instituicao/horarios';
@@ -173,13 +174,26 @@ export default function Horarios({ horarios }: Props) {
                                                             {h.hora_inicio.slice(0, 5)} – {h.hora_fim.slice(0, 5)}
                                                         </span>
                                                     </div>
-                                                    <button
-                                                        onClick={() => handleDelete(h.id)}
-                                                        disabled={deleting}
-                                                        className="text-muted-foreground hover:text-destructive disabled:opacity-50"
-                                                    >
-                                                        <Trash2 className="size-4" />
-                                                    </button>
+                                                    <TooltipProvider delayDuration={100}>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <span tabIndex={0}>
+                                                                    <button
+                                                                        onClick={() => handleDelete(h.id)}
+                                                                        disabled={deleting || h.pode_excluir === false}
+                                                                        className="text-muted-foreground hover:text-destructive disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:text-muted-foreground"
+                                                                    >
+                                                                        <Trash2 className="size-4" />
+                                                                    </button>
+                                                                </span>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                {h.pode_excluir === false
+                                                                    ? 'Não é possível excluir: há doações pendentes ou confirmadas neste horário.'
+                                                                    : 'Excluir horário'}
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </TooltipProvider>
                                                 </div>
                                             ))}
                                             <Separator />

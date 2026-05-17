@@ -133,6 +133,7 @@ export function SolicitacaoDoacaoModal({ open, onClose, instituicaoId, categoria
                 agendamento: {
                     tipo,
                     data_hora: dataHora.replace('T', ' ') + ':00',
+                    horario_disponivel_id: upcomingDates.find((d) => d.value === dataHora)?.horarioId ?? null,
                     endereco_referencia: tipo === 'coleta' ? enderecoReferencia : null,
                 },
             },

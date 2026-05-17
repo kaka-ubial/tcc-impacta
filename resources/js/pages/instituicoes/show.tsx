@@ -56,9 +56,11 @@ function MapSection({ lat, lng, label }: { lat: number; lng: number; label: stri
 function NecessidadeCard({
     n,
     onAtender,
+    disabled,
 }: {
     n: InstituicaoDetalhe['necessidades_ativas'][number];
     onAtender: () => void;
+    disabled: boolean;
 }) {
     const pct = Math.min(100, Math.round((n.quantidade_atual / n.quantidade_objetivo) * 100));
     const cfg = prioridadeConfig[n.prioridade];
@@ -91,7 +93,13 @@ function NecessidadeCard({
             </div>
 
             {!isFull && (
-                <Button size="sm" variant="outline" className="mt-1 gap-1.5 self-end" onClick={onAtender}>
+                <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={disabled}
+                    className="mt-1 gap-1.5 self-end"
+                    onClick={onAtender}
+                >
                     <HandHeart className="size-3.5" />
                     Atender necessidade
                 </Button>
@@ -110,6 +118,7 @@ export default function InstituicaoShow({ instituicao, categorias }: Props) {
     ];
 
     const hasMap = instituicao.latitude !== null && instituicao.longitude !== null;
+    const temHorarios = instituicao.horarios_disponiveis.length > 0;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -157,11 +166,21 @@ export default function InstituicaoShow({ instituicao, categorias }: Props) {
                         )}
                     </div>
 
-                    <div className="flex shrink-0 flex-col gap-2 sm:mt-8 sm:flex-row">
-                        <Button size="lg" className="gap-2" onClick={() => setModalOpen(true)}>
+                    <div className="flex shrink-0 flex-col gap-2 sm:mt-8 sm:max-w-xs">
+                        <Button
+                            size="lg"
+                            className="gap-2"
+                            disabled={!temHorarios}
+                            onClick={() => setModalOpen(true)}
+                        >
                             <Heart className="size-4" />
                             Quero Doar
                         </Button>
+                        {!temHorarios && (
+                            <p className="text-muted-foreground text-xs">
+                                Esta instituição ainda não cadastrou horários para receber doações.
+                            </p>
+                        )}
                     </div>
                 </div>
 
@@ -227,7 +246,12 @@ export default function InstituicaoShow({ instituicao, categorias }: Props) {
                             ) : (
                                 <div className="flex flex-col gap-3">
                                     {instituicao.necessidades_ativas.map((n) => (
-                                        <NecessidadeCard key={n.id} n={n} onAtender={() => setNecessidadeModalId(n.id)} />
+                                        <NecessidadeCard
+                                            key={n.id}
+                                            n={n}
+                                            disabled={!temHorarios}
+                                            onAtender={() => setNecessidadeModalId(n.id)}
+                                        />
                                     ))}
                                 </div>
                             )}
