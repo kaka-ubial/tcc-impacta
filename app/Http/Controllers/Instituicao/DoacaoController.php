@@ -79,4 +79,21 @@ class DoacaoController extends Controller
 
         return back();
     }
+
+    public function notDelivered(Doacao $doacao): \Illuminate\Http\RedirectResponse
+    {
+        abort_if($doacao->instituicao_id !== auth()->user()->instituicao->usuario_id, 403);
+        abort_if($doacao->status !== 'confirmada', 422);
+
+        DB::transaction(function () use ($doacao) {
+            if ($doacao->status === 'confirmada') {
+                foreach ($doacao->itens()->whereNotNull('necessidade_id')->with('necessidade')->get() as $item) {
+                    $item->necessidade->decrement('quantidade_atual', $item->quantidade);
+                }
+            }
+            $doacao->update(['status' => 'nao_entregue']);
+        });
+
+        return back();
+    }
 }

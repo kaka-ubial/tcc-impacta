@@ -26,7 +26,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 // ─── status config ─────────────────────────────────────────────────────────────
 
-type StatusKey = 'pendente' | 'confirmada' | 'entregue' | 'cancelado' | 'recusada';
+type StatusKey = 'pendente' | 'confirmada' | 'entregue' | 'cancelado' | 'recusada' | 'nao_entregue';
 
 const statusConfig: Record<StatusKey, { label: string; className: string }> = {
     pendente:   {
@@ -40,6 +40,10 @@ const statusConfig: Record<StatusKey, { label: string; className: string }> = {
     entregue:   {
         label: 'Entregue',
         className: 'border-success/20 bg-success/10 text-success',
+    },
+    nao_entregue: {
+        label: 'Não entregue',
+        className: 'border-destructive/20 bg-destructive/5 text-destructive',
     },
     cancelado:  {
         label: 'Cancelada',

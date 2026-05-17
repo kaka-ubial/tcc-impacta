@@ -44,6 +44,7 @@ Route::middleware(['auth', 'verified', CheckInstituicao::class, EnsureInstitutio
     Route::post('doacoes/{doacao}/confirm', [InstituicaoDoacaoController::class, 'confirm'])->name('doacoes.confirm');
     Route::post('doacoes/{doacao}/reject', [InstituicaoDoacaoController::class, 'reject'])->name('doacoes.reject');
     Route::post('doacoes/{doacao}/deliver', [InstituicaoDoacaoController::class, 'deliver'])->name('doacoes.deliver');
+    Route::post('doacoes/{doacao}/notDelivered', [InstituicaoDoacaoController::class, 'notDelivered'])->name('doacoes.notDelivered');
 });
 
 Route::middleware(['auth', 'verified', CheckDoador::class])->group(function () {

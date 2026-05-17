@@ -11,6 +11,7 @@ import { painel } from '@/routes/instituicao';
 import {
     confirm as confirmRoute,
     deliver as deliverRoute,
+    notDelivered as notDeliveredRoute,
     index as doacoesIndex,
     reject as rejectRoute,
 } from '@/routes/instituicao/doacoes';
@@ -23,7 +24,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 // ─── types ────────────────────────────────────────────────────────────────────
 
-type StatusKey = 'pendente' | 'confirmada' | 'entregue' | 'cancelado' | 'recusada';
+type StatusKey = 'pendente' | 'confirmada' | 'entregue' | 'cancelado' | 'recusada' | 'nao_entregue';
 
 type Doacao = {
     id: number;
@@ -46,6 +47,7 @@ const statusConfig: Record<StatusKey, { label: string; variant: 'default' | 'sec
     pendente:   { label: 'Pendente',    variant: 'outline' },
     confirmada: { label: 'Confirmada',  variant: 'default' },
     entregue:   { label: 'Entregue',    variant: 'secondary' },
+    nao_entregue: { label: 'Não entregue', variant: 'destructive' },
     cancelado:  { label: 'Cancelada',   variant: 'secondary' },
     recusada:   { label: 'Recusada',    variant: 'destructive' },
 };
@@ -169,6 +171,15 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
                 <>
                     <Separator />
                     <CardFooter className="pt-4">
+                        <div className="grid w-full gap-2 md:grid-cols-2">
+                        <Button
+                            className="w-full bg-destructive gap-1.5"
+                            onClick={() => post(notDeliveredRoute(doacao.id).url)}
+                            disabled={processing}
+                        >
+                            <X className="size-4" />
+                            Não entregue 
+                        </Button>
                         <Button
                             className="w-full gap-1.5"
                             onClick={() => post(deliverRoute(doacao.id).url)}
@@ -176,7 +187,8 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
                         >
                             <CheckCheck className="size-4" />
                             Marcar como entregue
-                        </Button>
+                        </Button>                            
+                        </div>
                     </CardFooter>
                 </>
             )}
