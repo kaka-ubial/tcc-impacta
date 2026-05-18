@@ -73,7 +73,44 @@ export type Doador = {
     nome_completo: string;
     cpf: string;
     telefone: string;
+    foto_perfil: string | null;
 }
+
+export type DoadorDoacaoResumo = {
+    id: number;
+    status: 'pendente' | 'confirmada' | 'entregue' | 'cancelado' | 'recusada' | 'nao_entregue';
+    criado_em: string;
+    eh_para_esta_instituicao: boolean;
+    instituicao: {
+        usuario_id: number;
+        nome_fantasia: string;
+    };
+    itens: {
+        id: number;
+        categoria: string;
+        quantidade: number;
+    }[];
+};
+
+export type DoadorPerfil = {
+    usuario_id: number;
+    nome_completo: string;
+    email: string;
+    telefone: string;
+    endereco_completo: string | null;
+    foto_perfil: string | null;
+    pontuacao_gamificacao: number;
+    latitude: number | null;
+    longitude: number | null;
+    membro_desde: string | null;
+    causas: Causa[];
+    estatisticas: {
+        total_doacoes: number;
+        doacoes_concluidas: number;
+        doacoes_com_instituicao: number;
+    };
+    doacoes_recentes: DoadorDoacaoResumo[];
+};
 
 export type Instituicao = {
     nome_fantasia: string;

@@ -23,8 +23,10 @@ class DoacaoController extends Controller
                 'id'     => $d->id,
                 'status' => $d->status,
                 'doador' => [
-                    'nome'     => $d->doador->nome_completo,
-                    'telefone' => $d->doador->telefone,
+                    'usuario_id'  => $d->doador->usuario_id,
+                    'nome'        => $d->doador->nome_completo,
+                    'telefone'    => $d->doador->telefone,
+                    'foto_perfil' => $d->doador->foto_perfil,
                 ],
                 'itens' => $d->itens->map(fn ($item) => [
                     'id'           => $item->id,

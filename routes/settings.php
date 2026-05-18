@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Settings\FotoPerfilController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SecurityController;
 use Illuminate\Support\Facades\Route;
@@ -9,6 +10,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('settings/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('settings/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+    Route::post('settings/profile/foto', [FotoPerfilController::class, 'update'])->name('profile.foto.update');
+    Route::delete('settings/profile/foto', [FotoPerfilController::class, 'destroy'])->name('profile.foto.destroy');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

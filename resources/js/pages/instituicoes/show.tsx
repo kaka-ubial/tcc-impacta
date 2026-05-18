@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { ArrowLeft, Building2, FileText, Heart, MapPin, Package, Phone, HandHeart } from 'lucide-react';
 import { lazy, Suspense, useState } from 'react';
 
@@ -57,10 +57,12 @@ function NecessidadeCard({
     n,
     onAtender,
     disabled,
+    canDonate,
 }: {
     n: InstituicaoDetalhe['necessidades_ativas'][number];
     onAtender: () => void;
     disabled: boolean;
+    canDonate: boolean;
 }) {
     const pct = Math.min(100, Math.round((n.quantidade_atual / n.quantidade_objetivo) * 100));
     const cfg = prioridadeConfig[n.prioridade];
@@ -92,7 +94,7 @@ function NecessidadeCard({
                 </div>
             </div>
 
-            {!isFull && (
+            {!isFull && canDonate && (
                 <Button
                     size="sm"
                     variant="outline"
@@ -109,13 +111,19 @@ function NecessidadeCard({
 }
 
 export default function InstituicaoShow({ instituicao, categorias }: Props) {
+    const { auth } = usePage().props;
+    const isDoador = auth.user.tipo_usuario === 'doador';
+    const canDonate = isDoador;
+
     const [modalOpen, setModalOpen] = useState(false);
     const [necessidadeModalId, setNecessidadeModalId] = useState<number | null>(null);
 
-    const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Instituições', href: instituicoesIndex() },
-        { title: instituicao.nome_fantasia, href: instituicoesShow(instituicao.usuario_id) },
-    ];
+    const breadcrumbs: BreadcrumbItem[] = isDoador
+        ? [
+              { title: 'Instituições', href: instituicoesIndex() },
+              { title: instituicao.nome_fantasia, href: instituicoesShow(instituicao.usuario_id) },
+          ]
+        : [{ title: instituicao.nome_fantasia, href: instituicoesShow(instituicao.usuario_id) }];
 
     const hasMap = instituicao.latitude !== null && instituicao.longitude !== null;
     const temHorarios = instituicao.horarios_disponiveis.length > 0;
@@ -129,13 +137,15 @@ export default function InstituicaoShow({ instituicao, categorias }: Props) {
                 {/* Hero */}
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="flex flex-col gap-2">
-                        <Link
-                            href={instituicoesIndex()}
-                            className="text-muted-foreground hover:text-foreground flex w-fit items-center gap-1 text-sm transition-colors"
-                        >
-                            <ArrowLeft className="size-3.5" />
-                            Voltar para lista
-                        </Link>
+                        {isDoador && (
+                            <Link
+                                href={instituicoesIndex()}
+                                className="text-muted-foreground hover:text-foreground flex w-fit items-center gap-1 text-sm transition-colors"
+                            >
+                                <ArrowLeft className="size-3.5" />
+                                Voltar para lista
+                            </Link>
+                        )}
 
                         <div className="flex items-center gap-3 mt-3">
                             <div className="bg-primary/10 text-primary flex size-12 shrink-0 items-center justify-center rounded-xl">
@@ -166,22 +176,24 @@ export default function InstituicaoShow({ instituicao, categorias }: Props) {
                         )}
                     </div>
 
-                    <div className="flex shrink-0 flex-col gap-2 sm:mt-8 sm:max-w-xs">
-                        <Button
-                            size="lg"
-                            className="gap-2"
-                            disabled={!temHorarios}
-                            onClick={() => setModalOpen(true)}
-                        >
-                            <Heart className="size-4" />
-                            Quero Doar
-                        </Button>
-                        {!temHorarios && (
-                            <p className="text-muted-foreground text-xs">
-                                Esta instituição ainda não cadastrou horários para receber doações.
-                            </p>
-                        )}
-                    </div>
+                    {canDonate && (
+                        <div className="flex shrink-0 flex-col gap-2 sm:mt-8 sm:max-w-xs">
+                            <Button
+                                size="lg"
+                                className="gap-2"
+                                disabled={!temHorarios}
+                                onClick={() => setModalOpen(true)}
+                            >
+                                <Heart className="size-4" />
+                                Quero Doar
+                            </Button>
+                            {!temHorarios && (
+                                <p className="text-muted-foreground text-xs">
+                                    Esta instituição ainda não cadastrou horários para receber doações.
+                                </p>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 <Separator />
@@ -250,6 +262,7 @@ export default function InstituicaoShow({ instituicao, categorias }: Props) {
                                             key={n.id}
                                             n={n}
                                             disabled={!temHorarios}
+                                            canDonate={canDonate}
                                             onAtender={() => setNecessidadeModalId(n.id)}
                                         />
                                     ))}
@@ -259,22 +272,26 @@ export default function InstituicaoShow({ instituicao, categorias }: Props) {
                     </div>
                 </div>
 
-                <SolicitacaoDoacaoModal
-                    open={modalOpen}
-                    onClose={() => setModalOpen(false)}
-                    instituicaoId={instituicao.usuario_id}
-                    categorias={categorias}
-                    horariosDisponiveis={instituicao.horarios_disponiveis}
-                />
+                {canDonate && (
+                    <>
+                        <SolicitacaoDoacaoModal
+                            open={modalOpen}
+                            onClose={() => setModalOpen(false)}
+                            instituicaoId={instituicao.usuario_id}
+                            categorias={categorias}
+                            horariosDisponiveis={instituicao.horarios_disponiveis}
+                        />
 
-                <DoacaoNecessidadesModal
-                    open={necessidadeModalId !== null}
-                    onClose={() => setNecessidadeModalId(null)}
-                    instituicaoId={instituicao.usuario_id}
-                    necessidades={instituicao.necessidades_ativas}
-                    horariosDisponiveis={instituicao.horarios_disponiveis}
-                    initialNecessidadeId={necessidadeModalId ?? undefined}
-                />
+                        <DoacaoNecessidadesModal
+                            open={necessidadeModalId !== null}
+                            onClose={() => setNecessidadeModalId(null)}
+                            instituicaoId={instituicao.usuario_id}
+                            necessidades={instituicao.necessidades_ativas}
+                            horariosDisponiveis={instituicao.horarios_disponiveis}
+                            initialNecessidadeId={necessidadeModalId ?? undefined}
+                        />
+                    </>
+                )}
 
                 {/* Mapa — largura total */}
                 {hasMap && (
