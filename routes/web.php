@@ -12,7 +12,9 @@ use Inertia\Inertia;
 use App\Http\Controllers\Admin\InstitutionCheckController;
 use App\Http\Middleware\CheckAdmin;
 use App\Http\Controllers\Doador\DoacaoController;
+use App\Http\Controllers\Doador\PerfilController as DoadorPerfilController;
 use App\Http\Controllers\Instituicao\DoacaoController as InstituicaoDoacaoController;
+use App\Http\Controllers\Instituicao\DoadorController as InstituicaoDoadorController;
 use App\Http\Controllers\Instituicao\HorarioController;
 use App\Http\Controllers\Instituicao\AgendaController;
 use App\Http\Controllers\Instituicao\InstituicaoController;
@@ -50,13 +52,20 @@ Route::middleware(['auth', 'verified', CheckInstituicao::class, EnsureInstitutio
     Route::post('doacoes/{doacao}/reject', [InstituicaoDoacaoController::class, 'reject'])->name('doacoes.reject');
     Route::post('doacoes/{doacao}/deliver', [InstituicaoDoacaoController::class, 'deliver'])->name('doacoes.deliver');
     Route::post('doacoes/{doacao}/notDelivered', [InstituicaoDoacaoController::class, 'notDelivered'])->name('doacoes.notDelivered');
+
+    Route::get('doadores/{doador}', [InstituicaoDoadorController::class, 'show'])->name('doadores.show');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('instituicoes/{id}', [InstituicaoController::class, 'show'])->name('instituicoes.show');
 });
 
 Route::middleware(['auth', 'verified', CheckDoador::class])->group(function () {
 
     Route::get('instituicoes', [InstituicaoController::class, 'index'])->name('instituicoes.index');
-    Route::get('instituicoes/{id}', [InstituicaoController::class, 'show'])->name('instituicoes.show');
-    
+
+    Route::get('perfil', [DoadorPerfilController::class, 'show'])->name('doador.perfil');
+
     Route::get('doacoes', [DoacaoController::class, 'index'])->name('doacoes.index');
     Route::post('doacoes', [DoacaoController::class, 'store'])->name('doacoes.store');
     Route::post('doacoes/{doacao}/cancel', [DoacaoController::class, 'cancel'])->name('doacoes.cancel');

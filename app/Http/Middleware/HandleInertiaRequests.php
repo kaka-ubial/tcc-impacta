@@ -36,11 +36,17 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $user = $request->user();
+
+        if ($user) {
+            $user->loadMissing(['doador', 'instituicao']);
+        }
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user,
             ],
             'notificacoes_nao_lidas' => $request->user()
                 ? Notificacao::where('usuario_id', $request->user()->id)->where('lida', false)->count()

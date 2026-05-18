@@ -1,7 +1,6 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { Calendar, Check, CheckCheck, Package, Phone, User, X } from 'lucide-react';
 import { useState } from 'react';
-
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
@@ -16,6 +15,8 @@ import {
     reject as rejectRoute,
 } from '@/routes/instituicao/doacoes';
 import type { BreadcrumbItem } from '@/types';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { fotoUrl } from '@/lib/foto';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Painel', href: painel.url() },
@@ -29,7 +30,7 @@ type StatusKey = 'pendente' | 'confirmada' | 'entregue' | 'cancelado' | 'recusad
 type Doacao = {
     id: number;
     status: StatusKey;
-    doador: { nome: string; telefone: string };
+    doador: { usuario_id: number; nome: string; telefone: string, foto_perfil: string | null };
     itens: { id: number; categoria: string; quantidade: number; descricao: string | null }[];
     agendamento: {
         data_hora: string;
@@ -60,6 +61,15 @@ function formatDataHora(iso: string) {
     return `${DIAS[d.getDay()]}, ${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
 }
 
+function iniciais(nome: string) {
+    return nome
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((p) => p[0]?.toUpperCase() ?? '')
+        .join('');
+}
+
 // ─── card ─────────────────────────────────────────────────────────────────────
 
 function DoacaoCard({ doacao }: { doacao: Doacao }) {
@@ -74,13 +84,25 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
 
     return (
         <Card>
-            <CardHeader className="pb-3">
+            <CardHeader className="">
                 <div className="flex items-start justify-between gap-3">
-                    <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-2">
-                            <User className="text-muted-foreground size-4 shrink-0" />
-                            <span className="font-medium">{doacao.doador.nome}</span>
-                        </div>
+                    <div className="flex flex-col gap-2">
+                        <Link
+                            href={`/instituicao/doadores/${doacao.doador.usuario_id}`}
+                            className="hover:text-primary flex items-center gap-2 transition-colors"
+                        >
+                            <Avatar className="size-10 border">
+                                {fotoUrl(doacao.doador.foto_perfil) && (
+                                    <AvatarImage src={fotoUrl(doacao.doador.foto_perfil)} alt={doacao.doador.nome}   />
+                                )}
+                                <AvatarFallback className="text-sm font-semibold">
+                                    {iniciais(doacao.doador.nome) || <User className="text-muted-foreground size-4 shrink-0" />}
+                                </AvatarFallback>
+                            </Avatar>
+                            <span className="font-medium underline-offset-2 hover:underline">
+                                {doacao.doador.nome}
+                            </span>
+                        </Link>
                         <div className="flex items-center gap-2">
                             <Phone className="text-muted-foreground size-3.5 shrink-0" />
                             <span className="text-muted-foreground text-sm">{doacao.doador.telefone}</span>
@@ -97,7 +119,7 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
 
             <Separator />
 
-            <CardContent className="flex flex-col gap-4 pt-4">
+            <CardContent className="flex flex-col gap-4 ">
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-1.5 text-sm font-medium">
                         <Package className="text-muted-foreground size-3.5" />

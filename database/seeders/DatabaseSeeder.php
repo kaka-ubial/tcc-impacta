@@ -28,5 +28,8 @@ class DatabaseSeeder extends Seeder
         $this->call(CategoriaItemSeeder::class);
         $this->call(AdminUserSeeder::class);
         $this->call(CausaSeeder::class);
+        $this->call(HorarioDisponivelSeeder::class);
+        $this->call(InstituicaoSeeder::class);
+        $this->call(NecessidadeSeeder::class);
     }
 }

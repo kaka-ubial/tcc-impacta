@@ -25,6 +25,9 @@ trait ProfileValidationRules
                 'required',
                 'string',
                 new Cpf(),
+                $userId === null
+                    ? Rule::unique('doador', 'cpf')
+                    : Rule::unique('doador', 'cpf')->ignore($userId, 'usuario_id'),
             ],
             'telefone'          => ['exclude_unless:tipo_usuario,doador', 'required', 'string', 'regex:/^\(\d{2}\)\s\d{4,5}-\d{4}$/'],
             'nome_fantasia'     => ['exclude_unless:tipo_usuario,instituicao', 'required', 'string', 'min:2', 'max:255'],
@@ -34,6 +37,9 @@ trait ProfileValidationRules
                 'required',
                 'string',
                 new Cnpj(),
+                $userId === null
+                    ? Rule::unique('instituicao', 'cnpj')
+                    : Rule::unique('instituicao', 'cnpj')->ignore($userId, 'usuario_id'),
             ],
             'telefone_inst'     => ['exclude_unless:tipo_usuario,instituicao', 'required', 'string', 'regex:/^\(\d{2}\)\s\d{4,5}-\d{4}$/'],
             'endereco_completo' => ['exclude_unless:tipo_usuario,instituicao', 'required', 'string', 'min:10', 'max:500'],
