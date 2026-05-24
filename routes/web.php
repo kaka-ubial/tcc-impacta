@@ -18,6 +18,7 @@ use App\Http\Controllers\Instituicao\DoadorController as InstituicaoDoadorContro
 use App\Http\Controllers\Instituicao\HorarioController;
 use App\Http\Controllers\Instituicao\AgendaController;
 use App\Http\Controllers\Instituicao\InstituicaoController;
+use App\Http\Controllers\Instituicao\AvaliacaoController;
 use App\Http\Controllers\NecessidadeController;
 use App\Http\Controllers\NotificacaoController;
 use App\Http\Middleware\CheckNecessidadeOwnership;
@@ -52,6 +53,7 @@ Route::middleware(['auth', 'verified', CheckInstituicao::class, EnsureInstitutio
     Route::post('doacoes/{doacao}/reject', [InstituicaoDoacaoController::class, 'reject'])->name('doacoes.reject');
     Route::post('doacoes/{doacao}/deliver', [InstituicaoDoacaoController::class, 'deliver'])->name('doacoes.deliver');
     Route::post('doacoes/{doacao}/notDelivered', [InstituicaoDoacaoController::class, 'notDelivered'])->name('doacoes.notDelivered');
+    Route::post('doacoes/{doacao}/avaliar', [AvaliacaoController::class, 'store'])->name('doacoes.avaliar');
 
     Route::get('doadores/{doador}', [InstituicaoDoadorController::class, 'show'])->name('doadores.show');
 });

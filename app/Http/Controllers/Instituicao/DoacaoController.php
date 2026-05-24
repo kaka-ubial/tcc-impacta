@@ -15,7 +15,7 @@ class DoacaoController extends Controller
     {
         $instituicaoId = auth()->user()->instituicao->usuario_id;
 
-        $doacoes = Doacao::with(['doador', 'itens.categoria', 'agendamento'])
+        $doacoes = Doacao::with(['doador', 'itens.categoria', 'agendamento', 'avaliacao'])
             ->where('instituicao_id', $instituicaoId)
             ->orderBy('created_at', 'desc')
             ->get()
@@ -39,7 +39,8 @@ class DoacaoController extends Controller
                     'tipo'                => $d->agendamento->tipo,
                     'endereco_referencia' => $d->agendamento->endereco_referencia,
                 ] : null,
-                'criado_em' => $d->created_at->toIso8601String(),
+                'criado_em'  => $d->created_at->toIso8601String(),
+                'avaliacao'  => $d->avaliacao ? ['nota' => $d->avaliacao->nota] : null,
             ]);
 
         return Inertia::render('instituicao/doacoes', [
