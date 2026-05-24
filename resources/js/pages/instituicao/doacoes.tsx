@@ -1,10 +1,20 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Calendar, Check, CheckCheck, Package, Phone, User, X } from 'lucide-react';
+import { Calendar, Check, CheckCheck, Package, Phone, Star, User, X } from 'lucide-react';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
+import { StarDisplay } from '@/components/ui/star-display';
+import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import { painel } from '@/routes/instituicao';
 import {
@@ -13,6 +23,7 @@ import {
     notDelivered as notDeliveredRoute,
     index as doacoesIndex,
     reject as rejectRoute,
+    avaliar as avaliarRoute,
 } from '@/routes/instituicao/doacoes';
 import type { BreadcrumbItem } from '@/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -38,6 +49,7 @@ type Doacao = {
         endereco_referencia: string | null;
     } | null;
     criado_em: string;
+    avaliacao: { nota: number } | null;
 };
 
 type Props = { doacoes: Doacao[] };
@@ -45,12 +57,12 @@ type Props = { doacoes: Doacao[] };
 // ─── status config ────────────────────────────────────────────────────────────
 
 const statusConfig: Record<StatusKey, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-    pendente:   { label: 'Pendente',    variant: 'outline' },
-    confirmada: { label: 'Confirmada',  variant: 'default' },
-    entregue:   { label: 'Entregue',    variant: 'secondary' },
+    pendente:   { label: 'Pendente',      variant: 'outline' },
+    confirmada: { label: 'Confirmada',    variant: 'default' },
+    entregue:   { label: 'Entregue',      variant: 'secondary' },
     nao_entregue: { label: 'Não entregue', variant: 'destructive' },
-    cancelado:  { label: 'Cancelada',   variant: 'secondary' },
-    recusada:   { label: 'Recusada',    variant: 'destructive' },
+    cancelado:  { label: 'Cancelada',     variant: 'secondary' },
+    recusada:   { label: 'Recusada',      variant: 'destructive' },
 };
 
 const DIAS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -70,14 +82,55 @@ function iniciais(nome: string) {
         .join('');
 }
 
+// ─── star picker ─────────────────────────────────────────────────────────────
+
+function StarPicker({ value, onChange }: { value: number; onChange: (n: number) => void }) {
+    const [hovered, setHovered] = useState(0);
+    return (
+        <div className="flex gap-1">
+            {[1, 2, 3, 4, 5].map((n) => (
+                <button
+                    key={n}
+                    type="button"
+                    onClick={() => onChange(n)}
+                    onMouseEnter={() => setHovered(n)}
+                    onMouseLeave={() => setHovered(0)}
+                    className="transition-transform hover:scale-110"
+                >
+                    <Star
+                        className={`size-7 ${
+                            n <= (hovered || value)
+                                ? 'fill-yellow-400 text-yellow-400'
+                                : 'text-muted-foreground'
+                        }`}
+                    />
+                </button>
+            ))}
+        </div>
+    );
+}
+
 // ─── card ─────────────────────────────────────────────────────────────────────
 
 function DoacaoCard({ doacao }: { doacao: Doacao }) {
     const [processing, setProcessing] = useState(false);
+    const [nota, setNota] = useState(5);
+    const [descricao, setDescricao] = useState('');
+    const [avaliarOpen, setAvaliarOpen] = useState(false);
+
+    const descricaoObrigatoria = nota <= 3;
+    const podeSalvar = !descricaoObrigatoria || descricao.trim().length > 0;
 
     function post(url: string) {
         setProcessing(true);
         router.post(url, {}, { onFinish: () => setProcessing(false) });
+    }
+
+    function handleAvaliar() {
+        setProcessing(true);
+        router.post(avaliarRoute(doacao.id).url, { nota, descricao: descricao || null }, {
+            onFinish: () => { setProcessing(false); setAvaliarOpen(false); },
+        });
     }
 
     const cfg = statusConfig[doacao.status];
@@ -194,23 +247,83 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
                     <Separator />
                     <CardFooter className="pt-4">
                         <div className="grid w-full gap-2 md:grid-cols-2">
-                        <Button
-                            className="w-full bg-destructive gap-1.5"
-                            onClick={() => post(notDeliveredRoute(doacao.id).url)}
-                            disabled={processing}
-                        >
-                            <X className="size-4" />
-                            Não entregue 
-                        </Button>
-                        <Button
-                            className="w-full gap-1.5"
-                            onClick={() => post(deliverRoute(doacao.id).url)}
-                            disabled={processing}
-                        >
-                            <CheckCheck className="size-4" />
-                            Marcar como entregue
-                        </Button>                            
+                            <Button
+                                className="w-full bg-destructive gap-1.5"
+                                onClick={() => post(notDeliveredRoute(doacao.id).url)}
+                                disabled={processing}
+                            >
+                                <X className="size-4" />
+                                Não entregue
+                            </Button>
+                            <Button
+                                className="w-full gap-1.5"
+                                onClick={() => post(deliverRoute(doacao.id).url)}
+                                disabled={processing}
+                            >
+                                <CheckCheck className="size-4" />
+                                Entregue
+                            </Button>
                         </div>
+                    </CardFooter>
+                </>
+            )}
+
+            {doacao.status === 'entregue' && (
+                <>
+                    <Separator />
+                    <CardFooter className="pt-4">
+                        {doacao.avaliacao ? (
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <StarDisplay nota={doacao.avaliacao.nota} />
+                                <span>Avaliação registrada</span>
+                            </div>
+                        ) : (
+                            <Dialog open={avaliarOpen} onOpenChange={setAvaliarOpen}>
+                                <DialogTrigger asChild>
+                                    <Button variant="outline" size="sm" className="gap-1.5">
+                                        <Star className="size-3.5" />
+                                        Avaliar doador
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogTitle>Avaliar doador</DialogTitle>
+                                    <DialogDescription>
+                                        Avalie a experiência com{' '}
+                                        <span className="font-medium text-foreground">{doacao.doador.nome}</span>{' '}
+                                        nesta doação.
+                                    </DialogDescription>
+                                    <div className="flex flex-col gap-4">
+                                        <div className="flex justify-center py-1">
+                                            <StarPicker
+                                                value={nota}
+                                                onChange={(n) => { setNota(n); if (n > 3) setDescricao(''); }}
+                                            />
+                                        </div>
+                                        {descricaoObrigatoria && (
+                                            <div className="flex flex-col gap-1.5">
+                                                <label className="text-sm font-medium">
+                                                    Descreva o problema <span className="text-destructive">*</span>
+                                                </label>
+                                                <Textarea
+                                                    placeholder="O que aconteceu com esta doação?"
+                                                    value={descricao}
+                                                    onChange={(e) => setDescricao(e.target.value)}
+                                                    rows={3}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <DialogFooter className="gap-2">
+                                        <Button variant="secondary" onClick={() => setAvaliarOpen(false)}>
+                                            Cancelar
+                                        </Button>
+                                        <Button disabled={processing || !podeSalvar} onClick={handleAvaliar}>
+                                            {processing ? 'Enviando...' : 'Confirmar avaliação'}
+                                        </Button>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
+                        )}
                     </CardFooter>
                 </>
             )}

@@ -1,5 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Building2, Calendar, Gift, Package, Plus, X } from 'lucide-react';
+import { Building2, Calendar, Gift, Package, Plus, Star, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +14,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
+import { StarDisplay } from '@/components/ui/star-display';
 import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/app-layout';
 import {
@@ -85,6 +86,7 @@ type Doacao = {
     itens: { id: number; categoria: string; quantidade: number; descricao: string | null }[];
     agendamento: Agendamento | null;
     criado_em: string;
+    avaliacao: { nota: number; descricao: string | null } | null;
 };
 
 type Props = { doacoes: Doacao[] };
@@ -263,6 +265,18 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
                             </DialogContent>
                         </Dialog>
                     </CardFooter>
+                </>
+            )}
+
+            {doacao.avaliacao && (
+                <>
+                    <Separator />
+                    <div className="flex items-center gap-2 px-5 py-4 text-sm text-muted-foreground">
+                        <StarDisplay nota={doacao.avaliacao.nota} />
+                        {doacao.avaliacao.descricao && (
+                            <span>{doacao.avaliacao.descricao}</span>
+                        )}
+                    </div>
                 </>
             )}
         </article>
