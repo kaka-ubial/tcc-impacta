@@ -1,10 +1,10 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Building2, Calendar, Gift, Package, Plus, Star, X } from 'lucide-react';
+import { Building2, Calendar, Package, Plus, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { CardFooter } from '@/components/ui/card';
 import {
     Dialog,
     DialogClose,
@@ -14,8 +14,8 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
-import { StarDisplay } from '@/components/ui/star-display';
 import { Separator } from '@/components/ui/separator';
+import { StarDisplay } from '@/components/ui/star-display';
 import AppLayout from '@/layouts/app-layout';
 import {
     aceitarSugestao as aceitarRoute,

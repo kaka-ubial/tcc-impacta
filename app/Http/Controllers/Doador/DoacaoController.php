@@ -17,7 +17,8 @@ class DoacaoController extends Controller
 {
     public function index(): Response
     {
-        $doadorId = auth()->user()->doador->usuario_id;
+        $user = auth()->user();
+        $doadorId = $user->doador->usuario_id;
 
         $doacoes = Doacao::with(['instituicao', 'itens.categoria', 'agendamento', 'avaliacao'])
             ->where('doador_id', $doadorId)

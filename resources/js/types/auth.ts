@@ -52,6 +52,15 @@ export type InstituicaoListItem = {
     necessidades_ativas_count: number;
 };
 
+export type Recomendacao = {
+    usuario_id: number;
+    nome_fantasia: string;
+    endereco_completo: string;
+    causas: Causa[];
+    causa_overlap: number;
+    distancia_km: number | null;
+};
+
 export type InstituicaoDetalhe = {
     usuario_id: number;
     nome_fantasia: string;
