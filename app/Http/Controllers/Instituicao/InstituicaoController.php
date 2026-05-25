@@ -6,13 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\CategoriaItem;
 use App\Models\Causa;
 use App\Models\Instituicao;
+use App\Services\RecommendationService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class InstituicaoController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request, RecommendationService $recommendations): Response
     {
         $search = $request->string('search')->trim()->value();
         $causaId = $request->integer('causa') ?: null;
@@ -40,6 +41,8 @@ class InstituicaoController extends Controller
                 'necessidades_ativas_count' => $inst->necessidades_ativas_count,
             ]);
 
+        $isFiltering = $search !== '' || $causaId !== null;
+
         return Inertia::render('instituicoes/index', [
             'instituicoes' => $instituicoes,
             'causas' => Causa::orderBy('nome')->get(['id', 'nome', 'icone']),
@@ -47,6 +50,7 @@ class InstituicaoController extends Controller
                 'search' => $search,
                 'causa' => $causaId,
             ],
+            'recomendacoes' => $isFiltering ? [] : $recommendations->forDonor(auth()->user()),
         ]);
     }
 

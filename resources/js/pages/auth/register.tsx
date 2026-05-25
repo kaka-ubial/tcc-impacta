@@ -1,6 +1,6 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { Building2, Check, Heart, UserRound } from 'lucide-react';
-import { type FormEvent, useEffect, useState } from 'react';
+import { Building2, Check, Heart, LocateFixed, UserRound } from 'lucide-react';
+import { type FormEvent, useEffect, useRef, useState } from 'react';
 
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
@@ -189,6 +189,9 @@ export default function Register({ causas }: { causas: any[] }) {
         cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', uf: '',
     });
 
+    const [geoStatus, setGeoStatus] = useState<'idle' | 'loading' | 'granted' | 'denied'>('idle');
+    const geoAttempted = useRef(false);
+
     const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
         email: '',
         password: '',
@@ -202,6 +205,8 @@ export default function Register({ causas }: { causas: any[] }) {
         cnpj: '',
         telefone_inst: '',
         endereco_completo: '',
+        latitude: null as number | null,
+        longitude: null as number | null,
         causas_apoiadas: [] as number[],
     });
 
@@ -243,6 +248,20 @@ export default function Register({ causas }: { causas: any[] }) {
     function handleEnderecoChange(fields: EnderecoFields) {
         setEndereco(fields);
         setData('endereco_completo', buildEnderecoCompleto(fields));
+    }
+
+    function handleGeolocate() {
+        if (!navigator.geolocation || geoAttempted.current) return;
+        geoAttempted.current = true;
+        setGeoStatus('loading');
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                setData((prev) => ({ ...prev, latitude: pos.coords.latitude, longitude: pos.coords.longitude }));
+                setGeoStatus('granted');
+            },
+            () => setGeoStatus('denied'),
+            { timeout: 8000 },
+        );
     }
 
     const step3Rules = {
@@ -527,6 +546,49 @@ export default function Register({ causas }: { causas: any[] }) {
                                             className="h-11"
                                         />
                                         <InputError message={clientErrors.telefone || errors.telefone} />
+                                    </div>
+
+                                    <div className="flex flex-col gap-3 rounded-xl border border-border bg-muted/30 p-4">
+                                        <div>
+                                            <p className="text-sm font-medium text-foreground">
+                                                Endereço <span className="text-xs font-normal text-muted-foreground">(opcional)</span>
+                                            </p>
+                                            <p className="mt-0.5 text-xs text-muted-foreground">
+                                                Usado para sugerir instituições próximas a você.
+                                            </p>
+                                        </div>
+
+                                        <EnderecoCepFields
+                                            value={endereco}
+                                            onChange={handleEnderecoChange}
+                                            errors={{
+                                                cep: clientErrors.cep,
+                                                logradouro: clientErrors.logradouro,
+                                                numero: clientErrors.numero,
+                                                bairro: clientErrors.bairro,
+                                                cidade: clientErrors.cidade,
+                                            }}
+                                        />
+
+                                        <button
+                                            type="button"
+                                            onClick={handleGeolocate}
+                                            disabled={geoStatus === 'loading' || geoStatus === 'granted'}
+                                            className={cn(
+                                                'flex items-center gap-2 self-start rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors',
+                                                geoStatus === 'granted'
+                                                    ? 'border-success/30 bg-success/10 text-success'
+                                                    : geoStatus === 'denied'
+                                                      ? 'border-destructive/30 bg-destructive/5 text-destructive'
+                                                      : 'border-border bg-card text-muted-foreground hover:border-brand/40 hover:text-foreground',
+                                            )}
+                                        >
+                                            <LocateFixed className="size-3.5 shrink-0" />
+                                            {geoStatus === 'loading' && 'Obtendo localização...'}
+                                            {geoStatus === 'granted' && 'Localização obtida'}
+                                            {geoStatus === 'denied' && 'Permissão negada'}
+                                            {geoStatus === 'idle' && 'Usar minha localização atual'}
+                                        </button>
                                     </div>
 
                                     <div className="flex gap-3">

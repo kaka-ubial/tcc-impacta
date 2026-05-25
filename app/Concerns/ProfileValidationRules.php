@@ -42,7 +42,15 @@ trait ProfileValidationRules
                     : Rule::unique('instituicao', 'cnpj')->ignore($userId, 'usuario_id'),
             ],
             'telefone_inst'     => ['exclude_unless:tipo_usuario,instituicao', 'required', 'string', 'regex:/^\(\d{2}\)\s\d{4,5}-\d{4}$/'],
-            'endereco_completo' => ['exclude_unless:tipo_usuario,instituicao', 'required', 'string', 'min:10', 'max:500'],
+            'endereco_completo' => [
+                Rule::when(
+                    fn ($input) => ($input['tipo_usuario'] ?? '') === 'instituicao',
+                    ['required', 'string', 'min:10', 'max:500'],
+                    ['nullable', 'string', 'max:500'],
+                ),
+            ],
+            'latitude'          => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude'         => ['nullable', 'numeric', 'between:-180,180'],
             'causas_apoiadas'   => ['sometimes', 'array', 'min:1'],
             'causas_apoiadas.*' => ['integer', 'exists:causas,id'],
         ];

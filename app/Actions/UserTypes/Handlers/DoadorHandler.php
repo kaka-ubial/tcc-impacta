@@ -11,13 +11,14 @@ class DoadorHandler implements UserTypeHandler {
     public function create(User $user, array $data): void
     {
         \App\Models\Doador::create([
-            'usuario_id' => $user->id,
-            'nome_completo' => $data['nome_completo'],
-            'cpf' => $data['cpf'],
-            'telefone' => $data['telefone'],
-            'pontuacao_gamificacao' => 0,
-            'latitude' => $data['latitude'] ?? null,
-            'longitude' => $data['longitude'] ?? null,
+            'usuario_id'             => $user->id,
+            'nome_completo'          => $data['nome_completo'],
+            'cpf'                    => $data['cpf'],
+            'telefone'               => $data['telefone'],
+            'endereco_completo'      => $data['endereco_completo'] ?? null,
+            'pontuacao_gamificacao'  => 0,
+            'latitude'               => $data['latitude'] ?? null,
+            'longitude'              => $data['longitude'] ?? null,
         ]);
 
 
