@@ -23,6 +23,8 @@ class InstituicaoController extends Controller
                 $query->whereColumn('quantidade_atual', '<', 'quantidade_objetivo');
             }])
             ->visible()
+            ->when(auth()->user()->tipo_usuario === 'instituicao', fn ($q) => $q
+                ->where('usuario_id', '!=', auth()->user()->instituicao->usuario_id))
             ->when($search, fn ($q) => $q->where(function ($q) use ($search) {
                 $term = '%'.$search.'%';
                 $q->where('nome_fantasia', 'ilike', $term)
@@ -50,7 +52,9 @@ class InstituicaoController extends Controller
                 'search' => $search,
                 'causa' => $causaId,
             ],
-            'recomendacoes' => $isFiltering ? [] : $recommendations->forDonor(auth()->user()),
+            'recomendacoes' => (!$isFiltering && auth()->user()->tipo_usuario === 'doador')
+                ? $recommendations->forDonor(auth()->user())
+                : [],
         ]);
     }
 
@@ -94,7 +98,11 @@ class InstituicaoController extends Controller
                     'tipo' => $h->tipo,
                 ])->values(),
             ],
-            'categorias' => $categorias,
+            'categorias'   => $categorias,
+            'canTransfer'  => auth()->user()->tipo_usuario === 'instituicao',
+            'estoque'      => auth()->user()->tipo_usuario === 'instituicao'
+                ? TransferenciaController::calcularEstoque(auth()->user()->instituicao->usuario_id)
+                : [],
         ]);
     }
 }

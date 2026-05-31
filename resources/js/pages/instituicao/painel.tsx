@@ -1,5 +1,5 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { ArrowRight, Calendar, CalendarClock, Gift, Package, UserCog } from 'lucide-react';
+import { ArrowRight, Calendar, CalendarClock, Gift, Package, UserCog, ArrowLeftRight } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 
@@ -57,6 +57,14 @@ const painelItems: PainelItem[] = [
         accent: 'bg-muted',
         accentText: 'text-muted-foreground',
     },
+        {
+        title: 'Transferência de Itens',
+        description: 'Transfira itens entre instituições parceiras para otimizar a distribuição de doações.',
+        icon: ArrowLeftRight,
+        href: '/instituicao/transferencias',
+        accent: 'bg-fuchsia-500/10',
+        accentText: 'text-fuchsia-600',
+    },
 ];
 
 function getGreeting(): string {
@@ -66,8 +74,11 @@ function getGreeting(): string {
     return 'Boa noite';
 }
 
+type Contadores = { doacoes_pendentes: number; transferencias_pendentes: number };
+
 export default function Painel() {
-    const { auth } = usePage().props as any;
+    const { auth, contadores } = usePage().props as any;
+    const c = contadores as Contadores;
     const nomeInstituicao: string =
         auth.user.instituicao?.nome_fantasia ?? 'Instituição';
 
@@ -110,9 +121,21 @@ export default function Painel() {
                                         <div className={`flex size-10 items-center justify-center rounded-xl ${item.accent} ${item.accentText} mb-5`}>
                                             <Icon className="size-5" />
                                         </div>
-                                        <h2 className="font-semibold text-foreground group-hover:text-brand transition-colors">
-                                            {item.title}
-                                        </h2>
+                                        <div className="flex items-center gap-2">
+                                            <h2 className="font-semibold text-foreground group-hover:text-brand transition-colors">
+                                                {item.title}
+                                            </h2>
+                                            {item.title === 'Doações Recebidas' && c.doacoes_pendentes > 0 && (
+                                                <span className="flex size-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-white">
+                                                    {c.doacoes_pendentes}
+                                                </span>
+                                            )}
+                                            {item.title === 'Transferência de Itens' && c.transferencias_pendentes > 0 && (
+                                                <span className="flex size-5 items-center justify-center rounded-full bg-fuchsia-600 text-[10px] font-bold text-white">
+                                                    {c.transferencias_pendentes}
+                                                </span>
+                                            )}
+                                        </div>
                                         <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
                                             {item.description}
                                         </p>

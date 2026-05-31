@@ -86,7 +86,7 @@ type Doacao = {
     itens: { id: number; categoria: string; quantidade: number; descricao: string | null }[];
     agendamento: Agendamento | null;
     criado_em: string;
-    avaliacao: { nota: number; descricao: string | null } | null;
+    avaliacao: { nota: number; descricao: string } | null;
 };
 
 type Props = { doacoes: Doacao[] };
@@ -273,9 +273,7 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
                     <Separator />
                     <div className="flex items-center gap-2 px-5 py-4 text-sm text-muted-foreground">
                         <StarDisplay nota={doacao.avaliacao.nota} />
-                        {doacao.avaliacao.descricao && (
-                            <span>{doacao.avaliacao.descricao}</span>
-                        )}
+                        <span>{doacao.avaliacao.descricao}</span>
                     </div>
                 </>
             )}
