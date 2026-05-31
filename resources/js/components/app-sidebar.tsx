@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Building2, Gift, LayoutGrid, LayoutDashboard, Box, Calendar, CalendarClock, Bell } from 'lucide-react';
+import { Building2, Gift, LayoutGrid, LayoutDashboard, Box, Calendar, CalendarClock, Bell, ArrowLeftRight } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -55,7 +55,12 @@ const instituicaoNavItems: NavItem[] = [
         title: 'Doações Recebidas',
         href: '/instituicao/doacoes',
         icon: Gift,
-    }
+    },
+    {
+        title: 'Transferências',
+        href: '/instituicao/transferencias',
+        icon: ArrowLeftRight,
+    },
 ];
 
 const adminNavItems: NavItem[] = [

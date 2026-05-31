@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Instituicao;
 
 use App\Http\Controllers\Controller;
+use App\Models\CategoriaItem;
 use App\Models\Doacao;
 use App\Models\Notificacao;
 use Illuminate\Support\Facades\DB;
@@ -40,11 +41,22 @@ class DoacaoController extends Controller
                     'endereco_referencia' => $d->agendamento->endereco_referencia,
                 ] : null,
                 'criado_em'  => $d->created_at->toIso8601String(),
-                'avaliacao'  => $d->avaliacao ? ['nota' => $d->avaliacao->nota] : null,
+                'avaliacao'  => $d->avaliacao ? ['nota' => $d->avaliacao->nota, 'descricao' => $d->avaliacao->descricao] : null,
             ]);
 
+        $estoque = TransferenciaController::calcularEstoque($instituicaoId);
+        $categoriaIds = array_keys($estoque);
+        $categorias = CategoriaItem::whereIn('id', $categoriaIds)->pluck('nome', 'id');
+
+        $itensRecebidos = collect($estoque)->map(fn ($qty, $catId) => [
+            'categoria_id'   => (int) $catId,
+            'categoria'      => $categorias[$catId] ?? '',
+            'quantidade'     => $qty,
+        ])->values();
+
         return Inertia::render('instituicao/doacoes', [
-            'doacoes' => $doacoes,
+            'doacoes'         => $doacoes,
+            'itens_recebidos' => $itensRecebidos,
         ]);
     }
 

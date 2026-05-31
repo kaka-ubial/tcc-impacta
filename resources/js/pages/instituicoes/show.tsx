@@ -1,10 +1,11 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { ArrowLeft, Building2, FileText, Heart, MapPin, Package, Phone, HandHeart } from 'lucide-react';
+import { ArrowLeft, ArrowLeftRight, Building2, FileText, Heart, HandHeart, MapPin, Package, Phone } from 'lucide-react';
 import { lazy, Suspense, useState } from 'react';
 
 import { CausaBadge } from '@/components/causa-badge';
 import { DoacaoNecessidadesModal } from '@/components/doacao/DoacaoNecessidadesModal';
 import { SolicitacaoDoacaoModal } from '@/components/doacao/SolicitacaoDoacaoModal';
+import { TransferenciaNecessidadesModal } from '@/components/transferencia/TransferenciaNecessidadesModal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,6 +20,8 @@ const MapEmbed = lazy(() => import('@/components/map-embed'));
 type Props = {
     instituicao: InstituicaoDetalhe;
     categorias: CategoriaItem[];
+    canTransfer: boolean;
+    estoque: Record<number, number>;
 };
 
 const prioridadeConfig: Record<string, { variant: 'destructive' | 'default' | 'secondary'; label: string }> = {
@@ -56,13 +59,17 @@ function MapSection({ lat, lng, label }: { lat: number; lng: number; label: stri
 function NecessidadeCard({
     n,
     onAtender,
+    onTransferir,
     disabled,
     canDonate,
+    canTransfer,
 }: {
     n: InstituicaoDetalhe['necessidades_ativas'][number];
     onAtender: () => void;
+    onTransferir: () => void;
     disabled: boolean;
     canDonate: boolean;
+    canTransfer: boolean;
 }) {
     const pct = Math.min(100, Math.round((n.quantidade_atual / n.quantidade_objetivo) * 100));
     const cfg = prioridadeConfig[n.prioridade];
@@ -106,17 +113,24 @@ function NecessidadeCard({
                     Atender necessidade
                 </Button>
             )}
+            {!isFull && canTransfer && (
+                <Button size="sm" variant="outline" className="mt-1 gap-1.5 self-end" onClick={onTransferir}>
+                    <ArrowLeftRight className="size-3.5" />
+                    Transferir
+                </Button>
+            )}
         </div>
     );
 }
 
-export default function InstituicaoShow({ instituicao, categorias }: Props) {
+export default function InstituicaoShow({ instituicao, categorias, canTransfer, estoque }: Props) {
     const { auth } = usePage().props;
     const isDoador = auth.user.tipo_usuario === 'doador';
     const canDonate = isDoador;
 
     const [modalOpen, setModalOpen] = useState(false);
     const [necessidadeModalId, setNecessidadeModalId] = useState<number | null>(null);
+    const [transferenciaModalId, setTransferenciaModalId] = useState<number | null>(null);
 
     const breadcrumbs: BreadcrumbItem[] = isDoador
         ? [
@@ -263,7 +277,9 @@ export default function InstituicaoShow({ instituicao, categorias }: Props) {
                                             n={n}
                                             disabled={!temHorarios}
                                             canDonate={canDonate}
+                                            canTransfer={canTransfer}
                                             onAtender={() => setNecessidadeModalId(n.id)}
+                                            onTransferir={() => setTransferenciaModalId(n.id)}
                                         />
                                     ))}
                                 </div>
@@ -271,6 +287,18 @@ export default function InstituicaoShow({ instituicao, categorias }: Props) {
                         </div>
                     </div>
                 </div>
+
+                {canTransfer && (
+                    <TransferenciaNecessidadesModal
+                        open={transferenciaModalId !== null}
+                        onClose={() => setTransferenciaModalId(null)}
+                        instituicaoDestinoId={instituicao.usuario_id}
+                        necessidades={instituicao.necessidades_ativas}
+                        horariosDisponiveis={instituicao.horarios_disponiveis}
+                        estoque={estoque}
+                        initialNecessidadeId={transferenciaModalId ?? undefined}
+                    />
+                )}
 
                 {canDonate && (
                     <>
