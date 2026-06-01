@@ -1,9 +1,9 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Calendar, Check, CheckCheck, Package, Phone, Star, User, X } from 'lucide-react';
+import { ArrowLeftRight, Calendar, Check, CheckCheck, Package, Phone, Star, User, X } from 'lucide-react';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Dialog,
     DialogContent,
@@ -49,10 +49,16 @@ type Doacao = {
         endereco_referencia: string | null;
     } | null;
     criado_em: string;
-    avaliacao: { nota: number } | null;
+    avaliacao: { nota: number; descricao: string } | null;
 };
 
-type Props = { doacoes: Doacao[] };
+type ItemRecebido = {
+    categoria_id: number;
+    categoria: string;
+    quantidade: number;
+};
+
+type Props = { doacoes: Doacao[]; itens_recebidos: ItemRecebido[] };
 
 // ─── status config ────────────────────────────────────────────────────────────
 
@@ -117,9 +123,6 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
     const [nota, setNota] = useState(5);
     const [descricao, setDescricao] = useState('');
     const [avaliarOpen, setAvaliarOpen] = useState(false);
-
-    const descricaoObrigatoria = nota <= 3;
-    const podeSalvar = !descricaoObrigatoria || descricao.trim().length > 0;
 
     function post(url: string) {
         setProcessing(true);
@@ -275,7 +278,7 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
                         {doacao.avaliacao ? (
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <StarDisplay nota={doacao.avaliacao.nota} />
-                                <span>Avaliação registrada</span>
+                                <span>{doacao.avaliacao.descricao}</span>
                             </div>
                         ) : (
                             <Dialog open={avaliarOpen} onOpenChange={setAvaliarOpen}>
@@ -296,28 +299,26 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
                                         <div className="flex justify-center py-1">
                                             <StarPicker
                                                 value={nota}
-                                                onChange={(n) => { setNota(n); if (n > 3) setDescricao(''); }}
+                                                onChange={(n) => { setNota(n); setDescricao(''); }}
                                             />
                                         </div>
-                                        {descricaoObrigatoria && (
-                                            <div className="flex flex-col gap-1.5">
-                                                <label className="text-sm font-medium">
-                                                    Descreva o problema <span className="text-destructive">*</span>
-                                                </label>
-                                                <Textarea
-                                                    placeholder="O que aconteceu com esta doação?"
-                                                    value={descricao}
-                                                    onChange={(e) => setDescricao(e.target.value)}
-                                                    rows={3}
-                                                />
-                                            </div>
-                                        )}
+                                        <div className="flex flex-col gap-1.5">
+                                            <label className="text-sm font-medium">
+                                                Descrição <span className="text-destructive">*</span>
+                                            </label>
+                                            <Textarea
+                                                placeholder="Descreva a experiência com o doador. Esta descrição será visível para outros usuários."
+                                                value={descricao}
+                                                onChange={(e) => setDescricao(e.target.value)}
+                                                rows={3}
+                                            />
+                                        </div>
                                     </div>
                                     <DialogFooter className="gap-2">
                                         <Button variant="secondary" onClick={() => setAvaliarOpen(false)}>
                                             Cancelar
                                         </Button>
-                                        <Button disabled={processing || !podeSalvar} onClick={handleAvaliar}>
+                                        <Button disabled={processing || !descricao} onClick={handleAvaliar}>
                                             {processing ? 'Enviando...' : 'Confirmar avaliação'}
                                         </Button>
                                     </DialogFooter>
@@ -333,26 +334,54 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
 
 // ─── section ─────────────────────────────────────────────────────────────────
 
+const PER_PAGE = 10;
+
 function Section({ title, items }: { title: string; items: Doacao[] }) {
-    if (items.length === 0) {
-return null;
-}
+    const [page, setPage] = useState(1);
+
+    if (items.length === 0) return null;
+
+    const totalPages = Math.ceil(items.length / PER_PAGE);
+    const visivel = items.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
     return (
         <section className="flex flex-col gap-3">
             <h2 className="text-muted-foreground text-sm font-semibold uppercase tracking-wide">
                 {title} ({items.length})
             </h2>
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                {items.map((d) => <DoacaoCard key={d.id} doacao={d} />)}
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-2">
+                {visivel.map((d) => <DoacaoCard key={d.id} doacao={d} />)}
             </div>
+            {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 pt-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={page === 1}
+                        onClick={() => setPage((p) => p - 1)}
+                    >
+                        Anterior
+                    </Button>
+                    <span className="text-muted-foreground text-sm">
+                        {page} de {totalPages}
+                    </span>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={page === totalPages}
+                        onClick={() => setPage((p) => p + 1)}
+                    >
+                        Próxima
+                    </Button>
+                </div>
+            )}
         </section>
     );
 }
 
 // ─── page ─────────────────────────────────────────────────────────────────────
 
-export default function InstituicaoDoacoes({ doacoes }: Props) {
+export default function InstituicaoDoacoes({ doacoes, itens_recebidos }: Props) {
     const pendentes   = doacoes.filter((d) => d.status === 'pendente');
     const confirmadas = doacoes.filter((d) => d.status === 'confirmada');
     const historico   = doacoes.filter((d) => !['pendente', 'confirmada'].includes(d.status));
@@ -362,29 +391,65 @@ export default function InstituicaoDoacoes({ doacoes }: Props) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Doações" />
-
-            <div className="flex flex-col gap-8 p-6">
-                <div className="flex flex-col gap-1">
-                    <h1 className="text-2xl font-semibold">Doações</h1>
-                    <p className="text-muted-foreground text-sm">
-                        {totalAtivas > 0
-                            ? `${pendentes.length} pendente${pendentes.length !== 1 ? 's' : ''} · ${confirmadas.length} confirmada${confirmadas.length !== 1 ? 's' : ''}`
-                            : 'Nenhuma solicitação ativa no momento.'}
-                    </p>
+                <div className="flex flex-col gap-8 p-6">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex flex-col gap-1">
+                            <h1 className="text-2xl font-semibold">Doações</h1>
+                            <p className="text-muted-foreground text-sm">
+                                {totalAtivas > 0
+                                    ? `${pendentes.length} pendente${pendentes.length !== 1 ? 's' : ''} · ${confirmadas.length} confirmada${confirmadas.length !== 1 ? 's' : ''}`
+                                    : 'Nenhuma solicitação ativa no momento.'}
+                            </p>
+                        </div>
+                    </div>
+                    <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+                        {doacoes.length === 0 ? (
+                            <div className="text-muted-foreground rounded-xl border border-dashed py-16 text-center text-sm">
+                                Nenhuma solicitação de doação recebida ainda.
+                            </div>
+                        ) : (
+                            <div className="flex flex-col gap-10">
+                                <Section title="Pendentes" items={pendentes} />
+                                <Section title="Confirmadas" items={confirmadas} />
+                                <Section title="Histórico" items={historico} />
+                            </div>
+                        )}
+                    <div className="flex flex-col gap-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="text-base">Itens Disponíveis</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="flex flex-col gap-3">
+                                    <p className="text-sm text-muted-foreground">
+                                        Itens recebidos disponíveis para transferência.
+                                    </p>
+                                    {itens_recebidos.length === 0 ? (
+                                        <p className="text-muted-foreground text-sm">Nenhum item disponível.</p>
+                                    ) : (
+                                        <>
+                                            <ul className="flex flex-col gap-1 text-sm">
+                                                {itens_recebidos.map((item) => (
+                                                    <li key={item.categoria_id}>
+                                                        <span className="font-medium">{item.quantidade}×</span> {item.categoria}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                            <Link
+                                                href="/instituicoes"
+                                                className="inline-flex items-center justify-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary/5 transition-colors"
+                                            >
+                                                <ArrowLeftRight className="size-3.5" />
+                                                Transferir itens
+                                            </Link>
+                                        </>
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                    </div>
                 </div>
-
-                {doacoes.length === 0 ? (
-                    <div className="text-muted-foreground rounded-xl border border-dashed py-16 text-center text-sm">
-                        Nenhuma solicitação de doação recebida ainda.
-                    </div>
-                ) : (
-                    <div className="flex flex-col gap-10">
-                        <Section title="Pendentes" items={pendentes} />
-                        <Section title="Confirmadas" items={confirmadas} />
-                        <Section title="Histórico" items={historico} />
-                    </div>
-                )}
-            </div>
         </AppLayout>
     );
 }

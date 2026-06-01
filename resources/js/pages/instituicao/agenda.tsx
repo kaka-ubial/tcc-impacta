@@ -1,4 +1,4 @@
-import { Head, router, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import { CalendarClock, Check, CheckCheck, ChevronLeft, ChevronRight, Clock, Phone, Plus, User, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
@@ -50,7 +50,16 @@ type Horario = {
     tipo: 'coleta' | 'entrega';
 };
 
-type Props = { agendamentos: Agendamento[]; horarios: Horario[] };
+type TransferenciaAgenda = {
+    id: number;
+    status: string;
+    direcao: 'enviada' | 'recebida';
+    criado_em: string;
+    data_hora: string | null;
+    parceiro: string;
+};
+
+type Props = { agendamentos: Agendamento[]; horarios: Horario[]; transferencias: TransferenciaAgenda[] };
 
 // ─── constants ──────────────────────────────────────────────────────────────
 
@@ -439,7 +448,7 @@ function AgendamentoItem({ agendamento, horarios }: { agendamento: Agendamento; 
 
 // ─── page ───────────────────────────────────────────────────────────────────
 
-export default function Agenda({ agendamentos, horarios }: Props) {
+export default function Agenda({ agendamentos, horarios, transferencias }: Props) {
     const hoje = new Date();
     const [ref, setRef] = useState(() => ({ ano: hoje.getFullYear(), mes: hoje.getMonth() }));
     const [diaSelecionado, setDiaSelecionado] = useState<string | null>(null);
@@ -491,8 +500,18 @@ arr.push(new Date(ref.ano, ref.mes, d));
         setDiaSelecionado(null);
     }
 
+    const transferenciasPorDia = useMemo(() => {
+        const map: Record<string, TransferenciaAgenda[]> = {};
+        for (const t of transferencias) {
+            const k = dateKey(new Date(t.data_hora ?? t.criado_em));
+            (map[k] ??= []).push(t);
+        }
+        return map;
+    }, [transferencias]);
+
     const hojeKey = dateKey(hoje);
     const agendamentosDoDia = diaSelecionado ? (porDia[diaSelecionado] ?? []) : [];
+    const transferenciasDoDia = diaSelecionado ? (transferenciasPorDia[diaSelecionado] ?? []) : [];
     const horariosPorDia = useMemo(() => {
         const map: Record<number, Horario[]> = {};
 
@@ -543,8 +562,8 @@ arr.push(new Date(ref.ano, ref.mes, d));
                                 ))}
                                 {celulas.map((dia, i) => {
                                     if (!dia) {
-return <div key={`v-${i}`} />;
-}
+                                        return <div key={`v-${i}`} />;
+                                    }
 
                                     const k = dateKey(dia);
                                     const itens = porDia[k] ?? [];
@@ -585,6 +604,11 @@ return <div key={`v-${i}`} />;
                                                         +{itens.length - 3} mais
                                                     </span>
                                                 )}
+                                                {(transferenciasPorDia[k] ?? []).slice(0, 2).map((t) => (
+                                                    <span key={`t-${t.id}`} className="truncate rounded px-1 py-0.5 text-[10px] font-medium bg-fuchsia-500/15 text-fuchsia-700 dark:text-fuchsia-400">
+                                                        Transf. {t.parceiro.split(' ')[0]}
+                                                    </span>
+                                                ))}
                                             </div>
                                         </button>
                                     );
@@ -613,14 +637,32 @@ return <div key={`v-${i}`} />;
                                     <p className="text-muted-foreground text-sm">
                                         Clique em um dia do calendário para ver os agendamentos.
                                     </p>
-                                ) : agendamentosDoDia.length === 0 ? (
-                                    <p className="text-muted-foreground text-sm">
-                                        Nenhuma doação agendada para este dia.
-                                    </p>
                                 ) : (
-                                    agendamentosDoDia.map((a) => (
-                                        <AgendamentoItem key={a.id} agendamento={a} horarios={horarios} />
-                                    ))
+                                    <>
+                                        <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wide">Doações</p>
+                                        {agendamentosDoDia.length === 0 ? (
+                                            <p className="text-muted-foreground text-sm">Nenhuma doação agendada.</p>
+                                        ) : (
+                                            agendamentosDoDia.map((a) => (
+                                                <AgendamentoItem key={a.id} agendamento={a} horarios={horarios} />
+                                            ))
+                                        )}
+                                        <Separator />
+                                        <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wide">Transferências</p>
+                                        {transferenciasDoDia.length === 0 ? (
+                                            <p className="text-muted-foreground text-sm">Nenhuma transferência neste dia.</p>
+                                        ) : (
+                                            transferenciasDoDia.map((t) => (
+                                                <Link key={t.id} href="/instituicao/transferencias" className="flex items-center justify-between gap-2 rounded-lg border px-3 py-2 text-sm hover:bg-muted/50 transition-colors">
+                                                    <div className="flex flex-col gap-0.5">
+                                                        <span className="font-medium">{t.parceiro}</span>
+                                                        <span className="text-muted-foreground text-xs">{t.direcao === 'enviada' ? 'Enviada' : 'Recebida'}</span>
+                                                    </div>
+                                                    <span className="rounded px-1.5 py-0.5 text-xs font-medium bg-fuchsia-500/15 text-fuchsia-700 dark:text-fuchsia-400">Transf.</span>
+                                                </Link>
+                                            ))
+                                        )}
+                                    </>
                                 )}
                             </CardContent>
                         </Card>

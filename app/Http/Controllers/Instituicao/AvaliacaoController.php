@@ -20,14 +20,14 @@ class AvaliacaoController extends Controller
 
         $validated = $request->validate([
             'nota'      => ['required', 'integer', 'min:1', 'max:5'],
-            'descricao' => ['nullable', 'string', 'max:1000', 'required_if:nota,1', 'required_if:nota,2', 'required_if:nota,3'],
+            'descricao' => ['string', 'max:1000', 'required'],
         ]);
 
         Avaliacao::create([
             'usuario_id' => auth()->id(),
             'doacao_id'  => $doacao->id,
             'nota'       => $validated['nota'],
-            'descricao'  => $validated['descricao'] ?? null,
+            'descricao'  => $validated['descricao'],
         ]);
 
         return back();

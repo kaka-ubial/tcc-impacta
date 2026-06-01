@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Agendamento;
 use App\Models\HorarioDisponivel;
 use App\Models\Notificacao;
+use App\Models\Transferencia;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -50,9 +51,28 @@ class AgendaController extends Controller
                 'tipo'        => $h->tipo,
             ]);
 
+        $transferencias = Transferencia::with(['origem', 'destino'])
+            ->where(function ($q) use ($instituicaoId) {
+                $q->where('instituicao_origem_id', $instituicaoId)
+                  ->orWhere('instituicao_destino_id', $instituicaoId);
+            })
+            ->whereNotIn('status', ['cancelada', 'recusada'])
+            ->get()
+            ->map(fn (Transferencia $t) => [
+                'id'        => $t->id,
+                'status'    => $t->status,
+                'direcao'   => $t->instituicao_origem_id === $instituicaoId ? 'enviada' : 'recebida',
+                'criado_em' => $t->created_at->toIso8601String(),
+                'data_hora' => $t->data_hora?->toIso8601String(),
+                'parceiro'  => $t->instituicao_origem_id === $instituicaoId
+                    ? $t->destino->nome_fantasia
+                    : $t->origem->nome_fantasia,
+            ]);
+
         return Inertia::render('instituicao/agenda', [
-            'agendamentos' => $agendamentos,
-            'horarios'     => $horarios,
+            'agendamentos'   => $agendamentos,
+            'horarios'       => $horarios,
+            'transferencias' => $transferencias,
         ]);
     }
 

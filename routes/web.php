@@ -19,6 +19,7 @@ use App\Http\Controllers\Instituicao\HorarioController;
 use App\Http\Controllers\Instituicao\AgendaController;
 use App\Http\Controllers\Instituicao\InstituicaoController;
 use App\Http\Controllers\Instituicao\AvaliacaoController;
+use App\Http\Controllers\Instituicao\TransferenciaController;
 use App\Http\Controllers\NecessidadeController;
 use App\Http\Controllers\NotificacaoController;
 use App\Http\Middleware\CheckNecessidadeOwnership;
@@ -55,16 +56,26 @@ Route::middleware(['auth', 'verified', CheckInstituicao::class, EnsureInstitutio
     Route::post('doacoes/{doacao}/notDelivered', [InstituicaoDoacaoController::class, 'notDelivered'])->name('doacoes.notDelivered');
     Route::post('doacoes/{doacao}/avaliar', [AvaliacaoController::class, 'store'])->name('doacoes.avaliar');
 
+    Route::get('transferencias', [TransferenciaController::class, 'index'])->name('transferencias.index');
+    Route::post('transferencias', [TransferenciaController::class, 'store'])->name('transferencias.store');
+    Route::post('transferencias/{transferencia}/confirmar', [TransferenciaController::class, 'confirmar'])->name('transferencias.confirmar');
+    Route::post('transferencias/{transferencia}/recusar', [TransferenciaController::class, 'recusar'])->name('transferencias.recusar');
+    Route::post('transferencias/{transferencia}/entregar', [TransferenciaController::class, 'entregar'])->name('transferencias.entregar');
+    Route::post('transferencias/{transferencia}/cancelar', [TransferenciaController::class, 'cancelar'])->name('transferencias.cancelar');
+    Route::post('transferencias/{transferencia}/nao-entregue', [TransferenciaController::class, 'naoEntregue'])->name('transferencias.naoEntregue');
+    Route::post('transferencias/{transferencia}/sugerir', [TransferenciaController::class, 'sugerirAlteracao'])->name('transferencias.sugerir');
+    Route::post('transferencias/{transferencia}/sugestao/aceitar', [TransferenciaController::class, 'aceitarSugestao'])->name('transferencias.aceitarSugestao');
+    Route::post('transferencias/{transferencia}/sugestao/recusar', [TransferenciaController::class, 'recusarSugestao'])->name('transferencias.recusarSugestao');
+
     Route::get('doadores/{doador}', [InstituicaoDoadorController::class, 'show'])->name('doadores.show');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('instituicoes', [InstituicaoController::class, 'index'])->name('instituicoes.index');
     Route::get('instituicoes/{id}', [InstituicaoController::class, 'show'])->name('instituicoes.show');
 });
 
 Route::middleware(['auth', 'verified', CheckDoador::class])->group(function () {
-
-    Route::get('instituicoes', [InstituicaoController::class, 'index'])->name('instituicoes.index');
 
     Route::get('perfil', [DoadorPerfilController::class, 'show'])->name('doador.perfil');
 
