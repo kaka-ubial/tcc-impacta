@@ -10,7 +10,9 @@
       "Bash(node:*)",
       "Bash(xargs grep -l \"doacoes\")",
       "Bash(npx eslint *)",
-      "Bash(git stash *)"
+      "Bash(git stash *)",
+      "Bash(Get-ChildItem -Path \"D:\\\\faculdade\\\\tcc\\\\BSI_2026_1SEM_7U_EQ05\\\\resources\\\\js\\\\pages\" -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object Name)"
     ]
   },
   "model": "opusplan"
