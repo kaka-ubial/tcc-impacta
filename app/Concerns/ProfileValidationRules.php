@@ -51,7 +51,9 @@ trait ProfileValidationRules
             ],
             'latitude'          => ['nullable', 'numeric', 'between:-90,90'],
             'longitude'         => ['nullable', 'numeric', 'between:-180,180'],
-            'causas_apoiadas'   => ['sometimes', 'array', 'min:1'],
+            'geocoding_query'   => ['nullable', 'string', 'max:500'],
+            'causas_submitted'  => ['sometimes', 'nullable'],
+            'causas_apoiadas'   => ['nullable', 'array'],
             'causas_apoiadas.*' => ['integer', 'exists:causas,id'],
         ];
     }

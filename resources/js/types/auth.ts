@@ -83,6 +83,9 @@ export type Doador = {
     cpf: string;
     telefone: string;
     foto_perfil: string | null;
+    endereco_completo: string | null;
+    latitude: number | null;
+    longitude: number | null;
 }
 
 export type DoadorDoacaoResumo = {
@@ -140,6 +143,7 @@ export type User = {
     tipo_usuario: 'doador' | 'instituicao';
     instituicao ?: Instituicao;
     doador ?: Doador;
+    causas?: Causa[];
     [key: string]: unknown;
 };
 
