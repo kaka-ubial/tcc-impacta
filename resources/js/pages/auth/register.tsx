@@ -205,6 +205,7 @@ export default function Register({ causas }: { causas: any[] }) {
         cnpj: '',
         telefone_inst: '',
         endereco_completo: '',
+        geocoding_query: '',
         latitude: null as number | null,
         longitude: null as number | null,
         causas_apoiadas: [] as number[],
@@ -247,7 +248,16 @@ export default function Register({ causas }: { causas: any[] }) {
 
     function handleEnderecoChange(fields: EnderecoFields) {
         setEndereco(fields);
-        setData('endereco_completo', buildEnderecoCompleto(fields));
+        const geocodingQuery = [fields.logradouro, fields.numero, fields.cidade, fields.uf, 'Brasil']
+            .filter(Boolean)
+            .join(', ');
+        setData((prev) => ({
+            ...prev,
+            endereco_completo: buildEnderecoCompleto(fields),
+            geocoding_query: geocodingQuery,
+            latitude: null,
+            longitude: null,
+        }));
     }
 
     function handleGeolocate() {

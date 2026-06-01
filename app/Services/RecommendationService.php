@@ -24,13 +24,7 @@ class RecommendationService
 
         return $institutions
             ->map(function (Instituicao $inst) use ($donorCauseIds, $doador, $hasLocation, $hasCauses) {
-                $instCauseIds = $inst->causas->pluck('id')->all();
-                $overlap = count(array_intersect($donorCauseIds, $instCauseIds));
-
-                $causeScore = $hasCauses ? ($overlap / max(count($donorCauseIds), 1)) * 60 : 0;
-
                 $distanceKm = null;
-                $proximityScore = 0;
                 if ($hasLocation && $inst->latitude !== null && $inst->longitude !== null) {
                     $distanceKm = $this->haversine(
                         $doador->latitude,
@@ -38,19 +32,31 @@ class RecommendationService
                         $inst->latitude,
                         $inst->longitude
                     );
-                    $proximityScore = max(0, self::MAX_DISTANCE_KM - $distanceKm) / self::MAX_DISTANCE_KM * 40;
                 }
 
-                $score = $causeScore + $proximityScore;
+                if (!$hasCauses) {
+                    $score = $distanceKm !== null
+                        ? max(0, self::MAX_DISTANCE_KM - $distanceKm) / self::MAX_DISTANCE_KM * 100
+                        : 0;
 
-                // If donor has neither causes nor location, score all equally and rely on ordering
-                if (!$hasCauses && !$hasLocation) {
-                    $score = 0;
+                    return [
+                        'instituicao' => $inst,
+                        'score' => $score,
+                        'causa_overlap' => 0,
+                        'distancia_km' => $distanceKm,
+                    ];
                 }
+
+                $instCauseIds = $inst->causas->pluck('id')->all();
+                $overlap = count(array_intersect($donorCauseIds, $instCauseIds));
+                $causeScore = ($overlap / max(count($donorCauseIds), 1)) * 60;
+                $proximityScore = $distanceKm !== null
+                    ? max(0, self::MAX_DISTANCE_KM - $distanceKm) / self::MAX_DISTANCE_KM * 40
+                    : 0;
 
                 return [
                     'instituicao' => $inst,
-                    'score' => $score,
+                    'score' => $causeScore + $proximityScore,
                     'causa_overlap' => $overlap,
                     'distancia_km' => $distanceKm,
                 ];
