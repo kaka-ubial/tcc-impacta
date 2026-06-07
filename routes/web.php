@@ -24,9 +24,16 @@ use App\Http\Controllers\NecessidadeController;
 use App\Http\Controllers\NotificacaoController;
 use App\Http\Middleware\CheckNecessidadeOwnership;
 
-Route::inertia('/', 'welcome', [
-    'canRegister' => Features::enabled(Features::registration()),
-])->name('home');
+Route::get('/', function () {
+    return Inertia::render('welcome', [
+        'canRegister' => Features::enabled(Features::registration()),
+        'stats' => [
+            'doadoras'     => \App\Models\Doador::count(),
+            'instituicoes' => \App\Models\Instituicao::where('status', 'approved')->count(),
+            'doacoes'      => \App\Models\Doacao::count(),
+        ],
+    ]);
+})->name('home');
 
 Route::get('/redirect', RedirectController::class)->middleware('auth')->name('redirect');
 
