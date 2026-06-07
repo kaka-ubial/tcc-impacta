@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { ArrowLeftRight, Building2, Calendar, Check, Package, Plus, X } from 'lucide-react';
+import { ArrowLeftRight, Building2, Calendar, CalendarClock, Check, Package, Plus, X } from 'lucide-react';
 import { useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
@@ -168,11 +168,10 @@ function TransferenciaCard({ t, horarios }: { t: Transferencia; horarios: Horari
                 )}
 
                 {/* Data sugerida */}
-                {t.data_hora_sugerida && (
-                    <div className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm dark:border-amber-700 dark:bg-amber-950">
-                        <span className="font-medium text-amber-800 dark:text-amber-300">Nova data sugerida: </span>
-                        <span className="text-amber-700 dark:text-amber-400">{formatDataHora(t.data_hora_sugerida)}</span>
-                    </div>
+                {t.status === 'alteracao_sugerida' && t.data_hora_sugerida && (
+                    <p className="text-amber-600 bg-amber-500/10 rounded-md px-3 py-2 text-xs">
+                        Alteração sugerida para <strong>{formatDataHora(t.data_hora_sugerida)}</strong> — aguardando resposta.
+                    </p>
                 )}
 
                 {/* Itens */}
@@ -244,9 +243,10 @@ function TransferenciaCard({ t, horarios }: { t: Transferencia; horarios: Horari
                                         <Check className="size-4" /> Confirmar
                                     </Button>
                                 </div>
-                                <Button variant="ghost" size="sm" className="w-full text-xs"
+                                <Button variant="outline" size="sm" className="w-full gap-1.5"
                                     onClick={() => setSugerindo(true)}>
-                                    Sugerir outro horário
+                                    <CalendarClock className="size-3.5" />
+                                    Sugerir outra data
                                 </Button>
                             </>
                         )}
@@ -275,13 +275,13 @@ function TransferenciaCard({ t, horarios }: { t: Transferencia; horarios: Horari
             {t.direcao === 'recebida' && t.status === 'confirmada' && (
                 <>
                     <Separator />
-                    <CardFooter className="pt-4">
-                        <div className="grid w-full gap-2 md:grid-cols-2">
-                            <Button className="w-full gap-1.5 bg-destructive"
+                    <CardFooter className="flex flex-col gap-3 pt-4">
+                        <div className="flex w-full gap-2">
+                            <Button variant="outline" className="flex-1 gap-1.5 text-destructive hover:text-destructive"
                                 onClick={() => post(naoEntregueRoute(t.id).url)} disabled={processing}>
                                 <X className="size-4" /> Não entregue
                             </Button>
-                            <Button className="w-full gap-1.5"
+                            <Button className="flex-1 gap-1.5"
                                 onClick={() => post(entregarRoute(t.id).url)} disabled={processing}>
                                 <Check className="size-4" /> Entregue
                             </Button>
@@ -354,10 +354,10 @@ function Section({ title, items, horarios }: { title: string; items: Transferenc
 export default function Transferencias({ enviadas, recebidas, horarios, itensEnviados, itensRecebidos }: Props) {
     const [filtro, setFiltro] = useState<'todas' | 'ativas' | 'historico'>('todas');
 
-    const pendentesRecebidas = recebidas.filter((t) => t.status === 'pendente');
+    const pendentesRecebidas = recebidas.filter((t) => ['pendente', 'alteracao_sugerida'].includes(t.status));
     const confirmadas        = recebidas.filter((t) => t.status === 'confirmada');
     const sugeridas          = enviadas.filter((t) => t.status === 'alteracao_sugerida');
-    const historicoRecebidas = recebidas.filter((t) => !['pendente', 'confirmada'].includes(t.status));
+    const historicoRecebidas = recebidas.filter((t) => !['pendente', 'confirmada', 'alteracao_sugerida'].includes(t.status));
     const pendenteEnviadas   = enviadas.filter((t) => t.status === 'pendente');
     const historicoEnviadas  = enviadas.filter((t) => !['pendente', 'alteracao_sugerida'].includes(t.status));
     const totalAtivas        = pendentesRecebidas.length + confirmadas.length + pendenteEnviadas.length + sugeridas.length;

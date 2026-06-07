@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { ArrowLeftRight, Calendar, Check, CheckCheck, Package, Phone, Star, User, X } from 'lucide-react';
+import { ArrowLeftRight, Calendar, CalendarClock, Check, CheckCheck, Package, Phone, Star, User, X } from 'lucide-react';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { StarDisplay } from '@/components/ui/star-display';
 import { Textarea } from '@/components/ui/textarea';
+import SugerirAlteracaoDialog, { type Horario } from '@/components/doacao/SugerirAlteracaoDialog';
 import AppLayout from '@/layouts/app-layout';
 import { painel } from '@/routes/instituicao';
 import {
@@ -44,8 +45,11 @@ type Doacao = {
     doador: { usuario_id: number; nome: string; telefone: string, foto_perfil: string | null };
     itens: { id: number; categoria: string; quantidade: number; descricao: string | null }[];
     agendamento: {
+        id: number;
         data_hora: string;
         tipo: 'coleta' | 'entrega';
+        status: 'confirmado' | 'alteracao_sugerida';
+        data_hora_sugerida: string | null;
         endereco_referencia: string | null;
     } | null;
     criado_em: string;
@@ -58,7 +62,7 @@ type ItemRecebido = {
     quantidade: number;
 };
 
-type Props = { doacoes: Doacao[]; itens_recebidos: ItemRecebido[] };
+type Props = { doacoes: Doacao[]; itens_recebidos: ItemRecebido[]; horarios: Horario[] };
 
 // ─── status config ────────────────────────────────────────────────────────────
 
@@ -118,7 +122,7 @@ function StarPicker({ value, onChange }: { value: number; onChange: (n: number) 
 
 // ─── card ─────────────────────────────────────────────────────────────────────
 
-function DoacaoCard({ doacao }: { doacao: Doacao }) {
+function DoacaoCard({ doacao, horarios }: { doacao: Doacao; horarios: Horario[] }) {
     const [processing, setProcessing] = useState(false);
     const [nota, setNota] = useState(5);
     const [descricao, setDescricao] = useState('');
@@ -137,6 +141,7 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
     }
 
     const cfg = statusConfig[doacao.status];
+    const temSugestao = doacao.agendamento?.status === 'alteracao_sugerida';
 
     return (
         <Card>
@@ -214,33 +219,45 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
                                     Endereço: {doacao.agendamento.endereco_referencia}
                                 </span>
                             )}
+                            {temSugestao && doacao.agendamento.data_hora_sugerida && (
+                                <p className="text-amber-600 bg-amber-500/10 rounded-md px-3 py-2 text-xs mt-1">
+                                    Alteração sugerida para <strong>{formatDataHora(doacao.agendamento.data_hora_sugerida)}</strong> — aguardando resposta do doador.
+                                </p>
+                            )}
                         </div>
                     </div>
                 )}
             </CardContent>
 
             {/* actions — only for actionable statuses */}
-            {doacao.status === 'pendente' && (
+            {doacao.status === 'pendente' && !temSugestao && (
                 <>
                     <Separator />
-                    <CardFooter className="gap-2 pt-4">
-                        <Button
-                            variant="outline"
-                            className="flex-1 gap-1.5 text-destructive hover:text-destructive"
-                            onClick={() => post(rejectRoute(doacao.id).url)}
-                            disabled={processing}
-                        >
-                            <X className="size-4" />
-                            Recusar
-                        </Button>
-                        <Button
-                            className="flex-1 gap-1.5"
-                            onClick={() => post(confirmRoute(doacao.id).url)}
-                            disabled={processing}
-                        >
-                            <Check className="size-4" />
-                            Confirmar
-                        </Button>
+                    <CardFooter className="flex flex-col gap-3 pt-4">
+                        <div className="flex w-full gap-2">
+                            <Button variant="outline" className="flex-1 gap-1.5 text-destructive hover:text-destructive"
+                                onClick={() => post(rejectRoute(doacao.id).url)} disabled={processing}>
+                                <X className="size-4" /> Recusar
+                            </Button>
+                            <Button className="flex-1 gap-1.5"
+                                onClick={() => post(confirmRoute(doacao.id).url)} disabled={processing}>
+                                <Check className="size-4" /> Confirmar
+                            </Button>
+                        </div>
+                        {doacao.agendamento && (
+                            <SugerirAlteracaoDialog
+                                agendamentoId={doacao.agendamento.id}
+                                dataHoraAtual={doacao.agendamento.data_hora}
+                                tipo={doacao.agendamento.tipo}
+                                horarios={horarios}
+                                trigger={
+                                    <Button variant="outline" size="sm" className="w-full gap-1.5">
+                                        <CalendarClock className="size-3.5" />
+                                        Sugerir outra data
+                                    </Button>
+                                }
+                            />
+                        )}
                     </CardFooter>
                 </>
             )}
@@ -248,25 +265,31 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
             {doacao.status === 'confirmada' && (
                 <>
                     <Separator />
-                    <CardFooter className="pt-4">
-                        <div className="grid w-full gap-2 md:grid-cols-2">
-                            <Button
-                                className="w-full bg-destructive gap-1.5"
-                                onClick={() => post(notDeliveredRoute(doacao.id).url)}
-                                disabled={processing}
-                            >
-                                <X className="size-4" />
-                                Não entregue
+                    <CardFooter className="flex flex-col gap-3 pt-4">
+                        <div className="flex w-full gap-2">
+                            <Button variant="outline" className="flex-1 gap-1.5 text-destructive hover:text-destructive"
+                                onClick={() => post(notDeliveredRoute(doacao.id).url)} disabled={processing}>
+                                <X className="size-4" /> Não entregue
                             </Button>
-                            <Button
-                                className="w-full gap-1.5"
-                                onClick={() => post(deliverRoute(doacao.id).url)}
-                                disabled={processing}
-                            >
-                                <CheckCheck className="size-4" />
-                                Entregue
+                            <Button className="flex-1 gap-1.5"
+                                onClick={() => post(deliverRoute(doacao.id).url)} disabled={processing}>
+                                <CheckCheck className="size-4" /> Entregue
                             </Button>
                         </div>
+                        {doacao.agendamento && (
+                            <SugerirAlteracaoDialog
+                                agendamentoId={doacao.agendamento.id}
+                                dataHoraAtual={doacao.agendamento.data_hora}
+                                tipo={doacao.agendamento.tipo}
+                                horarios={horarios}
+                                trigger={
+                                    <Button variant="outline" size="sm" className="w-full gap-1.5">
+                                        <CalendarClock className="size-3.5" />
+                                        Sugerir outra data
+                                    </Button>
+                                }
+                            />
+                        )}
                     </CardFooter>
                 </>
             )}
@@ -336,7 +359,7 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
 
 const PER_PAGE = 10;
 
-function Section({ title, items }: { title: string; items: Doacao[] }) {
+function Section({ title, items, horarios }: { title: string; items: Doacao[]; horarios: Horario[] }) {
     const [page, setPage] = useState(1);
 
     if (items.length === 0) return null;
@@ -350,7 +373,7 @@ function Section({ title, items }: { title: string; items: Doacao[] }) {
                 {title} ({items.length})
             </h2>
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-2">
-                {visivel.map((d) => <DoacaoCard key={d.id} doacao={d} />)}
+                {visivel.map((d) => <DoacaoCard key={d.id} doacao={d} horarios={horarios} />)}
             </div>
             {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-2 pt-2">
@@ -381,7 +404,7 @@ function Section({ title, items }: { title: string; items: Doacao[] }) {
 
 // ─── page ─────────────────────────────────────────────────────────────────────
 
-export default function InstituicaoDoacoes({ doacoes, itens_recebidos }: Props) {
+export default function InstituicaoDoacoes({ doacoes, itens_recebidos, horarios }: Props) {
     const pendentes   = doacoes.filter((d) => d.status === 'pendente');
     const confirmadas = doacoes.filter((d) => d.status === 'confirmada');
     const historico   = doacoes.filter((d) => !['pendente', 'confirmada'].includes(d.status));
@@ -409,9 +432,9 @@ export default function InstituicaoDoacoes({ doacoes, itens_recebidos }: Props) 
                             </div>
                         ) : (
                             <div className="flex flex-col gap-10">
-                                <Section title="Pendentes" items={pendentes} />
-                                <Section title="Confirmadas" items={confirmadas} />
-                                <Section title="Histórico" items={historico} />
+                                <Section title="Pendentes" items={pendentes} horarios={horarios} />
+                                <Section title="Confirmadas" items={confirmadas} horarios={horarios} />
+                                <Section title="Histórico" items={historico} horarios={horarios} />
                             </div>
                         )}
                     <div className="flex flex-col gap-6">

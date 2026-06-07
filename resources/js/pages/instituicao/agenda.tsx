@@ -17,8 +17,8 @@ import {
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import SugerirAlteracaoDialog from '@/components/doacao/SugerirAlteracaoDialog';
 import AppLayout from '@/layouts/app-layout';
-import { sugerir as sugerirRoute } from '@/routes/instituicao/agenda';
 import {
     confirm as confirmRoute,
     deliver as deliverRoute,
@@ -39,7 +39,7 @@ type Agendamento = {
     status: 'confirmado' | 'alteracao_sugerida';
     endereco_referencia: string | null;
     doacao_status: string;
-    doador: { nome: string; telefone: string };
+    doador: { usuario_id: number;nome: string; telefone: string };
 };
 
 type Horario = {
@@ -150,93 +150,6 @@ function buildUpcomingDates(horarios: Horario[], tipo: 'coleta' | 'entrega', wee
     }
 
     return opcoes.sort((a, b) => a.value.localeCompare(b.value));
-}
-
-// ─── suggest-change dialog ──────────────────────────────────────────────────
-
-function SugerirDialog({ agendamento, horarios }: { agendamento: Agendamento; horarios: Horario[] }) {
-    const [open, setOpen] = useState(false);
-    const { data, setData, post, processing, errors, reset } = useForm({ data_hora_sugerida: '' });
-
-    const opcoes = useMemo(
-        () => buildUpcomingDates(horarios, agendamento.tipo),
-        [horarios, agendamento.tipo],
-    );
-
-    const tipoLabel = agendamento.tipo === 'coleta' ? 'coleta' : 'entrega';
-
-    function submit(e: React.FormEvent) {
-        e.preventDefault();
-        post(sugerirRoute(agendamento.id).url, {
-            preserveScroll: true,
-            onSuccess: () => {
-                setOpen(false);
-                reset();
-            },
-        });
-    }
-
-    return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-1.5">
-                    <CalendarClock className="size-3.5" />
-                    Sugerir outra data
-                </Button>
-            </DialogTrigger>
-            <DialogContent>
-                <DialogTitle>Sugerir nova data</DialogTitle>
-                <DialogDescription>
-                    Agendado para {formatDataHora(agendamento.data_hora)}. Escolha um horário entre os que
-                    você cadastrou como disponíveis para {tipoLabel} — o doador precisa aceitar para valer.
-                </DialogDescription>
-                {opcoes.length === 0 ? (
-                    <div className="flex flex-col gap-3 pt-2">
-                        <p className="text-muted-foreground text-sm">
-                            Você ainda não tem horários de {tipoLabel} cadastrados. Cadastre um para poder
-                            sugerir uma nova data.
-                        </p>
-                        <AddHorarioDialog
-                            trigger={
-                                <Button size="sm" className="gap-1.5 self-start">
-                                    <Plus className="size-3.5" />
-                                    Adicionar horário livre
-                                </Button>
-                            }
-                        />
-                    </div>
-                ) : (
-                    <form onSubmit={submit} className="flex flex-col gap-4 pt-2">
-                        <div className="flex flex-col gap-1">
-                            <Label>Nova data e horário</Label>
-                            <Select
-                                value={data.data_hora_sugerida}
-                                onValueChange={(v) => setData('data_hora_sugerida', v)}
-                            >
-                                <SelectTrigger><SelectValue placeholder="Selecione um horário" /></SelectTrigger>
-                                <SelectContent>
-                                    {opcoes.map((o) => (
-                                        <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {errors.data_hora_sugerida && (
-                                <p className="text-destructive text-xs">{errors.data_hora_sugerida}</p>
-                            )}
-                        </div>
-                        <DialogFooter className="gap-2">
-                            <DialogClose asChild>
-                                <Button type="button" variant="secondary">Cancelar</Button>
-                            </DialogClose>
-                            <Button type="submit" disabled={processing || !data.data_hora_sugerida}>
-                                {processing ? 'Enviando...' : 'Enviar sugestão'}
-                            </Button>
-                        </DialogFooter>
-                    </form>
-                )}
-            </DialogContent>
-        </Dialog>
-    );
 }
 
 // ─── add-availability dialog ────────────────────────────────────────────────
@@ -360,10 +273,15 @@ function AgendamentoItem({ agendamento, horarios }: { agendamento: Agendamento; 
         <div className="flex flex-col gap-2 rounded-lg border px-4 py-3">
             <div className="flex items-start justify-between gap-3">
                 <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-2">
-                        <User className="text-muted-foreground size-4 shrink-0" />
-                        <span className="font-medium">{agendamento.doador.nome}</span>
-                    </div>
+                    <Link
+                        href={`/instituicao/doadores/${agendamento.doador.usuario_id}`}
+                        className="hover:text-primary flex items-center gap-2 transition-colors"
+                    >
+                        <div className="flex items-center gap-2">
+                            <User className="text-muted-foreground size-4 shrink-0" />
+                            <span className="font-medium">{agendamento.doador.nome}</span>
+                        </div>
+                    </Link>
                     <div className="flex items-center gap-2">
                         <Phone className="text-muted-foreground size-3.5 shrink-0" />
                         <span className="text-muted-foreground text-sm">{agendamento.doador.telefone}</span>
@@ -384,7 +302,7 @@ function AgendamentoItem({ agendamento, horarios }: { agendamento: Agendamento; 
             )}
 
             {temSugestao && agendamento.data_hora_sugerida && (
-                <p className="text-pending bg-pending/10 rounded-md px-3 py-2 text-xs">
+                <p className="text-amber-600 bg-amber-500/10 rounded-md px-3 py-2 text-xs">
                     Alteração sugerida para <strong>{formatDataHora(agendamento.data_hora_sugerida)}</strong> —
                     aguardando resposta do doador.
                 </p>
@@ -439,8 +357,16 @@ function AgendamentoItem({ agendamento, horarios }: { agendamento: Agendamento; 
                             Recusar
                         </Button>
                     </div>
-                    <SugerirDialog agendamento={agendamento} horarios={horarios} />
                 </div>
+            )}
+
+            {(pendente || podeConcluir || temSugestao) && (
+                <SugerirAlteracaoDialog
+                    agendamentoId={agendamento.id}
+                    dataHoraAtual={agendamento.data_hora}
+                    tipo={agendamento.tipo}
+                    horarios={horarios}
+                />
             )}
         </div>
     );

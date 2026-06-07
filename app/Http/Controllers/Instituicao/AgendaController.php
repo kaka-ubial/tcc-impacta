@@ -33,6 +33,7 @@ class AgendaController extends Controller
                 'endereco_referencia' => $a->endereco_referencia,
                 'doacao_status'      => $a->doacao->status,
                 'doador'             => [
+                    'usuario_id'     => $a->doacao->doador->usuario_id,
                     'nome'     => $a->doacao->doador->nome_completo,
                     'telefone' => $a->doacao->doador->telefone,
                 ],

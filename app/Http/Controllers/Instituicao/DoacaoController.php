@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Instituicao;
 use App\Http\Controllers\Controller;
 use App\Models\CategoriaItem;
 use App\Models\Doacao;
+use App\Models\HorarioDisponivel;
 use App\Models\Notificacao;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -36,8 +37,11 @@ class DoacaoController extends Controller
                     'descricao'    => $item->descricao,
                 ]),
                 'agendamento' => $d->agendamento ? [
+                    'id'                  => $d->agendamento->id,
                     'data_hora'           => $d->agendamento->data_hora->toIso8601String(),
                     'tipo'                => $d->agendamento->tipo,
+                    'status'              => $d->agendamento->status,
+                    'data_hora_sugerida'  => $d->agendamento->data_hora_sugerida?->toIso8601String(),
                     'endereco_referencia' => $d->agendamento->endereco_referencia,
                 ] : null,
                 'criado_em'  => $d->created_at->toIso8601String(),
@@ -54,9 +58,23 @@ class DoacaoController extends Controller
             'quantidade'     => $qty,
         ])->values();
 
+        $horarios = HorarioDisponivel::where('instituicao_id', $instituicaoId)
+            ->where('ativo', true)
+            ->orderBy('dia_semana')
+            ->orderBy('hora_inicio')
+            ->get()
+            ->map(fn (HorarioDisponivel $h) => [
+                'id'          => $h->id,
+                'dia_semana'  => $h->dia_semana,
+                'hora_inicio' => $h->hora_inicio,
+                'hora_fim'    => $h->hora_fim,
+                'tipo'        => $h->tipo,
+            ]);
+
         return Inertia::render('instituicao/doacoes', [
             'doacoes'         => $doacoes,
             'itens_recebidos' => $itensRecebidos,
+            'horarios'        => $horarios,
         ]);
     }
 

@@ -120,6 +120,8 @@ export type DoadorPerfil = {
         total_doacoes: number;
         doacoes_concluidas: number;
         doacoes_com_instituicao: number;
+        media_avaliacoes: number | null;
+        total_avaliacoes: number;
     };
     doacoes_recentes: DoadorDoacaoResumo[];
 };

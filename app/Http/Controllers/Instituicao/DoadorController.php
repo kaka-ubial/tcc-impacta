@@ -31,6 +31,7 @@ class DoadorController extends Controller
 
         $totalDoacoes = $doador->doacoes()->count();
         $totalConcluidas = $doador->doacoes()->where('status', 'entregue')->count();
+        $totalAvaliadas = $doador->doacoes()->where('status', 'entregue')->with('avaliacao')->get()->filter(fn ($d) => $d->avaliacao !== null)->count();
         $totalComInstituicao = $doador->doacoes()->where('instituicao_id', $instituicaoId)->count();
 
         return Inertia::render('instituicao/doadores/show', [
@@ -55,6 +56,10 @@ class DoadorController extends Controller
                     'total_doacoes'         => $totalDoacoes,
                     'doacoes_concluidas'    => $totalConcluidas,
                     'doacoes_com_instituicao' => $totalComInstituicao,
+                    'media_avaliacoes' => $totalConcluidas > 0
+                        ? round($doador->doacoes()->where('status', 'entregue')->with('avaliacao')->get()->avg(fn ($d) => $d->avaliacao?->nota), 2)
+                        : null,
+                    'total_avaliacoes' => $totalAvaliadas,
                 ],
                 'doacoes_recentes' => $doador->doacoes->map(fn (Doacao $d) => [
                     'id'          => $d->id,

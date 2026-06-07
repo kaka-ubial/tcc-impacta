@@ -12,7 +12,7 @@ import {
     User as UserIcon,
 } from 'lucide-react';
 import { lazy, Suspense } from 'react';
-
+import { StarDisplay } from '@/components/ui/star-display';
 import { CausaBadge } from '@/components/causa-badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -177,6 +177,11 @@ export default function DoadorPerfilPage({ doador, isOwnProfile = false }: Props
                         <h1 className="text-2xl font-bold leading-tight">
                             {doador.nome_completo}
                         </h1>
+                        {doador.estatisticas.media_avaliacoes !== null && (
+                            <div className="flex items-center gap-1 text-sm text-yellow-500">
+                                <StarDisplay nota={Math.round(doador.estatisticas.media_avaliacoes)} /> ({doador.estatisticas.total_avaliacoes})
+                            </div>
+                        )}
                         <div className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
                             {doador.membro_desde && (
                                 <span className="flex items-center gap-1.5">
