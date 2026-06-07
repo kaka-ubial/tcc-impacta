@@ -13,6 +13,9 @@
         'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
         'Noto Color Emoji';
 
+    --font-display:
+        'Playfair Display', Georgia, 'Times New Roman', serif;
+
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
     --radius-sm: calc(var(--radius) - 4px);
@@ -59,77 +62,128 @@
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-ring: var(--sidebar-ring);
+
+    /* Brand tokens */
+    --color-brand: var(--brand);
+    --color-brand-soft: var(--brand-soft);
+    --color-brand-green: var(--brand-green);
+    --color-warm-neutral: var(--warm-neutral);
+    --color-warm-muted: var(--warm-muted);
+    --color-success: var(--success);
+    --color-success-foreground: var(--success-foreground);
+    --color-pending: var(--pending);
+    --color-pending-foreground: var(--pending-foreground);
 }
 
 :root {
-    --background: oklch(1 0 0);
+    /* Brand palette */
+    --brand: oklch(0.556 0.162 41.0);
+    --brand-soft: oklch(0.929 0.028 60.0);
+    --brand-green: oklch(0.571 0.071 152.0);
+    --warm-neutral: oklch(0.970 0.012 70.0);
+    --warm-muted: oklch(0.552 0.022 53.0);
+    --warm-border: oklch(0.910 0.014 68.0);
+    --impacta-ring-glow: oklch(0.556 0.162 41.0 / 0.35);
+    --success: oklch(0.571 0.071 152.0);
+    --success-foreground: oklch(0.985 0 0);
+    --pending: oklch(0.760 0.130 73.0);
+    --pending-foreground: oklch(0.985 0 0);
+
+    /* Override shadcn tokens with warm brand values */
+    --background: oklch(0.970 0.012 70.0);
     --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
+    --card: oklch(0.990 0.006 68.0);
     --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
+    --popover: oklch(0.990 0.006 68.0);
     --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
+    --primary: oklch(0.556 0.162 41.0);
     --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
+    --secondary: oklch(0.950 0.010 68.0);
     --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
+    --muted: oklch(0.950 0.010 68.0);
+    --muted-foreground: oklch(0.552 0.022 53.0);
+    --accent: oklch(0.950 0.010 68.0);
     --accent-foreground: oklch(0.205 0 0);
     --destructive: oklch(0.577 0.245 27.325);
-    --destructive-foreground: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.87 0 0);
-    --chart-1: oklch(0.646 0.222 41.116);
-    --chart-2: oklch(0.6 0.118 184.704);
+    --destructive-foreground: oklch(0.985 0 0);
+    --border: oklch(0.910 0.014 68.0);
+    --input: oklch(0.910 0.014 68.0);
+    --ring: oklch(0.556 0.162 41.0);
+    --chart-1: oklch(0.556 0.162 41.0);
+    --chart-2: oklch(0.571 0.071 152.0);
     --chart-3: oklch(0.398 0.07 227.392);
     --chart-4: oklch(0.828 0.189 84.429);
     --chart-5: oklch(0.769 0.188 70.08);
     --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
+    --sidebar: oklch(0.978 0.010 68.0);
     --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
+    --sidebar-primary: oklch(0.556 0.162 41.0);
     --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.87 0 0);
+    --sidebar-accent: oklch(0.950 0.010 68.0);
+    --sidebar-accent-foreground: oklch(0.320 0.015 53.0);
+    --sidebar-border: oklch(0.910 0.014 68.0);
+    --sidebar-ring: oklch(0.556 0.162 41.0);
 }
 
 .dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.145 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.145 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.985 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
+    /* Brand palette — dark adapted, warmth preserved */
+    --brand-soft: oklch(0.240 0.015 60.0);
+    --warm-neutral: oklch(0.195 0.007 68.0);
+    --warm-muted: oklch(0.650 0.010 53.0);
+    --warm-border: oklch(0.280 0.008 68.0);
+    --impacta-ring-glow: oklch(0.72 0.12 41.0 / 0.35);
+
+    /* Surfaces — warm-tinted neutrals with tonal hierarchy */
+    --background: oklch(0.155 0.008 68.0);
+    --foreground: oklch(0.975 0.006 68.0);
+    --card: oklch(0.185 0.007 68.0);
+    --card-foreground: oklch(0.975 0.006 68.0);
+    --popover: oklch(0.205 0.007 68.0);
+    --popover-foreground: oklch(0.975 0.006 68.0);
+
+    /* Primary — lighter terracota for dark backgrounds */
+    --primary: oklch(0.72 0.12 41.0);
+    --primary-foreground: oklch(0.155 0.008 68.0);
+
+    /* Secondary / Muted / Accent — warm grays */
+    --secondary: oklch(0.245 0.008 68.0);
+    --secondary-foreground: oklch(0.975 0.006 68.0);
+    --muted: oklch(0.245 0.008 68.0);
+    --muted-foreground: oklch(0.650 0.010 68.0);
+    --accent: oklch(0.245 0.008 68.0);
+    --accent-foreground: oklch(0.975 0.006 68.0);
+
+    /* Destructive */
     --destructive: oklch(0.396 0.141 25.723);
     --destructive-foreground: oklch(0.637 0.237 25.331);
-    --border: oklch(0.269 0 0);
-    --input: oklch(0.269 0 0);
-    --ring: oklch(0.439 0 0);
-    --chart-1: oklch(0.488 0.243 264.376);
-    --chart-2: oklch(0.696 0.17 162.48);
+
+    /* Structural — warm borders */
+    --border: oklch(0.280 0.008 68.0);
+    --input: oklch(0.280 0.008 68.0);
+    --ring: oklch(0.72 0.12 41.0);
+
+    /* Charts */
+    --chart-1: oklch(0.72 0.12 41.0);
+    --chart-2: oklch(0.65 0.065 152.0);
     --chart-3: oklch(0.769 0.188 70.08);
     --chart-4: oklch(0.627 0.265 303.9);
     --chart-5: oklch(0.645 0.246 16.439);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.985 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(0.269 0 0);
-    --sidebar-ring: oklch(0.439 0 0);
+
+    /* Status */
+    --success: oklch(0.65 0.065 152.0);
+    --success-foreground: oklch(0.155 0.008 68.0);
+    --pending: oklch(0.760 0.130 73.0);
+    --pending-foreground: oklch(0.155 0.008 68.0);
+
+    /* Sidebar — between background and card */
+    --sidebar: oklch(0.175 0.008 68.0);
+    --sidebar-foreground: oklch(0.975 0.006 68.0);
+    --sidebar-primary: oklch(0.72 0.12 41.0);
+    --sidebar-primary-foreground: oklch(0.155 0.008 68.0);
+    --sidebar-accent: oklch(0.245 0.008 68.0);
+    --sidebar-accent-foreground: oklch(0.975 0.006 68.0);
+    --sidebar-border: oklch(0.280 0.008 68.0);
+    --sidebar-ring: oklch(0.72 0.12 41.0);
 }
 
 @layer base {
@@ -139,5 +193,301 @@
 
     body {
         @apply bg-background text-foreground;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LIVING STATES — Impacta Design System
+   Unlayered CSS: higher priority than all Tailwind @layer rules.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── @property: animatable focus ring growth ─── */
+@property --impacta-ring-size {
+    syntax: '<length>';
+    inherits: false;
+    initial-value: 0px;
+}
+
+/* ─── Keyframes ─── */
+@keyframes impacta-shimmer {
+    0%   { background-position: -400% 0; }
+    100% { background-position:  400% 0; }
+}
+
+@keyframes impacta-dialog-enter {
+    from {
+        opacity: 0;
+        transform: translateY(18px) scale(0.965);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes impacta-dialog-exit {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(10px) scale(0.975);
+    }
+}
+
+@keyframes impacta-overlay-enter {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes impacta-overlay-exit {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+}
+
+/* ─── 1. Dialog / AlertDialog — @starting-style warm entrance ─── */
+[data-slot="dialog-overlay"],
+[data-slot="alert-dialog-overlay"] {
+    background: oklch(0.145 0 0 / 0.52);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+[data-slot="dialog-overlay"][data-state="open"],
+[data-slot="alert-dialog-overlay"][data-state="open"] {
+    animation: impacta-overlay-enter 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+[data-slot="dialog-overlay"][data-state="closed"],
+[data-slot="alert-dialog-overlay"][data-state="closed"] {
+    animation: impacta-overlay-exit 160ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+[data-slot="dialog-content"],
+[data-slot="alert-dialog-content"] {
+    border-radius: 16px;
+    border-color: var(--warm-border, oklch(0.910 0.014 68.0));
+    box-shadow:
+        0 0 0 1px oklch(0.145 0 0 / 0.04),
+        0 8px 40px oklch(0.145 0 0 / 0.10),
+        0 2px 8px oklch(0.145 0 0 / 0.06);
+}
+
+[data-slot="dialog-content"][data-state="open"],
+[data-slot="alert-dialog-content"][data-state="open"] {
+    animation: impacta-dialog-enter 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+[data-slot="dialog-content"][data-state="closed"],
+[data-slot="alert-dialog-content"][data-state="closed"] {
+    animation: impacta-dialog-exit 180ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+/* ─── 2. Input / Textarea / Select — 0px → 3px animated focus ring ─── */
+[data-slot="input"],
+[data-slot="textarea"],
+[data-slot="select-trigger"] {
+    background-color: var(--warm-neutral, oklch(0.970 0.012 70.0));
+    border-color: var(--warm-border, oklch(0.910 0.014 68.0));
+    box-shadow: 0 0 0 var(--impacta-ring-size) var(--impacta-ring-glow);
+    transition:
+        border-color 150ms cubic-bezier(0.16, 1, 0.3, 1),
+        --impacta-ring-size 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-slot="input"]:focus-visible,
+[data-slot="textarea"]:focus-visible,
+[data-slot="select-trigger"]:focus-visible {
+    --impacta-ring-size: 3px;
+    border-color: var(--ring);
+    outline: none;
+}
+
+/* ─── 3. Badge — animated entrance via @starting-style ─── */
+[data-slot="badge"] {
+    border-radius: 9999px;
+    font-size: 0.715rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    opacity: 1;
+    transform: scale(1);
+    transition:
+        opacity 220ms cubic-bezier(0.16, 1, 0.3, 1),
+        transform 260ms cubic-bezier(0.16, 1, 0.3, 1),
+        background-color 400ms cubic-bezier(0.16, 1, 0.3, 1),
+        color 400ms cubic-bezier(0.16, 1, 0.3, 1),
+        border-color 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@starting-style {
+    [data-slot="badge"] {
+        opacity: 0;
+        transform: scale(0.82);
+    }
+}
+
+/* ─── 4. Sidebar nav — sliding active indicator on entry + navigation ─── */
+[data-slot="sidebar-menu-button"] {
+    transition:
+        background-color 200ms cubic-bezier(0.16, 1, 0.3, 1),
+        color 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-slot="sidebar-menu-button"] > svg,
+[data-slot="sidebar-menu-button"] > span:last-child {
+    transition: transform 280ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-slot="sidebar-menu-button"][data-active="true"] {
+    background: oklch(0.556 0.162 41.0 / 0.11);
+    color: oklch(0.556 0.162 41.0);
+    font-weight: 500;
+}
+
+[data-slot="sidebar-menu-button"][data-active="true"] > svg,
+[data-slot="sidebar-menu-button"][data-active="true"] > span:last-child {
+    transform: translateX(2px);
+}
+
+@starting-style {
+    [data-slot="sidebar-menu-button"][data-active="true"] {
+        background: transparent;
+    }
+
+    [data-slot="sidebar-menu-button"][data-active="true"] > svg,
+    [data-slot="sidebar-menu-button"][data-active="true"] > span:last-child {
+        transform: translateX(-8px);
+    }
+}
+
+.dark [data-slot="sidebar-menu-button"][data-active="true"] {
+    background: oklch(0.72 0.12 41.0 / 0.18);
+    color: var(--sidebar-primary);
+}
+
+/* ─── Dark mode: elevated surface shadows ─── */
+.dark [data-slot="dialog-content"],
+.dark [data-slot="alert-dialog-content"] {
+    border-color: var(--warm-border);
+    box-shadow:
+        0 0 0 1px oklch(0.975 0.006 68.0 / 0.06),
+        0 8px 40px oklch(0 0 0 / 0.45),
+        0 2px 8px oklch(0 0 0 / 0.25);
+}
+
+.dark [data-slot="card"] {
+    border-color: var(--warm-border);
+    box-shadow:
+        0 1px 3px oklch(0 0 0 / 0.25),
+        0 1px 2px oklch(0 0 0 / 0.18);
+}
+
+.dark [data-slot="select-content"] {
+    border-color: var(--warm-border);
+    box-shadow:
+        0 4px 24px oklch(0 0 0 / 0.35),
+        0 1px 4px oklch(0 0 0 / 0.22);
+}
+
+/* ─── 5. DataTable Skeleton — shimmer instead of pulse ─── */
+[data-slot="skeleton"] {
+    background:
+        linear-gradient(
+            90deg,
+            oklch(0.910 0.014 68.0) 0%,
+            oklch(0.948 0.009 68.0) 38%,
+            oklch(0.962 0.007 67.0) 50%,
+            oklch(0.948 0.009 68.0) 62%,
+            oklch(0.910 0.014 68.0) 100%
+        );
+    background-size: 400% 100%;
+    animation: impacta-shimmer 1.8s ease-in-out infinite;
+    border-radius: 6px;
+}
+
+.dark [data-slot="skeleton"] {
+    background:
+        linear-gradient(
+            90deg,
+            oklch(0.220 0.006 68.0) 0%,
+            oklch(0.290 0.006 68.0) 38%,
+            oklch(0.310 0.006 68.0) 50%,
+            oklch(0.290 0.006 68.0) 62%,
+            oklch(0.220 0.006 68.0) 100%
+        );
+    background-size: 400% 100%;
+}
+
+/* ─── Supporting: Button press, Card elevation, Select shadow ─── */
+[data-slot="button"]:not([disabled]):not([aria-disabled="true"]):active {
+    transform: scale(0.97);
+    transition: transform 80ms ease-out;
+}
+
+[data-slot="card"] {
+    border-color: var(--warm-border, oklch(0.910 0.014 68.0));
+    box-shadow:
+        0 1px 3px oklch(0.145 0 0 / 0.05),
+        0 1px 2px oklch(0.145 0 0 / 0.04);
+}
+
+[data-slot="select-content"] {
+    border-color: var(--warm-border, oklch(0.910 0.014 68.0));
+    border-radius: 10px;
+    box-shadow:
+        0 4px 24px oklch(0.145 0 0 / 0.08),
+        0 1px 4px oklch(0.145 0 0 / 0.05);
+}
+
+[data-slot="tooltip-content"] {
+    border-radius: 8px;
+    font-size: 0.8rem;
+}
+
+/* ─── prefers-reduced-motion ─── */
+@media (prefers-reduced-motion: reduce) {
+    [data-slot="dialog-content"],
+    [data-slot="dialog-overlay"],
+    [data-slot="alert-dialog-content"],
+    [data-slot="alert-dialog-overlay"] {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    [data-slot="skeleton"] {
+        animation: none;
+        background: oklch(0.910 0.014 68.0);
+    }
+
+    .dark [data-slot="skeleton"] {
+        background: oklch(0.245 0.008 68.0);
+    }
+
+    [data-slot="sidebar-menu-button"],
+    [data-slot="sidebar-menu-button"] > svg,
+    [data-slot="sidebar-menu-button"] > span {
+        transition: none;
+    }
+
+    [data-slot="sidebar-menu-button"][data-active="true"] > svg,
+    [data-slot="sidebar-menu-button"][data-active="true"] > span:last-child {
+        transform: none;
+    }
+
+    [data-slot="button"]:active {
+        transform: none;
+    }
+
+    [data-slot="input"],
+    [data-slot="textarea"],
+    [data-slot="select-trigger"] {
+        transition: none;
+    }
+
+    [data-slot="badge"] {
+        transition: none;
+        opacity: 1;
+        transform: none;
     }
 }

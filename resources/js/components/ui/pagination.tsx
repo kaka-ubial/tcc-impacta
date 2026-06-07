@@ -1,3 +1,4 @@
+import { Link } from "@inertiajs/react"
 import * as React from "react"
 import {
   ChevronLeftIcon,
@@ -40,7 +41,7 @@ function PaginationItem({ ...props }: React.ComponentProps<"li">) {
 type PaginationLinkProps = {
   isActive?: boolean
 } & Pick<React.ComponentProps<typeof Button>, "size"> &
-  React.ComponentProps<"a">
+  Omit<React.ComponentProps<typeof Link>, "size">
 
 function PaginationLink({
   className,
@@ -49,7 +50,7 @@ function PaginationLink({
   ...props
 }: PaginationLinkProps) {
   return (
-    <a
+    <Link
       aria-current={isActive ? "page" : undefined}
       data-slot="pagination-link"
       data-active={isActive}

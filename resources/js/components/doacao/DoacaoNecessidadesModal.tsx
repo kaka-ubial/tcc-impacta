@@ -1,6 +1,7 @@
 import { router } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 
+import EnderecoCepFields from '@/components/endereco-cep-fields';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -8,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { buildEnderecoCompleto, type EnderecoFields } from '@/lib/validators';
 import { store as doacoesStore } from '@/routes/doacoes';
 import type { HorarioDisponivel, NecessidadeAtiva } from '@/types';
 
@@ -30,7 +32,7 @@ function fmt(hora: string) {
 function buildUpcomingDates(horarios: HorarioDisponivel[], tipo: 'coleta' | 'entrega', weeks = 2) {
     const filtered = horarios.filter((h) => h.tipo === tipo);
     const now = new Date();
-    const results: { label: string; value: string }[] = [];
+    const results: { label: string; value: string; horarioId: number }[] = [];
 
     for (const h of filtered) {
         for (let w = 0; w < weeks; w++) {
@@ -39,10 +41,12 @@ function buildUpcomingDates(horarios: HorarioDisponivel[], tipo: 'coleta' | 'ent
             d.setDate(d.getDate() + dayDiff + w * 7);
             const [hh, mm] = h.hora_inicio.split(':');
             d.setHours(Number(hh), Number(mm), 0, 0);
+
             if (d > now) {
                 results.push({
                     label: `${DIAS[h.dia_semana]}, ${d.toLocaleDateString('pt-BR')} — ${fmt(h.hora_inicio)} às ${fmt(h.hora_fim)}`,
                     value: d.toISOString().slice(0, 16),
+                    horarioId: h.id,
                 });
             }
         }
@@ -72,6 +76,9 @@ export function DoacaoNecessidadesModal({ open, onClose, instituicaoId, necessid
     const [tipo, setTipo] = useState<'coleta' | 'entrega'>('entrega');
     const [dataHora, setDataHora] = useState('');
     const [enderecoReferencia, setEnderecoReferencia] = useState('');
+    const [enderecoColeta, setEnderecoColeta] = useState<EnderecoFields>({
+        cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', uf: '',
+    });
     const [processing, setProcessing] = useState(false);
 
     const abertas = necessidades.filter((n) => n.quantidade_atual < n.quantidade_objetivo);
@@ -82,8 +89,10 @@ export function DoacaoNecessidadesModal({ open, onClose, instituicaoId, necessid
             if (prev[n.id] !== undefined) {
                 const next = { ...prev };
                 delete next[n.id];
+
                 return next;
             }
+
             return { ...prev, [n.id]: 1 };
         });
     }
@@ -95,24 +104,31 @@ export function DoacaoNecessidadesModal({ open, onClose, instituicaoId, necessid
         setSelected((prev) => ({ ...prev, [id]: qty }));
     }
 
+    function handleEnderecoColetaChange(fields: EnderecoFields) {
+        setEnderecoColeta(fields);
+        setEnderecoReferencia(buildEnderecoCompleto(fields));
+    }
+
     function handleClose() {
         setStep(0);
         setSelected({});
         setTipo('entrega');
         setDataHora('');
         setEnderecoReferencia('');
+        setEnderecoColeta({ cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', uf: '' });
         onClose();
     }
 
     const selectedIds = Object.keys(selected).map(Number);
     const canAdvanceStep1 = selectedIds.length > 0;
-    const canAdvanceStep2 = dataHora !== '' && (tipo !== 'coleta' || enderecoReferencia.trim() !== '');
+    const canAdvanceStep2 = dataHora !== '' && (tipo !== 'coleta' || (enderecoColeta.cep.replace(/\D/g, '').length === 8 && !!enderecoColeta.logradouro && !!enderecoColeta.numero));
 
     function handleSubmit() {
         setProcessing(true);
 
         const itens = selectedIds.map((id) => {
             const n = necessidades.find((x) => x.id === id)!;
+
             return {
                 necessidade_id: n.id,
                 categoria_id: n.categoria.id,
@@ -129,11 +145,14 @@ export function DoacaoNecessidadesModal({ open, onClose, instituicaoId, necessid
                 agendamento: {
                     tipo,
                     data_hora: dataHora.replace('T', ' ') + ':00',
+                    horario_disponivel_id: upcomingDates.find((d) => d.value === dataHora)?.horarioId ?? null,
                     endereco_referencia: tipo === 'coleta' ? enderecoReferencia : null,
                 },
             },
             {
-                onSuccess: () => { setProcessing(false); handleClose(); },
+                onSuccess: () => {
+ setProcessing(false); handleClose(); 
+},
                 onError: () => setProcessing(false),
             },
         );
@@ -288,10 +307,9 @@ export function DoacaoNecessidadesModal({ open, onClose, instituicaoId, necessid
                                 {tipo === 'coleta' && (
                                     <div className="flex flex-col gap-1">
                                         <Label>Seu endereço para coleta</Label>
-                                        <Input
-                                            placeholder="Rua, número, bairro, cidade"
-                                            value={enderecoReferencia}
-                                            onChange={(e) => setEnderecoReferencia(e.target.value)}
+                                        <EnderecoCepFields
+                                            value={enderecoColeta}
+                                            onChange={handleEnderecoColetaChange}
                                         />
                                     </div>
                                 )}
@@ -322,6 +340,7 @@ export function DoacaoNecessidadesModal({ open, onClose, instituicaoId, necessid
                                 <ul className="list-inside list-disc space-y-0.5 pl-1">
                                     {selectedIds.map((id) => {
                                         const n = necessidades.find((x) => x.id === id)!;
+
                                         return (
                                             <li key={id}>
                                                 {selected[id]}× {n.categoria.nome}

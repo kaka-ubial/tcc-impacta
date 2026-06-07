@@ -26,7 +26,10 @@ class NecessidadeController extends Controller
             'necessidades' => $necessidades,
             'necessidades_count' => $user->instituicao
                 ? $user->instituicao->necessidades()->count()
-                : 0,            
+                : 0,
+            'tem_horarios' => $user->instituicao
+                ? $user->instituicao->horarios()->where('ativo', true)->exists()
+                : false,
             'categorias' => CategoriaItem::all(),
             'auth' => [
                 'user' => $request->user()->load(['doador', 'instituicao']),
@@ -44,9 +47,16 @@ class NecessidadeController extends Controller
     }
 
     public function store(NecessidadeRequest $request) {
+        $instituicao = $request->user()->instituicao;
+
+        if ($instituicao->horarios()->where('ativo', true)->doesntExist()) {
+            return redirect()->route('instituicao.horarios.index')
+                ->with('error', 'Cadastre ao menos um horário disponível antes de criar necessidades.');
+        }
+
         $data = $request->validated();
 
-        $data['instituicao_id'] = $request->user()->instituicao->usuario_id;
+        $data['instituicao_id'] = $instituicao->usuario_id;
         $data['quantidade_atual'] = 0;
 
         Necessidade::create($data);

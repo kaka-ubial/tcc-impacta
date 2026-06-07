@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Instituicao;
 
 use App\Http\Controllers\Controller;
+use App\Models\CategoriaItem;
 use App\Models\Doacao;
+use App\Models\Notificacao;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -14,7 +16,7 @@ class DoacaoController extends Controller
     {
         $instituicaoId = auth()->user()->instituicao->usuario_id;
 
-        $doacoes = Doacao::with(['doador', 'itens.categoria', 'agendamento'])
+        $doacoes = Doacao::with(['doador', 'itens.categoria', 'agendamento', 'avaliacao'])
             ->where('instituicao_id', $instituicaoId)
             ->orderBy('created_at', 'desc')
             ->get()
@@ -22,8 +24,10 @@ class DoacaoController extends Controller
                 'id'     => $d->id,
                 'status' => $d->status,
                 'doador' => [
-                    'nome'     => $d->doador->nome_completo,
-                    'telefone' => $d->doador->telefone,
+                    'usuario_id'  => $d->doador->usuario_id,
+                    'nome'        => $d->doador->nome_completo,
+                    'telefone'    => $d->doador->telefone,
+                    'foto_perfil' => $d->doador->foto_perfil,
                 ],
                 'itens' => $d->itens->map(fn ($item) => [
                     'id'           => $item->id,
@@ -36,11 +40,23 @@ class DoacaoController extends Controller
                     'tipo'                => $d->agendamento->tipo,
                     'endereco_referencia' => $d->agendamento->endereco_referencia,
                 ] : null,
-                'criado_em' => $d->created_at->toIso8601String(),
+                'criado_em'  => $d->created_at->toIso8601String(),
+                'avaliacao'  => $d->avaliacao ? ['nota' => $d->avaliacao->nota, 'descricao' => $d->avaliacao->descricao] : null,
             ]);
 
+        $estoque = TransferenciaController::calcularEstoque($instituicaoId);
+        $categoriaIds = array_keys($estoque);
+        $categorias = CategoriaItem::whereIn('id', $categoriaIds)->pluck('nome', 'id');
+
+        $itensRecebidos = collect($estoque)->map(fn ($qty, $catId) => [
+            'categoria_id'   => (int) $catId,
+            'categoria'      => $categorias[$catId] ?? '',
+            'quantidade'     => $qty,
+        ])->values();
+
         return Inertia::render('instituicao/doacoes', [
-            'doacoes' => $doacoes,
+            'doacoes'         => $doacoes,
+            'itens_recebidos' => $itensRecebidos,
         ]);
     }
 
@@ -57,6 +73,12 @@ class DoacaoController extends Controller
             }
         });
 
+        Notificacao::enviar(
+            $doacao->doador_id,
+            'Doação confirmada',
+            auth()->user()->instituicao->nome_fantasia.' confirmou a sua solicitação de doação.'
+        );
+
         return back();
     }
 
@@ -67,6 +89,12 @@ class DoacaoController extends Controller
 
         $doacao->update(['status' => 'recusada']);
 
+        Notificacao::enviar(
+            $doacao->doador_id,
+            'Doação recusada',
+            auth()->user()->instituicao->nome_fantasia.' recusou a sua solicitação de doação.'
+        );
+
         return back();
     }
 
@@ -76,6 +104,35 @@ class DoacaoController extends Controller
         abort_if($doacao->status !== 'confirmada', 422);
 
         $doacao->update(['status' => 'entregue']);
+
+        Notificacao::enviar(
+            $doacao->doador_id,
+            'Doação concluída',
+            auth()->user()->instituicao->nome_fantasia.' marcou a sua doação como entregue.'
+        );
+
+        return back();
+    }
+
+    public function notDelivered(Doacao $doacao): \Illuminate\Http\RedirectResponse
+    {
+        abort_if($doacao->instituicao_id !== auth()->user()->instituicao->usuario_id, 403);
+        abort_if($doacao->status !== 'confirmada', 422);
+
+        DB::transaction(function () use ($doacao) {
+            if ($doacao->status === 'confirmada') {
+                foreach ($doacao->itens()->whereNotNull('necessidade_id')->with('necessidade')->get() as $item) {
+                    $item->necessidade->decrement('quantidade_atual', $item->quantidade);
+                }
+            }
+            $doacao->update(['status' => 'nao_entregue']);
+        });
+
+        Notificacao::enviar(
+            $doacao->doador_id,
+            'Doação não entregue',
+            auth()->user()->instituicao->nome_fantasia.' marcou a sua doação como não entregue.'
+        );
 
         return back();
     }

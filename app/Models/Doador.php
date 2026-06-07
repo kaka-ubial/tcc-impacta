@@ -6,8 +6,9 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['usuario_id','nome_completo', 'cpf','telefone','pontuacao_gamificacao','latitude','longitude'])]
+#[Fillable(['usuario_id','nome_completo', 'cpf','telefone','endereco_completo','foto_perfil','pontuacao_gamificacao','latitude','longitude'])]
 class Doador extends Model
 {
 
@@ -29,6 +30,11 @@ class Doador extends Model
     public function usuario(): BelongsTo
     {
         return $this->belongsTo(User::class, 'usuario_id');
+    }
+
+    public function doacoes(): HasMany
+    {
+        return $this->hasMany(Doacao::class, 'doador_id', 'usuario_id');
     }
 
 
