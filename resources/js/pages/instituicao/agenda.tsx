@@ -39,7 +39,7 @@ type Agendamento = {
     status: 'confirmado' | 'alteracao_sugerida';
     endereco_referencia: string | null;
     doacao_status: string;
-    doador: { nome: string; telefone: string };
+    doador: { usuario_id: number;nome: string; telefone: string };
 };
 
 type Horario = {
@@ -360,10 +360,15 @@ function AgendamentoItem({ agendamento, horarios }: { agendamento: Agendamento; 
         <div className="flex flex-col gap-2 rounded-lg border px-4 py-3">
             <div className="flex items-start justify-between gap-3">
                 <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-2">
-                        <User className="text-muted-foreground size-4 shrink-0" />
-                        <span className="font-medium">{agendamento.doador.nome}</span>
-                    </div>
+                    <Link
+                        href={`/instituicao/doadores/${agendamento.doador.usuario_id}`}
+                        className="hover:text-primary flex items-center gap-2 transition-colors"
+                    >
+                        <div className="flex items-center gap-2">
+                            <User className="text-muted-foreground size-4 shrink-0" />
+                            <span className="font-medium">{agendamento.doador.nome}</span>
+                        </div>
+                    </Link>
                     <div className="flex items-center gap-2">
                         <Phone className="text-muted-foreground size-3.5 shrink-0" />
                         <span className="text-muted-foreground text-sm">{agendamento.doador.telefone}</span>
