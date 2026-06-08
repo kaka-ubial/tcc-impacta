@@ -120,10 +120,10 @@ class InstituicaoSeeder extends Seeder
                 'status' => 'approved',
             ]));
 
-            if (!empty($causaIds)) {
-                $randomCausas = collect($causaIds)->random(rand(1, min(3, count($causaIds))));
-                $user->causas()->attach($randomCausas);
-            }
+            // if (!empty($causaIds)) {
+            //     $randomCausas = collect($causaIds)->random(rand(1, min(3, count($causaIds))));
+            //     $user->causas()->attach($randomCausas);
+            // }
         }
     }
 }

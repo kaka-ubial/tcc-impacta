@@ -262,37 +262,49 @@ export default function InstituicoesIndex({ instituicoes, causas, filters, recom
                     )}
 
                     {/* ── Recommendations ─────────────────────── */}
-                    {recomendacoes.length > 0 && !filters.search && !filters.causa && (
-                        <div className="mb-8">
-                            <button
-                                type="button"
-                                onClick={() => setRecsOpen((o) => !o)}
-                                className="mb-4 flex w-full items-center justify-between gap-4 text-left"
-                            >
-                                <div className="flex items-center gap-2">
-                                    <Sparkles className="size-4 text-brand" />
-                                    <h2 className="text-sm font-semibold text-foreground">Recomendadas para você</h2>
-                                </div>
-                                <ChevronRight
-                                    className={cn(
-                                        'size-4 text-muted-foreground transition-transform duration-200',
-                                        recsOpen ? 'rotate-90' : '',
-                                    )}
-                                />
-                            </button>
+                    {!filters.search && !filters.causa && (
+                        recomendacoes.length > 0 ? (
+                            <div className="mb-8">
+                                <button
+                                    type="button"
+                                    onClick={() => setRecsOpen((o) => !o)}
+                                    className="mb-4 flex w-full items-center justify-between gap-4 text-left"
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <h2 className="text-sm font-semibold text-foreground">Recomendadas para você</h2>
+                                    </div>
+                                    <ChevronRight
+                                        className={cn(
+                                            'size-4 text-muted-foreground transition-transform duration-200',
+                                            recsOpen ? 'rotate-90' : '',
+                                        )}
+                                    />
+                                </button>
 
-                            {recsOpen && (
-                                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                                    {recomendacoes.map((rec) => (
-                                        <RecommendationCard key={rec.usuario_id} rec={rec} />
-                                    ))}
-                                </div>
-                            )}
+                                {recsOpen && (
+                                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                        {recomendacoes.map((rec) => (
+                                            <RecommendationCard key={rec.usuario_id} rec={rec} />
+                                        ))}
+                                    </div>
+                                )}
 
-                            <div className="mt-6 border-t border-border pt-6">
-                                <h2 className="text-sm font-semibold text-foreground">Todas as instituições</h2>
+                                <div className="mt-6 border-t border-border pt-6">
+                                    <h2 className="text-sm font-semibold text-foreground">Todas as instituições</h2>
+                                </div>
                             </div>
-                        </div>
+                        ) : instituicoes.data.length > 0 ? (
+                            <div className="mb-6 flex flex-col items-center gap-3 rounded-2xl border border-border bg-card p-6 text-center">
+                                <Sparkles className="size-7 text-muted-foreground/40" />
+                                <div>
+                                    <p className="font-medium text-foreground">Nenhuma recomendação disponível</p>
+                                    <p className="mt-1 text-sm text-muted-foreground">
+                                        Ainda não há instituições próximas a você.{' '}
+                                        Explore a lista geral de instituições abaixo.
+                                    </p>
+                                </div>
+                            </div>
+                        ) : null
                     )}
 
                     {/* ── Content ─────────────────────────────── */}
