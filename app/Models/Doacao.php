@@ -36,4 +36,9 @@ class Doacao extends Model
     {
         return $this->hasOne(Agendamento::class, 'doacao_id');
     }
+
+    public function avaliacao(): HasOne
+    {
+        return $this->hasOne(Avaliacao::class, 'doacao_id');
+    }
 }

@@ -12,15 +12,28 @@ use Inertia\Inertia;
 use App\Http\Controllers\Admin\InstitutionCheckController;
 use App\Http\Middleware\CheckAdmin;
 use App\Http\Controllers\Doador\DoacaoController;
+use App\Http\Controllers\Doador\PerfilController as DoadorPerfilController;
 use App\Http\Controllers\Instituicao\DoacaoController as InstituicaoDoacaoController;
+use App\Http\Controllers\Instituicao\DoadorController as InstituicaoDoadorController;
 use App\Http\Controllers\Instituicao\HorarioController;
+use App\Http\Controllers\Instituicao\AgendaController;
 use App\Http\Controllers\Instituicao\InstituicaoController;
+use App\Http\Controllers\Instituicao\AvaliacaoController;
+use App\Http\Controllers\Instituicao\TransferenciaController;
 use App\Http\Controllers\NecessidadeController;
+use App\Http\Controllers\NotificacaoController;
 use App\Http\Middleware\CheckNecessidadeOwnership;
 
-Route::inertia('/', 'welcome', [
-    'canRegister' => Features::enabled(Features::registration()),
-])->name('home');
+Route::get('/', function () {
+    return Inertia::render('welcome', [
+        'canRegister' => Features::enabled(Features::registration()),
+        'stats' => [
+            'doadoras'     => \App\Models\Doador::count(),
+            'instituicoes' => \App\Models\Instituicao::where('status', 'approved')->count(),
+            'doacoes'      => \App\Models\Doacao::count(),
+        ],
+    ]);
+})->name('home');
 
 Route::get('/redirect', RedirectController::class)->middleware('auth')->name('redirect');
 
@@ -34,6 +47,9 @@ Route::middleware(['auth', 'verified', CheckInstituicao::class, EnsureInstitutio
     Route::post('horarios', [HorarioController::class, 'store'])->name('horarios.store');
     Route::delete('horarios/{horario}', [HorarioController::class, 'destroy'])->name('horarios.destroy');
 
+    Route::get('agenda', [AgendaController::class, 'index'])->name('agenda.index');
+    Route::post('agendamentos/{agendamento}/sugerir', [AgendaController::class, 'sugerirAlteracao'])->name('agenda.sugerir');
+
     Route::get('necessidades', [NecessidadeController::class, 'index'])->name('necessidades.index');
     Route::post('necessidades', [NecessidadeController::class, 'store'])->name('necessidades.store');
     Route::get('necessidades/create', [NecessidadeController::class, 'create'])->name('necessidades.create');
@@ -44,16 +60,37 @@ Route::middleware(['auth', 'verified', CheckInstituicao::class, EnsureInstitutio
     Route::post('doacoes/{doacao}/confirm', [InstituicaoDoacaoController::class, 'confirm'])->name('doacoes.confirm');
     Route::post('doacoes/{doacao}/reject', [InstituicaoDoacaoController::class, 'reject'])->name('doacoes.reject');
     Route::post('doacoes/{doacao}/deliver', [InstituicaoDoacaoController::class, 'deliver'])->name('doacoes.deliver');
+    Route::post('doacoes/{doacao}/notDelivered', [InstituicaoDoacaoController::class, 'notDelivered'])->name('doacoes.notDelivered');
+    Route::post('doacoes/{doacao}/avaliar', [AvaliacaoController::class, 'store'])->name('doacoes.avaliar');
+
+    Route::get('transferencias', [TransferenciaController::class, 'index'])->name('transferencias.index');
+    Route::post('transferencias', [TransferenciaController::class, 'store'])->name('transferencias.store');
+    Route::post('transferencias/{transferencia}/confirmar', [TransferenciaController::class, 'confirmar'])->name('transferencias.confirmar');
+    Route::post('transferencias/{transferencia}/recusar', [TransferenciaController::class, 'recusar'])->name('transferencias.recusar');
+    Route::post('transferencias/{transferencia}/entregar', [TransferenciaController::class, 'entregar'])->name('transferencias.entregar');
+    Route::post('transferencias/{transferencia}/cancelar', [TransferenciaController::class, 'cancelar'])->name('transferencias.cancelar');
+    Route::post('transferencias/{transferencia}/nao-entregue', [TransferenciaController::class, 'naoEntregue'])->name('transferencias.naoEntregue');
+    Route::post('transferencias/{transferencia}/sugerir', [TransferenciaController::class, 'sugerirAlteracao'])->name('transferencias.sugerir');
+    Route::post('transferencias/{transferencia}/sugestao/aceitar', [TransferenciaController::class, 'aceitarSugestao'])->name('transferencias.aceitarSugestao');
+    Route::post('transferencias/{transferencia}/sugestao/recusar', [TransferenciaController::class, 'recusarSugestao'])->name('transferencias.recusarSugestao');
+
+    Route::get('doadores/{doador}', [InstituicaoDoadorController::class, 'show'])->name('doadores.show');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('instituicoes', [InstituicaoController::class, 'index'])->name('instituicoes.index');
+    Route::get('instituicoes/{id}', [InstituicaoController::class, 'show'])->name('instituicoes.show');
 });
 
 Route::middleware(['auth', 'verified', CheckDoador::class])->group(function () {
 
-    Route::get('instituicoes', [InstituicaoController::class, 'index'])->name('instituicoes.index');
-    Route::get('instituicoes/{id}', [InstituicaoController::class, 'show'])->name('instituicoes.show');
-    
+    Route::get('perfil', [DoadorPerfilController::class, 'show'])->name('doador.perfil');
+
     Route::get('doacoes', [DoacaoController::class, 'index'])->name('doacoes.index');
     Route::post('doacoes', [DoacaoController::class, 'store'])->name('doacoes.store');
     Route::post('doacoes/{doacao}/cancel', [DoacaoController::class, 'cancel'])->name('doacoes.cancel');
+    Route::post('doacoes/{doacao}/sugestao/aceitar', [DoacaoController::class, 'aceitarSugestao'])->name('doacoes.aceitarSugestao');
+    Route::post('doacoes/{doacao}/sugestao/recusar', [DoacaoController::class, 'recusarSugestao'])->name('doacoes.recusarSugestao');
 
 });
 
@@ -66,6 +103,8 @@ Route::middleware(['auth', CheckAdmin::class])->prefix('admin')->name('admin.')-
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('notificacoes', [NotificacaoController::class, 'index'])->name('notificacoes.index');
+
     Route::get('waiting-validation', function () {
         return auth()->user()->instituicao?->isApproved()
             ? redirect()->route('instituicao.painel')

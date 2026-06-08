@@ -25,6 +25,9 @@ trait ProfileValidationRules
                 'required',
                 'string',
                 new Cpf(),
+                $userId === null
+                    ? Rule::unique('doador', 'cpf')
+                    : Rule::unique('doador', 'cpf')->ignore($userId, 'usuario_id'),
             ],
             'telefone'          => ['exclude_unless:tipo_usuario,doador', 'required', 'string', 'regex:/^\(\d{2}\)\s\d{4,5}-\d{4}$/'],
             'nome_fantasia'     => ['exclude_unless:tipo_usuario,instituicao', 'required', 'string', 'min:2', 'max:255'],
@@ -34,10 +37,23 @@ trait ProfileValidationRules
                 'required',
                 'string',
                 new Cnpj(),
+                $userId === null
+                    ? Rule::unique('instituicao', 'cnpj')
+                    : Rule::unique('instituicao', 'cnpj')->ignore($userId, 'usuario_id'),
             ],
             'telefone_inst'     => ['exclude_unless:tipo_usuario,instituicao', 'required', 'string', 'regex:/^\(\d{2}\)\s\d{4,5}-\d{4}$/'],
-            'endereco_completo' => ['exclude_unless:tipo_usuario,instituicao', 'required', 'string', 'min:10', 'max:500'],
-            'causas_apoiadas'   => ['sometimes', 'array', 'min:1'],
+            'endereco_completo' => [
+                Rule::when(
+                    fn ($input) => ($input['tipo_usuario'] ?? '') === 'instituicao',
+                    ['required', 'string', 'min:10', 'max:500'],
+                    ['nullable', 'string', 'max:500'],
+                ),
+            ],
+            'latitude'          => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude'         => ['nullable', 'numeric', 'between:-180,180'],
+            'geocoding_query'   => ['nullable', 'string', 'max:500'],
+            'causas_submitted'  => ['sometimes', 'nullable'],
+            'causas_apoiadas'   => ['nullable', 'array'],
             'causas_apoiadas.*' => ['integer', 'exists:causas,id'],
         ];
     }

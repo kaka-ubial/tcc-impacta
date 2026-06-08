@@ -6,13 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\CategoriaItem;
 use App\Models\Causa;
 use App\Models\Instituicao;
+use App\Services\RecommendationService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class InstituicaoController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request, RecommendationService $recommendations): Response
     {
         $search = $request->string('search')->trim()->value();
         $causaId = $request->integer('causa') ?: null;
@@ -22,6 +23,8 @@ class InstituicaoController extends Controller
                 $query->whereColumn('quantidade_atual', '<', 'quantidade_objetivo');
             }])
             ->visible()
+            ->when(auth()->user()->tipo_usuario === 'instituicao', fn ($q) => $q
+                ->where('usuario_id', '!=', auth()->user()->instituicao->usuario_id))
             ->when($search, fn ($q) => $q->where(function ($q) use ($search) {
                 $term = '%'.$search.'%';
                 $q->where('nome_fantasia', 'ilike', $term)
@@ -40,6 +43,8 @@ class InstituicaoController extends Controller
                 'necessidades_ativas_count' => $inst->necessidades_ativas_count,
             ]);
 
+        $isFiltering = $search !== '' || $causaId !== null;
+
         return Inertia::render('instituicoes/index', [
             'instituicoes' => $instituicoes,
             'causas' => Causa::orderBy('nome')->get(['id', 'nome', 'icone']),
@@ -47,6 +52,9 @@ class InstituicaoController extends Controller
                 'search' => $search,
                 'causa' => $causaId,
             ],
+            'recomendacoes' => (!$isFiltering && auth()->user()->tipo_usuario === 'doador')
+                ? $recommendations->forDonor(auth()->user())
+                : [],
         ]);
     }
 
@@ -90,7 +98,11 @@ class InstituicaoController extends Controller
                     'tipo' => $h->tipo,
                 ])->values(),
             ],
-            'categorias' => $categorias,
+            'categorias'   => $categorias,
+            'canTransfer'  => auth()->user()->tipo_usuario === 'instituicao',
+            'estoque'      => auth()->user()->tipo_usuario === 'instituicao'
+                ? TransferenciaController::calcularEstoque(auth()->user()->instituicao->usuario_id)
+                : [],
         ]);
     }
 }

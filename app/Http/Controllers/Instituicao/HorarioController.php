@@ -16,6 +16,8 @@ class HorarioController extends Controller
 
         $horarios = HorarioDisponivel::where('instituicao_id', $instituicaoId)
             ->where('ativo', true)
+            ->withExists(['agendamentos as tem_doacoes_ativas' => fn ($q) => $q
+                ->whereHas('doacao', fn ($q) => $q->whereIn('status', ['pendente', 'confirmada']))])
             ->orderBy('dia_semana')
             ->orderBy('hora_inicio')
             ->get()
@@ -25,6 +27,7 @@ class HorarioController extends Controller
                 'hora_inicio' => $h->hora_inicio,
                 'hora_fim'    => $h->hora_fim,
                 'tipo'        => $h->tipo,
+                'pode_excluir' => ! $h->tem_doacoes_ativas,
             ]);
 
         return Inertia::render('instituicao/horarios', [
@@ -60,6 +63,14 @@ class HorarioController extends Controller
             $horario->instituicao_id !== auth()->user()->instituicao->usuario_id,
             403
         );
+
+        $temDoacoesAtivas = $horario->agendamentos()
+            ->whereHas('doacao', fn ($q) => $q->whereIn('status', ['pendente', 'confirmada']))
+            ->exists();
+
+        if ($temDoacoesAtivas) {
+            return back()->with('error', 'Não é possível excluir um horário com doações agendadas em andamento.');
+        }
 
         $horario->delete();
 

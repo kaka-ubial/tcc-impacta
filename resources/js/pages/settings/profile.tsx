@@ -1,8 +1,10 @@
 import { Transition } from '@headlessui/react';
 import { Form, Head, Link, usePage, useForm } from '@inertiajs/react';
-import { useState } from 'react';
+import { LocateFixed } from 'lucide-react';
+import { useRef, useState } from 'react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import DeleteUser from '@/components/delete-user';
+import { DoadorFotoUploader } from '@/components/doador-foto-uploader';
 import EnderecoCepFields from '@/components/endereco-cep-fields';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -15,7 +17,9 @@ import SettingsLayout from '@/layouts/settings/layout';
 import { edit } from '@/routes/profile';
 import { send } from '@/routes/verification';
 import type { BreadcrumbItem } from '@/types';
+import { cn } from '@/lib/utils';
 import { maskCpf, maskCnpj, maskPhone, runValidation, rules, buildEnderecoCompleto, parseEnderecoCompleto, type EnderecoFields } from '@/lib/validators';
+import type { Causa } from '@/types/auth';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -27,19 +31,61 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function Profile({
     mustVerifyEmail,
     status,
+    causas,
 }: {
     mustVerifyEmail: boolean;
     status?: string;
+    causas: Causa[];
 }) {
     const { auth } = usePage().props;
     const tipo = auth.user.tipo_usuario;
+
+    const enderecoSource = tipo === 'doador'
+        ? auth.user.doador?.endereco_completo || ''
+        : auth.user.instituicao?.endereco_completo || '';
+
     const [endereco, setEndereco] = useState<EnderecoFields>(
-        () => parseEnderecoCompleto(auth.user.instituicao?.endereco_completo || '')
+        () => parseEnderecoCompleto(enderecoSource)
     );
-    const [enderecoCompleto, setEnderecoCompleto] = useState(
-        auth.user.instituicao?.endereco_completo || ''
+    const [enderecoCompleto, setEnderecoCompleto] = useState(enderecoSource);
+
+    const [latitude, setLatitude] = useState<number | null>(auth.user.doador?.latitude ?? null);
+    const [longitude, setLongitude] = useState<number | null>(auth.user.doador?.longitude ?? null);
+    const [geoStatus, setGeoStatus] = useState<'idle' | 'loading' | 'granted' | 'denied'>(
+        auth.user.doador?.latitude ? 'granted' : 'idle'
+    );
+    const geoAttempted = useRef(false);
+
+    const [selectedCausas, setSelectedCausas] = useState<number[]>(
+        () => auth.user.causas?.map((c) => c.id) ?? []
     );
 
+    function toggleCausa(id: number) {
+        setSelectedCausas((prev) =>
+            prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+        );
+    }
+
+    function handleGeolocate() {
+        if (!navigator.geolocation || geoAttempted.current) return;
+        geoAttempted.current = true;
+        setGeoStatus('loading');
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                setLatitude(pos.coords.latitude);
+                setLongitude(pos.coords.longitude);
+                setGeoStatus('granted');
+            },
+            () => setGeoStatus('denied'),
+            { timeout: 8000 },
+        );
+    }
+
+    const [geocodingQuery, setGeocodingQuery] = useState(() => {
+        const e = endereco;
+        return [e.logradouro, e.numero, e.cidade, e.uf, 'Brasil'].filter(Boolean).join(', ');
+    });
+    const [addressTouched, setAddressTouched] = useState(() => !!enderecoSource);
     const [clientErrors, setClientErrors] = useState<Record<string, string>>({});
 
     function validateField(field: string, value: string, fieldRules: ((v: string) => string | null)[]) {
@@ -59,7 +105,27 @@ export default function Profile({
     function handleEnderecoChange(fields: EnderecoFields) {
         setEndereco(fields);
         setEnderecoCompleto(buildEnderecoCompleto(fields));
+        setLatitude(null);
+        setLongitude(null);
+        setGeoStatus('idle');
+        geoAttempted.current = false;
+        setAddressTouched(true);
+        setGeocodingQuery(
+            [fields.logradouro, fields.numero, fields.cidade, fields.uf, 'Brasil'].filter(Boolean).join(', ')
+        );
     }
+
+    const enderecoErrors = (() => {
+        if (!addressTouched) return {};
+        const hasAnyField = Object.values(endereco).some((v) => !!v);
+        if (!hasAnyField) return {};
+        const errs: Partial<Record<keyof EnderecoFields, string>> = {};
+        if (!endereco.logradouro) errs.logradouro = 'Campo obrigatório';
+        if (!endereco.cidade) errs.cidade = 'Campo obrigatório';
+        if (!endereco.uf) errs.uf = 'Campo obrigatório';
+        return errs;
+    })();
+    const hasEnderecoErrors = Object.keys(enderecoErrors).length > 0;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -69,6 +135,20 @@ export default function Profile({
 
             <SettingsLayout>
                 <div className="space-y-6">
+                    {tipo === 'doador' && (
+                        <div className="space-y-3">
+                            <Heading
+                                variant="small"
+                                title="Foto de perfil"
+                                description="Sua foto aparecerá para as instituições ao receberem suas doações."
+                            />
+                            <DoadorFotoUploader
+                                nome={auth.user.doador?.nome_completo ?? auth.user.email}
+                                fotoAtual={auth.user.doador?.foto_perfil ?? null}
+                            />
+                        </div>
+                    )}
+
                     <Heading
                         variant="small"
                         title="Informações do perfil"
@@ -105,7 +185,6 @@ console.log('Erros:', errors);
                                         required
                                         autoComplete="username"
                                         placeholder="Endereço de email"
-                                        disabled={tipo === 'admin'}
                                     />
 
                                     <InputError
@@ -222,9 +301,90 @@ console.log('Erros:', errors);
                                             />
                                             <InputError message={clientErrors.telefone || errors.telefone} />
 
+                                            <input type="hidden" name="endereco_completo" value={enderecoCompleto} />
+                                            <input type="hidden" name="geocoding_query" value={geocodingQuery} />
+                                            {latitude !== null && <input type="hidden" name="latitude" value={latitude} />}
+                                            {longitude !== null && <input type="hidden" name="longitude" value={longitude} />}
+
+                                            <div className="flex flex-col gap-3 rounded-xl border border-border bg-muted/30 p-4 mt-1">
+                                                <div>
+                                                    <p className="text-sm font-medium text-foreground">
+                                                        Endereço <span className="text-xs font-normal text-muted-foreground">(opcional)</span>
+                                                    </p>
+                                                    <p className="mt-0.5 text-xs text-muted-foreground">
+                                                        Usado para sugerir instituições próximas a você.
+                                                    </p>
+                                                </div>
+                                                <EnderecoCepFields
+                                                    value={endereco}
+                                                    onChange={handleEnderecoChange}
+                                                    errors={enderecoErrors}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={handleGeolocate}
+                                                    disabled={geoStatus === 'loading' || geoStatus === 'granted'}
+                                                    className={cn(
+                                                        'flex items-center gap-2 self-start rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors',
+                                                        geoStatus === 'granted'
+                                                            ? 'border-success/30 bg-success/10 text-success'
+                                                            : geoStatus === 'denied'
+                                                              ? 'border-destructive/30 bg-destructive/5 text-destructive'
+                                                              : 'border-border bg-card text-muted-foreground hover:border-brand/40 hover:text-foreground',
+                                                    )}
+                                                >
+                                                    <LocateFixed className="size-3.5 shrink-0" />
+                                                    {geoStatus === 'loading' && 'Obtendo localização...'}
+                                                    {geoStatus === 'granted' && 'Localização obtida'}
+                                                    {geoStatus === 'denied' && 'Permissão negada'}
+                                                    {geoStatus === 'idle' && 'Usar minha localização atual'}
+                                                </button>
+                                            </div>
                                         </>
                                     )}
                                 </div>
+
+                                {tipo === 'doador' && (
+                                    <div className="flex flex-col gap-3">
+                                        <div>
+                                            <p className="text-sm font-medium text-foreground">Causas apoiadas</p>
+                                            <p className="mt-0.5 text-xs text-muted-foreground">
+                                                Usamos suas causas para recomendar instituições relevantes.
+                                            </p>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {causas.map((causa) => {
+                                                const isSelected = selectedCausas.includes(causa.id);
+                                                return (
+                                                    <button
+                                                        key={causa.id}
+                                                        type="button"
+                                                        onClick={() => toggleCausa(causa.id)}
+                                                        className={cn(
+                                                            'flex items-center gap-2 rounded-lg border px-3 py-2.5 text-left text-xs font-medium transition-all duration-150',
+                                                            isSelected
+                                                                ? 'border-brand bg-brand/8 text-brand'
+                                                                : 'border-border bg-card text-muted-foreground hover:border-brand/30 hover:text-foreground',
+                                                        )}
+                                                    >
+                                                        <span
+                                                            className={cn(
+                                                                'size-3.5 shrink-0 rounded-full border-2 transition-colors duration-150',
+                                                                isSelected ? 'border-brand bg-brand' : 'border-muted-foreground/30',
+                                                            )}
+                                                        />
+                                                        {causa.nome}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                        <input type="hidden" name="causas_submitted" value="1" />
+                                        {selectedCausas.map((id) => (
+                                            <input key={id} type="hidden" name="causas_apoiadas[]" value={id} />
+                                        ))}
+                                        <InputError message={errors.causas_apoiadas as string | undefined} />
+                                    </div>
+                                )}
 
                                 {mustVerifyEmail &&
                                     auth.user.email_verified_at === null && (
@@ -250,7 +410,7 @@ console.log('Erros:', errors);
 
                                 <div className="flex items-center gap-4">
                                     <Button
-                                        disabled={processing}
+                                        disabled={processing || hasEnderecoErrors}
                                         data-test="update-profile-button"
                                     >
                                         Salvar

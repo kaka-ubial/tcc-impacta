@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { ChevronLeft, ChevronRight, MapPin, Package, Search, Tag, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MapPin, Package, Search, Sparkles, Tag, X } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { CausaBadge } from '@/components/causa-badge';
@@ -14,13 +14,15 @@ import {
 } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
 import AppLayout from '@/layouts/app-layout';
+import { cn } from '@/lib/utils';
 import { index as instituicoesIndex, show as instituicoesShow } from '@/routes/instituicoes';
-import type { BreadcrumbItem, Causa, InstituicaoListItem, SimplePaginated } from '@/types';
+import type { BreadcrumbItem, Causa, InstituicaoListItem, Recomendacao, SimplePaginated } from '@/types';
 
 type Props = {
     instituicoes: SimplePaginated<InstituicaoListItem>;
     causas: Causa[];
     filters: { search: string; causa: number | null };
+    recomendacoes: Recomendacao[];
 };
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -45,6 +47,56 @@ function CardSkeleton() {
                 <Skeleton className="h-3.5 w-2/5" />
             </div>
         </div>
+    );
+}
+
+function RecommendationCard({ rec }: { rec: Recomendacao }) {
+    return (
+        <Link
+            href={instituicoesShow(rec.usuario_id)}
+            className="group flex h-full flex-col gap-3 overflow-hidden rounded-2xl border border-border bg-card p-5 transition-all duration-200 hover:border-brand/30 hover:shadow-md"
+        >
+            <div className="flex items-start justify-between gap-2">
+                <h3 className="font-semibold leading-snug text-foreground group-hover:text-brand transition-colors">
+                    {rec.nome_fantasia}
+                </h3>
+                <ChevronRight className="size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+            </div>
+
+            {rec.endereco_completo && (
+                <div className="flex items-start gap-1.5 text-xs text-muted-foreground">
+                    <MapPin className="mt-0.5 size-3 shrink-0" />
+                    <span className="line-clamp-1">{rec.endereco_completo}</span>
+                </div>
+            )}
+
+            {rec.causas.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                    {rec.causas.slice(0, 3).map((c) => (
+                        <CausaBadge key={c.id} causa={c} />
+                    ))}
+                    {rec.causas.length > 3 && (
+                        <span className="inline-flex items-center rounded-full border border-border bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                            +{rec.causas.length - 3}
+                        </span>
+                    )}
+                </div>
+            )}
+
+            <div className="mt-auto flex flex-wrap items-center gap-3 pt-1 text-xs text-muted-foreground">
+                {rec.causa_overlap > 0 && (
+                    <span className="font-medium text-success">
+                        {rec.causa_overlap}{' '}
+                        {rec.causa_overlap === 1 ? 'causa em comum' : 'causas em comum'}
+                    </span>
+                )}
+                {rec.distancia_km !== null && (
+                    <span>
+                        {rec.distancia_km < 1 ? 'menos de 1 km' : `${rec.distancia_km} km`}
+                    </span>
+                )}
+            </div>
+        </Link>
     );
 }
 
@@ -85,9 +137,10 @@ function EmptyState({ hasSearch, onClear }: { hasSearch: boolean; onClear: () =>
     );
 }
 
-export default function InstituicoesIndex({ instituicoes, causas, filters }: Props) {
+export default function InstituicoesIndex({ instituicoes, causas, filters, recomendacoes }: Props) {
     const [search, setSearch] = useState(filters.search);
     const [searching, setSearching] = useState(false);
+    const [recsOpen, setRecsOpen] = useState(true);
     const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
     useEffect(() => {
@@ -205,6 +258,40 @@ export default function InstituicoesIndex({ instituicoes, causas, filters }: Pro
                                     {causa.nome}
                                 </button>
                             ))}
+                        </div>
+                    )}
+
+                    {/* ── Recommendations ─────────────────────── */}
+                    {recomendacoes.length > 0 && !filters.search && !filters.causa && (
+                        <div className="mb-8">
+                            <button
+                                type="button"
+                                onClick={() => setRecsOpen((o) => !o)}
+                                className="mb-4 flex w-full items-center justify-between gap-4 text-left"
+                            >
+                                <div className="flex items-center gap-2">
+                                    <Sparkles className="size-4 text-brand" />
+                                    <h2 className="text-sm font-semibold text-foreground">Recomendadas para você</h2>
+                                </div>
+                                <ChevronRight
+                                    className={cn(
+                                        'size-4 text-muted-foreground transition-transform duration-200',
+                                        recsOpen ? 'rotate-90' : '',
+                                    )}
+                                />
+                            </button>
+
+                            {recsOpen && (
+                                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                    {recomendacoes.map((rec) => (
+                                        <RecommendationCard key={rec.usuario_id} rec={rec} />
+                                    ))}
+                                </div>
+                            )}
+
+                            <div className="mt-6 border-t border-border pt-6">
+                                <h2 className="text-sm font-semibold text-foreground">Todas as instituições</h2>
+                            </div>
                         </div>
                     )}
 

@@ -22,6 +22,7 @@ class StoreDoacaoRequest extends FormRequest
             'itens.*.descricao'                 => ['nullable', 'string', 'max:255'],
             'agendamento.tipo'                  => ['required', 'in:coleta,entrega'],
             'agendamento.data_hora'             => ['required', 'date', 'after:now'],
+            'agendamento.horario_disponivel_id' => ['nullable', 'integer', 'exists:horarios_disponiveis,id'],
             'agendamento.endereco_referencia'   => ['nullable', 'string', 'max:255', 'required_if:agendamento.tipo,coleta'],
         ];
     }

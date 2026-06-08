@@ -32,7 +32,7 @@ function fmt(hora: string) {
 function buildUpcomingDates(horarios: HorarioDisponivel[], tipo: 'coleta' | 'entrega', weeks = 2) {
     const filtered = horarios.filter((h) => h.tipo === tipo);
     const now = new Date();
-    const results: { label: string; value: string }[] = [];
+    const results: { label: string; value: string; horarioId: number }[] = [];
 
     for (const h of filtered) {
         for (let w = 0; w < weeks; w++) {
@@ -46,6 +46,7 @@ function buildUpcomingDates(horarios: HorarioDisponivel[], tipo: 'coleta' | 'ent
                 results.push({
                     label: `${DIAS[h.dia_semana]}, ${d.toLocaleDateString('pt-BR')} — ${fmt(h.hora_inicio)} às ${fmt(h.hora_fim)}`,
                     value: d.toISOString().slice(0, 16),
+                    horarioId: h.id,
                 });
             }
         }
@@ -144,6 +145,7 @@ export function DoacaoNecessidadesModal({ open, onClose, instituicaoId, necessid
                 agendamento: {
                     tipo,
                     data_hora: dataHora.replace('T', ' ') + ':00',
+                    horario_disponivel_id: upcomingDates.find((d) => d.value === dataHora)?.horarioId ?? null,
                     endereco_referencia: tipo === 'coleta' ? enderecoReferencia : null,
                 },
             },
