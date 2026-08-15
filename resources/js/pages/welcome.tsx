@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { login, redirect, register } from '@/routes';
 import { index as instituicoesIndex } from '@/routes/instituicoes';
+import AppLogoIcon from '@/components/app-logo-icon';
 
 function useCounter(end: number, duration = 2000, active = false) {
     const [count, setCount] = useState(0);
@@ -97,6 +98,9 @@ export default function Welcome({
                             {/* <div className="flex size-7 items-center justify-center rounded-md bg-brand text-primary-foreground">
                                 <Heart className="size-4" />
                             </div> */}
+                            <div className="flex aspect-square size-10 items-center justify-center">
+                                <AppLogoIcon />
+                            </div>
                             <span>Impacta</span>
                         </div>
                         <nav className="flex items-center gap-2">

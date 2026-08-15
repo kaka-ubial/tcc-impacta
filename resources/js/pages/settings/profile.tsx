@@ -320,7 +320,7 @@ console.log('Erros:', errors);
                                                     onChange={handleEnderecoChange}
                                                     errors={enderecoErrors}
                                                 />
-                                                <button
+                                                {/* <button
                                                     type="button"
                                                     onClick={handleGeolocate}
                                                     disabled={geoStatus === 'loading' || geoStatus === 'granted'}
@@ -338,7 +338,7 @@ console.log('Erros:', errors);
                                                     {geoStatus === 'granted' && 'Localização obtida'}
                                                     {geoStatus === 'denied' && 'Permissão negada'}
                                                     {geoStatus === 'idle' && 'Usar minha localização atual'}
-                                                </button>
+                                                </button> */}
                                             </div>
                                         </>
                                     )}
