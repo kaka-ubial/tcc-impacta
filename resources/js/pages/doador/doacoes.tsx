@@ -17,6 +17,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { StarDisplay } from '@/components/ui/star-display';
 import AppLayout from '@/layouts/app-layout';
+import type { BreadcrumbItem } from '@/types';
 import {
     aceitarSugestao as aceitarRoute,
     cancel as cancelRoute,
@@ -24,7 +25,6 @@ import {
     recusarSugestao as recusarRoute,
 } from '@/routes/doacoes';
 import { index as instituicoesIndex } from '@/routes/instituicoes';
-import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Minhas Doações', href: doacoesIndex.url() },

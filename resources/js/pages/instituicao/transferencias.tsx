@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/app-layout';
+import type { BreadcrumbItem, HorarioDisponivel } from '@/types';
 import { painel } from '@/routes/instituicao';
 import {
     index as transferenciaIndex,
@@ -21,7 +22,6 @@ import {
     aceitarSugestao as aceitarSugestaoRoute,
     recusarSugestao as recusarSugestaoRoute,
 } from '@/routes/instituicao/transferencias';
-import type { BreadcrumbItem, HorarioDisponivel } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Painel', href: painel.url() },
@@ -33,10 +33,13 @@ const DIAS_LONGO = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta',
 
 function formatDataHora(iso: string) {
     const d = new Date(iso);
+
     return `${DIAS_CURTO[d.getDay()]}, ${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
 }
 
-function fmt(hora: string) { return hora.slice(0, 5); }
+function fmt(hora: string) {
+ return hora.slice(0, 5); 
+}
 
 function buildUpcomingDates(horarios: HorarioDisponivel[], weeks = 2) {
     const now = new Date();
@@ -114,7 +117,10 @@ function TransferenciaCard({ t, horarios }: { t: Transferencia; horarios: Horari
     const hasHorarios = upcomingDates.length > 0;
 
     function handleSugerir() {
-        if (!novaData) return;
+        if (!novaData) {
+return;
+}
+
         post(sugerirRoute(t.id).url, { data_hora_sugerida: novaData.replace('T', ' ') + ':00' });
         setSugerindo(false);
     }
@@ -311,7 +317,9 @@ const PER_PAGE = 10;
 function Section({ title, items, horarios }: { title: string; items: Transferencia[]; horarios: HorarioDisponivel[] }) {
     const [page, setPage] = useState(1);
 
-    if (items.length === 0) return null;
+    if (items.length === 0) {
+return null;
+}
 
     const totalPages = Math.ceil(items.length / PER_PAGE);
     const visivel = items.slice((page - 1) * PER_PAGE, page * PER_PAGE);

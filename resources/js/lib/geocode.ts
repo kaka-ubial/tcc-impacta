@@ -6,11 +6,13 @@ export async function geocodeAddress(address: string): Promise<{ lat: number; lo
             { headers: { 'Accept': 'application/json' } },
         );
         const data: { lat: string; lon: string }[] = await res.json();
+
         if (data.length > 0) {
             return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
         }
     } catch {
         // Geocoding unavailable — coordinates stay null
     }
+
     return null;
 }

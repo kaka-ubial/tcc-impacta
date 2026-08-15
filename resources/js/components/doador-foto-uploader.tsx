@@ -48,11 +48,13 @@ export function DoadorFotoUploader({ nome, fotoAtual }: Props) {
 
         if (!TIPOS_ACEITOS.includes(file.type)) {
             setClientError('Formato inválido. Use JPG, PNG ou WEBP.');
+
             return;
         }
 
         if (file.size > MAX_BYTES) {
             setClientError('A imagem deve ter no máximo 2 MB.');
+
             return;
         }
 
@@ -74,6 +76,7 @@ export function DoadorFotoUploader({ nome, fotoAtual }: Props) {
                     URL.revokeObjectURL(objectUrl);
                     setPreview(null);
                     setProcessing(false);
+
                     if (inputRef.current) {
                         inputRef.current.value = '';
                     }

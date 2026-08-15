@@ -63,6 +63,7 @@ function buildUpcomingDates(horarios: Horario[], tipo: 'coleta' | 'entrega', wee
 
 function formatDataHora(iso: string): string {
     const d = new Date(iso);
+
     return `${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
 }
 
@@ -79,7 +80,9 @@ export default function SugerirAlteracaoDialog({ agendamentoId, dataHoraAtual, t
         e.preventDefault();
         post(sugerirRoute(agendamentoId).url, {
             preserveScroll: true,
-            onSuccess: () => { setOpen(false); reset(); },
+            onSuccess: () => {
+ setOpen(false); reset(); 
+},
         });
     }
 

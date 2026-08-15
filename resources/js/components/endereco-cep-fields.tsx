@@ -4,9 +4,10 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import {
     maskCep,
-    fetchCep,
-    type EnderecoFields,
+    fetchCep
+    
 } from '@/lib/validators';
+import type {EnderecoFields} from '@/lib/validators';
 
 type Props = {
     value: EnderecoFields;
@@ -14,10 +15,6 @@ type Props = {
     errors?: Partial<Record<keyof EnderecoFields | 'cep', string>>;
 };
 
-const UFS = [
-    'AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG',
-    'PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO',
-];
 
 export default function EnderecoCepFields({ value, onChange, errors }: Props) {
     const [loading, setLoading] = useState(false);
@@ -29,8 +26,12 @@ export default function EnderecoCepFields({ value, onChange, errors }: Props) {
 
     async function handleCepBlur() {
         const digits = value.cep.replace(/\D/g, '');
+
         if (digits.length !== 8) {
-            if (digits.length > 0) setCepError('CEP deve ter 8 dígitos');
+            if (digits.length > 0) {
+setCepError('CEP deve ter 8 dígitos');
+}
+
             return;
         }
 
@@ -41,6 +42,7 @@ export default function EnderecoCepFields({ value, onChange, errors }: Props) {
 
         if (!result) {
             setCepError('CEP não encontrado');
+
             return;
         }
 
@@ -59,15 +61,19 @@ export default function EnderecoCepFields({ value, onChange, errors }: Props) {
         setCepError('');
 
         const digits = raw.replace(/\D/g, '');
+
         if (digits.length === 8) {
             setCepError('');
             setLoading(true);
             fetchCep(digits).then((result) => {
                 setLoading(false);
+
                 if (!result) {
                     setCepError('CEP não encontrado');
+
                     return;
                 }
+
                 onChange({
                     ...value,
                     cep: maskCep(digits),

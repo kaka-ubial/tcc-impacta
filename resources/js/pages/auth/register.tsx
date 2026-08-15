@@ -1,7 +1,9 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { Building2, Check, Heart, LocateFixed, UserRound } from 'lucide-react';
-import { type FormEvent, useEffect, useRef, useState } from 'react';
+import {  useEffect, useRef, useState } from 'react';
+import type {FormEvent} from 'react';
 
+import EnderecoCepFields from '@/components/endereco-cep-fields';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import TextLink from '@/components/text-link';
@@ -13,9 +15,9 @@ import { cn } from '@/lib/utils';
 import {
     maskCpf, maskCnpj, maskPhone,
     runValidation, rules,
-    buildEnderecoCompleto, type EnderecoFields,
+    buildEnderecoCompleto 
 } from '@/lib/validators';
-import EnderecoCepFields from '@/components/endereco-cep-fields';
+import type {EnderecoFields} from '@/lib/validators';
 import { home, login } from '@/routes';
 import { store } from '@/routes/register';
 
@@ -61,10 +63,14 @@ function BrandPanel() {
     const [paused, setPaused] = useState(false);
 
     useEffect(() => {
-        if (paused) return;
+        if (paused) {
+return;
+}
+
         const timer = setInterval(() => {
             setCurrent((c) => (c + 1) % brandSlides.length);
         }, 4500);
+
         return () => clearInterval(timer);
     }, [paused]);
 
@@ -139,6 +145,7 @@ function BrandPanel() {
 
 function StepIndicator({ step }: { step: Step }) {
     const progress = (step - 1) / (stepLabels.length - 1);
+
     return (
         <div className="relative mb-8 flex items-start justify-between">
             {/* Track */}
@@ -152,6 +159,7 @@ function StepIndicator({ step }: { step: Step }) {
                 const n = i + 1;
                 const done = step > n;
                 const active = step === n;
+
                 return (
                     <div key={n} className="relative z-10 flex flex-col items-center gap-1.5">
                         <div
@@ -235,6 +243,7 @@ export default function Register({ causas }: { causas: any[] }) {
 
         if (Object.keys(errs).length > 0) {
             setClientErrors(errs);
+
             return;
         }
 
@@ -261,7 +270,10 @@ export default function Register({ causas }: { causas: any[] }) {
     }
 
     function handleGeolocate() {
-        if (!navigator.geolocation || geoAttempted.current) return;
+        if (!navigator.geolocation || geoAttempted.current) {
+return;
+}
+
         geoAttempted.current = true;
         setGeoStatus('loading');
         navigator.geolocation.getCurrentPosition(
@@ -299,11 +311,15 @@ export default function Register({ causas }: { causas: any[] }) {
         const fieldData = { ...data, ...endereco } as unknown as Record<string, string>;
         const errs = runValidation(fieldData, fieldRules);
         setClientErrors(errs);
+
         return Object.keys(errs).length === 0;
     }
 
     function nextStep() {
-        if (step === 3 && !validateStep3()) return;
+        if (step === 3 && !validateStep3()) {
+return;
+}
+
         setStep((s) => (s < 4 ? ((s + 1) as Step) : s));
     }
 
@@ -732,6 +748,7 @@ export default function Register({ causas }: { causas: any[] }) {
                                         <div className="grid grid-cols-2 gap-2">
                                             {causas?.map((causa) => {
                                                 const isSelected = data.causas_apoiadas.includes(causa.id);
+
                                                 return (
                                                     <button
                                                         key={causa.id ?? `causa-${causa.nome}`}

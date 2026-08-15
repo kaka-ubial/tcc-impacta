@@ -69,8 +69,15 @@ const painelItems: PainelItem[] = [
 
 function getGreeting(): string {
     const h = new Date().getHours();
-    if (h < 12) return 'Bom dia';
-    if (h < 18) return 'Boa tarde';
+
+    if (h < 12) {
+return 'Bom dia';
+}
+
+    if (h < 18) {
+return 'Boa tarde';
+}
+
     return 'Boa noite';
 }
 
@@ -111,6 +118,7 @@ export default function Painel() {
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {available.map((item) => {
                             const Icon = item.icon;
+
                             return (
                                 <Link
                                     key={item.title}
@@ -154,6 +162,7 @@ export default function Painel() {
                         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             {unavailable.map((item) => {
                                 const Icon = item.icon;
+
                                 return (
                                     <div
                                         key={item.title}
