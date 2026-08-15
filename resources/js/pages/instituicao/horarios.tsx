@@ -10,9 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import AppLayout from '@/layouts/app-layout';
-import { index as painelIndex } from '@/routes/instituicao';
-import { destroy as destroyHorario, store as storeHorario } from '@/routes/instituicao/horarios';
 import type { BreadcrumbItem, HorarioDisponivel } from '@/types';
+import { destroy as destroyHorario, store as storeHorario } from '@/routes/instituicao/horarios';
 
 const DIAS = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
 

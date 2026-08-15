@@ -1,5 +1,5 @@
 import { router } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import EnderecoCepFields from '@/components/endereco-cep-fields';
 import { Badge } from '@/components/ui/badge';
@@ -9,9 +9,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { buildEnderecoCompleto, type EnderecoFields } from '@/lib/validators';
-import { store as doacoesStore } from '@/routes/doacoes';
+import { buildEnderecoCompleto  } from '@/lib/validators';
+import type {EnderecoFields} from '@/lib/validators';
 import type { HorarioDisponivel, NecessidadeAtiva } from '@/types';
+import { store as doacoesStore } from '@/routes/doacoes';
 
 type Props = {
     open: boolean;
@@ -68,11 +69,18 @@ export function DoacaoNecessidadesModal({ open, onClose, instituicaoId, necessid
     const [step, setStep] = useState(0);
     const [selected, setSelected] = useState<Record<number, number>>({});
 
-    useEffect(() => {
+    // Pre-seleciona a necessidade quando o modal abre (padrao "adjust state
+    // during render" — evita setState dentro de useEffect)
+    const [prevOpen, setPrevOpen] = useState(open);
+
+    if (prevOpen !== open) {
+        setPrevOpen(open);
+
         if (open && initialNecessidadeId !== undefined) {
             setSelected({ [initialNecessidadeId]: 1 });
         }
-    }, [open, initialNecessidadeId]);
+    }
+
     const [tipo, setTipo] = useState<'coleta' | 'entrega'>('entrega');
     const [dataHora, setDataHora] = useState('');
     const [enderecoReferencia, setEnderecoReferencia] = useState('');

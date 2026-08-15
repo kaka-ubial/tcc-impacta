@@ -10,9 +10,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { buildEnderecoCompleto, type EnderecoFields } from '@/lib/validators';
-import { store as doacoesStore } from '@/routes/doacoes';
+import { buildEnderecoCompleto  } from '@/lib/validators';
+import type {EnderecoFields} from '@/lib/validators';
 import type { CategoriaItem, HorarioDisponivel } from '@/types';
+import { store as doacoesStore } from '@/routes/doacoes';
 
 const DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
@@ -114,8 +115,14 @@ export function SolicitacaoDoacaoModal({ open, onClose, instituicaoId, categoria
     }
 
     function canAdvanceStep2() {
-        if (!dataHora) return false;
-        if (tipo === 'coleta' && (!enderecoColeta.cep || enderecoColeta.cep.replace(/\D/g, '').length !== 8 || !enderecoColeta.logradouro || !enderecoColeta.numero)) return false;
+        if (!dataHora) {
+return false;
+}
+
+        if (tipo === 'coleta' && (!enderecoColeta.cep || enderecoColeta.cep.replace(/\D/g, '').length !== 8 || !enderecoColeta.logradouro || !enderecoColeta.numero)) {
+return false;
+}
+
         return true;
     }
 

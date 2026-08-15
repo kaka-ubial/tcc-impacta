@@ -1,6 +1,9 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeftRight, Calendar, CalendarClock, Check, CheckCheck, Package, Phone, Star, User, X } from 'lucide-react';
 import { useState } from 'react';
+import SugerirAlteracaoDialog from '@/components/doacao/SugerirAlteracaoDialog';
+import type {Horario} from '@/components/doacao/SugerirAlteracaoDialog';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,8 +18,9 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { StarDisplay } from '@/components/ui/star-display';
 import { Textarea } from '@/components/ui/textarea';
-import SugerirAlteracaoDialog, { type Horario } from '@/components/doacao/SugerirAlteracaoDialog';
 import AppLayout from '@/layouts/app-layout';
+import { fotoUrl } from '@/lib/foto';
+import type { BreadcrumbItem } from '@/types';
 import { painel } from '@/routes/instituicao';
 import {
     confirm as confirmRoute,
@@ -26,9 +30,6 @@ import {
     reject as rejectRoute,
     avaliar as avaliarRoute,
 } from '@/routes/instituicao/doacoes';
-import type { BreadcrumbItem } from '@/types';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { fotoUrl } from '@/lib/foto';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Painel', href: painel.url() },
@@ -96,6 +97,7 @@ function iniciais(nome: string) {
 
 function StarPicker({ value, onChange }: { value: number; onChange: (n: number) => void }) {
     const [hovered, setHovered] = useState(0);
+
     return (
         <div className="flex gap-1">
             {[1, 2, 3, 4, 5].map((n) => (
@@ -136,7 +138,9 @@ function DoacaoCard({ doacao, horarios }: { doacao: Doacao; horarios: Horario[] 
     function handleAvaliar() {
         setProcessing(true);
         router.post(avaliarRoute(doacao.id).url, { nota, descricao: descricao || null }, {
-            onFinish: () => { setProcessing(false); setAvaliarOpen(false); },
+            onFinish: () => {
+ setProcessing(false); setAvaliarOpen(false); 
+},
         });
     }
 
@@ -322,7 +326,9 @@ function DoacaoCard({ doacao, horarios }: { doacao: Doacao; horarios: Horario[] 
                                         <div className="flex justify-center py-1">
                                             <StarPicker
                                                 value={nota}
-                                                onChange={(n) => { setNota(n); setDescricao(''); }}
+                                                onChange={(n) => {
+ setNota(n); setDescricao(''); 
+}}
                                             />
                                         </div>
                                         <div className="flex flex-col gap-1.5">
@@ -362,7 +368,9 @@ const PER_PAGE = 10;
 function Section({ title, items, horarios }: { title: string; items: Doacao[]; horarios: Horario[] }) {
     const [page, setPage] = useState(1);
 
-    if (items.length === 0) return null;
+    if (items.length === 0) {
+return null;
+}
 
     const totalPages = Math.ceil(items.length / PER_PAGE);
     const visivel = items.slice((page - 1) * PER_PAGE, page * PER_PAGE);
