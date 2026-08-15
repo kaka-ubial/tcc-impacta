@@ -17,6 +17,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Atras do proxy do Render — confiar nos headers X-Forwarded-* para
+        // gerar URLs https corretas (senao os assets saem como http e o
+        // navegador bloqueia por mixed content)
+        $middleware->trustProxies(at: '*');
+
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
         $middleware->web(append: [
