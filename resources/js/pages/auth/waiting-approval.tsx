@@ -1,6 +1,6 @@
 import { Head, router, Link } from '@inertiajs/react';
 import { Clock } from 'lucide-react';
-import { use, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 

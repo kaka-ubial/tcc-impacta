@@ -28,11 +28,23 @@ class UserFactory extends Factory
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
+            'tipo_usuario' => 'doador',
+            'status' => 'ativo',
             'remember_token' => Str::random(10),
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
             'two_factor_confirmed_at' => null,
         ];
+    }
+
+    /**
+     * Indicate that the user is an institution.
+     */
+    public function instituicao(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'tipo_usuario' => 'instituicao',
+        ]);
     }
 
     /**

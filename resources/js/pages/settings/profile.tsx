@@ -1,8 +1,6 @@
 import { Transition } from '@headlessui/react';
-import { Form, Head, Link, usePage, useForm } from '@inertiajs/react';
-import { LocateFixed } from 'lucide-react';
-import { useRef, useState } from 'react';
-import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
+import { Form, Head, Link, usePage } from '@inertiajs/react';
+import { useState } from 'react';
 import DeleteUser from '@/components/delete-user';
 import { DoadorFotoUploader } from '@/components/doador-foto-uploader';
 import EnderecoCepFields from '@/components/endereco-cep-fields';
@@ -14,12 +12,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
+import { cn } from '@/lib/utils';
+import { maskCpf, maskCnpj, maskPhone, runValidation, rules, buildEnderecoCompleto, parseEnderecoCompleto  } from '@/lib/validators';
+import type {EnderecoFields} from '@/lib/validators';
+import type { BreadcrumbItem } from '@/types';
+import type { Causa } from '@/types/auth';
+import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import { edit } from '@/routes/profile';
 import { send } from '@/routes/verification';
-import type { BreadcrumbItem } from '@/types';
-import { cn } from '@/lib/utils';
-import { maskCpf, maskCnpj, maskPhone, runValidation, rules, buildEnderecoCompleto, parseEnderecoCompleto, type EnderecoFields } from '@/lib/validators';
-import type { Causa } from '@/types/auth';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -51,10 +51,6 @@ export default function Profile({
 
     const [latitude, setLatitude] = useState<number | null>(auth.user.doador?.latitude ?? null);
     const [longitude, setLongitude] = useState<number | null>(auth.user.doador?.longitude ?? null);
-    const [geoStatus, setGeoStatus] = useState<'idle' | 'loading' | 'granted' | 'denied'>(
-        auth.user.doador?.latitude ? 'granted' : 'idle'
-    );
-    const geoAttempted = useRef(false);
 
     const [selectedCausas, setSelectedCausas] = useState<number[]>(
         () => auth.user.causas?.map((c) => c.id) ?? []
@@ -66,23 +62,9 @@ export default function Profile({
         );
     }
 
-    function handleGeolocate() {
-        if (!navigator.geolocation || geoAttempted.current) return;
-        geoAttempted.current = true;
-        setGeoStatus('loading');
-        navigator.geolocation.getCurrentPosition(
-            (pos) => {
-                setLatitude(pos.coords.latitude);
-                setLongitude(pos.coords.longitude);
-                setGeoStatus('granted');
-            },
-            () => setGeoStatus('denied'),
-            { timeout: 8000 },
-        );
-    }
-
     const [geocodingQuery, setGeocodingQuery] = useState(() => {
         const e = endereco;
+
         return [e.logradouro, e.numero, e.cidade, e.uf, 'Brasil'].filter(Boolean).join(', ');
     });
     const [addressTouched, setAddressTouched] = useState(() => !!enderecoSource);
@@ -92,14 +74,25 @@ export default function Profile({
         const errs = runValidation({ [field]: value }, { [field]: fieldRules });
         setClientErrors((prev) => {
             const next = { ...prev };
-            if (errs[field]) next[field] = errs[field];
-            else delete next[field];
+
+            if (errs[field]) {
+next[field] = errs[field];
+} else {
+delete next[field];
+}
+
             return next;
         });
     }
 
     function clearField(field: string) {
-        setClientErrors((prev) => { const { [field]: _, ...rest } = prev; return rest; });
+        setClientErrors((prev) => {
+            const rest = { ...prev };
+
+            delete rest[field];
+
+            return rest;
+        });
     }
 
     function handleEnderecoChange(fields: EnderecoFields) {
@@ -107,8 +100,6 @@ export default function Profile({
         setEnderecoCompleto(buildEnderecoCompleto(fields));
         setLatitude(null);
         setLongitude(null);
-        setGeoStatus('idle');
-        geoAttempted.current = false;
         setAddressTouched(true);
         setGeocodingQuery(
             [fields.logradouro, fields.numero, fields.cidade, fields.uf, 'Brasil'].filter(Boolean).join(', ')
@@ -116,13 +107,30 @@ export default function Profile({
     }
 
     const enderecoErrors = (() => {
-        if (!addressTouched) return {};
+        if (!addressTouched) {
+return {};
+}
+
         const hasAnyField = Object.values(endereco).some((v) => !!v);
-        if (!hasAnyField) return {};
+
+        if (!hasAnyField) {
+return {};
+}
+
         const errs: Partial<Record<keyof EnderecoFields, string>> = {};
-        if (!endereco.logradouro) errs.logradouro = 'Campo obrigatório';
-        if (!endereco.cidade) errs.cidade = 'Campo obrigatório';
-        if (!endereco.uf) errs.uf = 'Campo obrigatório';
+
+        if (!endereco.logradouro) {
+errs.logradouro = 'Campo obrigatório';
+}
+
+        if (!endereco.cidade) {
+errs.cidade = 'Campo obrigatório';
+}
+
+        if (!endereco.uf) {
+errs.uf = 'Campo obrigatório';
+}
+
         return errs;
     })();
     const hasEnderecoErrors = Object.keys(enderecoErrors).length > 0;
@@ -228,7 +236,9 @@ console.log('Erros:', errors);
                                                 placeholder="00.000.000/0000-00"
                                                 maxLength={18}
                                                 required
-                                                onChange={(e) => { e.target.value = maskCnpj(e.target.value); clearField('cnpj'); }}
+                                                onChange={(e) => {
+ e.target.value = maskCnpj(e.target.value); clearField('cnpj'); 
+}}
                                                 onBlur={(e) => validateField('cnpj', e.target.value, [rules.cnpj()])}
                                             />
                                             <InputError message={clientErrors.cnpj || errors.cnpj} />
@@ -241,7 +251,9 @@ console.log('Erros:', errors);
                                                 placeholder="(00) 00000-0000"
                                                 maxLength={15}
                                                 required
-                                                onChange={(e) => { e.target.value = maskPhone(e.target.value); clearField('telefone_inst'); }}
+                                                onChange={(e) => {
+ e.target.value = maskPhone(e.target.value); clearField('telefone_inst'); 
+}}
                                                 onBlur={(e) => validateField('telefone_inst', e.target.value, [rules.phone()])}
                                             />
                                             <InputError message={clientErrors.telefone_inst || errors.telefone_inst} />
@@ -283,7 +295,9 @@ console.log('Erros:', errors);
                                                 placeholder='000.000.000-00'
                                                 maxLength={14}
                                                 required
-                                                onChange={(e) => { e.target.value = maskCpf(e.target.value); clearField('cpf'); }}
+                                                onChange={(e) => {
+ e.target.value = maskCpf(e.target.value); clearField('cpf'); 
+}}
                                                 onBlur={(e) => validateField('cpf', e.target.value, [rules.cpf()])}
                                             />
                                             <InputError message={clientErrors.cpf || errors.cpf} />
@@ -296,7 +310,9 @@ console.log('Erros:', errors);
                                                 placeholder='(00) 00000-0000'
                                                 maxLength={15}
                                                 required
-                                                onChange={(e) => { e.target.value = maskPhone(e.target.value); clearField('telefone'); }}
+                                                onChange={(e) => {
+ e.target.value = maskPhone(e.target.value); clearField('telefone'); 
+}}
                                                 onBlur={(e) => validateField('telefone', e.target.value, [rules.phone()])}
                                             />
                                             <InputError message={clientErrors.telefone || errors.telefone} />
@@ -320,25 +336,6 @@ console.log('Erros:', errors);
                                                     onChange={handleEnderecoChange}
                                                     errors={enderecoErrors}
                                                 />
-                                                {/* <button
-                                                    type="button"
-                                                    onClick={handleGeolocate}
-                                                    disabled={geoStatus === 'loading' || geoStatus === 'granted'}
-                                                    className={cn(
-                                                        'flex items-center gap-2 self-start rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors',
-                                                        geoStatus === 'granted'
-                                                            ? 'border-success/30 bg-success/10 text-success'
-                                                            : geoStatus === 'denied'
-                                                              ? 'border-destructive/30 bg-destructive/5 text-destructive'
-                                                              : 'border-border bg-card text-muted-foreground hover:border-brand/40 hover:text-foreground',
-                                                    )}
-                                                >
-                                                    <LocateFixed className="size-3.5 shrink-0" />
-                                                    {geoStatus === 'loading' && 'Obtendo localização...'}
-                                                    {geoStatus === 'granted' && 'Localização obtida'}
-                                                    {geoStatus === 'denied' && 'Permissão negada'}
-                                                    {geoStatus === 'idle' && 'Usar minha localização atual'}
-                                                </button> */}
                                             </div>
                                         </>
                                     )}
@@ -355,6 +352,7 @@ console.log('Erros:', errors);
                                         <div className="grid grid-cols-2 gap-2">
                                             {causas.map((causa) => {
                                                 const isSelected = selectedCausas.includes(causa.id);
+
                                                 return (
                                                     <button
                                                         key={causa.id}

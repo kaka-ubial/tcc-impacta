@@ -27,8 +27,8 @@ import { UserMenuContent } from '@/components/user-menu-content';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
-import { index as instituicoesIndex } from '@/routes/instituicoes';
 import type { BreadcrumbItem, NavItem } from '@/types';
+import { index as instituicoesIndex } from '@/routes/instituicoes';
 
 type Props = {
     breadcrumbs?: BreadcrumbItem[];

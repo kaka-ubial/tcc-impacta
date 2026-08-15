@@ -1,6 +1,18 @@
 <?php
 
+use App\Models\Doador;
 use App\Models\User;
+
+function makeDoadorFor(User $user): Doador
+{
+    return Doador::create([
+        'usuario_id'            => $user->id,
+        'nome_completo'         => 'Doador Original',
+        'cpf'                   => '529.982.247-25',
+        'telefone'              => '(11) 91234-5678',
+        'pontuacao_gamificacao' => 0,
+    ]);
+}
 
 test('profile page is displayed', function () {
     $user = User::factory()->create();
@@ -14,12 +26,16 @@ test('profile page is displayed', function () {
 
 test('profile information can be updated', function () {
     $user = User::factory()->create();
+    makeDoadorFor($user);
 
     $response = $this
         ->actingAs($user)
         ->patch(route('profile.update'), [
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            'tipo_usuario'  => 'doador',
+            'email'         => 'test@example.com',
+            'nome_completo' => 'Test User',
+            'cpf'           => '529.982.247-25',
+            'telefone'      => '(11) 91234-5678',
         ]);
 
     $response
@@ -28,19 +44,23 @@ test('profile information can be updated', function () {
 
     $user->refresh();
 
-    expect($user->name)->toBe('Test User');
+    expect($user->doador->nome_completo)->toBe('Test User');
     expect($user->email)->toBe('test@example.com');
     expect($user->email_verified_at)->toBeNull();
 });
 
 test('email verification status is unchanged when the email address is unchanged', function () {
     $user = User::factory()->create();
+    makeDoadorFor($user);
 
     $response = $this
         ->actingAs($user)
         ->patch(route('profile.update'), [
-            'name' => 'Test User',
-            'email' => $user->email,
+            'tipo_usuario'  => 'doador',
+            'email'         => $user->email,
+            'nome_completo' => 'Test User',
+            'cpf'           => '529.982.247-25',
+            'telefone'      => '(11) 91234-5678',
         ]);
 
     $response

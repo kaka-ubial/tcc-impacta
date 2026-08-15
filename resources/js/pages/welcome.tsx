@@ -1,25 +1,35 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { ArrowRight, Building2, Heart, Package, Users } from 'lucide-react';
+import { ArrowRight, Building2, Package, Users } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import AppLogoIcon from '@/components/app-logo-icon';
 import { Button } from '@/components/ui/button';
 import { login, redirect, register } from '@/routes';
 import { index as instituicoesIndex } from '@/routes/instituicoes';
-import AppLogoIcon from '@/components/app-logo-icon';
 
 function useCounter(end: number, duration = 2000, active = false) {
     const [count, setCount] = useState(0);
     useEffect(() => {
-        if (!active || end === 0) return;
+        if (!active || end === 0) {
+return;
+}
+
         let startTime: number | null = null;
         const step = (ts: number) => {
-            if (!startTime) startTime = ts;
+            if (!startTime) {
+startTime = ts;
+}
+
             const progress = Math.min((ts - startTime) / duration, 1);
             const ease = 1 - Math.pow(1 - progress, 3);
             setCount(Math.floor(ease * end));
-            if (progress < 1) requestAnimationFrame(step);
+
+            if (progress < 1) {
+requestAnimationFrame(step);
+}
         };
         requestAnimationFrame(step);
     }, [end, duration, active]);
+
     return count;
 }
 
@@ -27,6 +37,7 @@ function StatCounter({ value, suffix = '', label, active }: {
     value: number; suffix?: string; label: string; active: boolean;
 }) {
     const count = useCounter(value, 2000, active);
+
     return (
         <div>
             <span className="font-display block text-5xl font-bold text-brand leading-none md:text-6xl">
@@ -71,12 +82,21 @@ export default function Welcome({
 
     useEffect(() => {
         const el = statsRef.current;
-        if (!el) return;
+
+        if (!el) {
+return;
+}
+
         const observer = new IntersectionObserver(
-            ([entry]) => { if (entry.isIntersecting) setStatsVisible(true); },
+            ([entry]) => {
+ if (entry.isIntersecting) {
+setStatsVisible(true);
+} 
+},
             { threshold: 0.25 },
         );
         observer.observe(el);
+
         return () => observer.disconnect();
     }, []);
 
@@ -194,6 +214,7 @@ export default function Welcome({
                         <div className="grid gap-12 md:grid-cols-3 md:gap-0">
                             {steps.map((step, i) => {
                                 const Icon = step.icon;
+
                                 return (
                                     <div key={i} className="relative md:pr-12">
                                         <div className="mb-6 flex items-center">

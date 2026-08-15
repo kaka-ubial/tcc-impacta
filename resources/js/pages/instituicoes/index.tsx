@@ -1,9 +1,8 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { ChevronLeft, ChevronRight, MapPin, Package, Search, Sparkles, Tag, X } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 import { CausaBadge } from '@/components/causa-badge';
-import { VerificadaBadge } from '@/components/verificada-badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -13,10 +12,11 @@ import {
     PaginationLink,
 } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
+import { VerificadaBadge } from '@/components/verificada-badge';
 import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
-import { index as instituicoesIndex, show as instituicoesShow } from '@/routes/instituicoes';
 import type { BreadcrumbItem, Causa, InstituicaoListItem, Recomendacao, SimplePaginated } from '@/types';
+import { index as instituicoesIndex, show as instituicoesShow } from '@/routes/instituicoes';
 
 type Props = {
     instituicoes: SimplePaginated<InstituicaoListItem>;
@@ -143,10 +143,15 @@ export default function InstituicoesIndex({ instituicoes, causas, filters, recom
     const [recsOpen, setRecsOpen] = useState(true);
     const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-    useEffect(() => {
+    // Sincroniza o input quando o filtro muda via navegacao (padrao "adjust
+    // state during render" — evita setState dentro de useEffect)
+    const [prevFilterSearch, setPrevFilterSearch] = useState(filters.search);
+
+    if (prevFilterSearch !== filters.search) {
+        setPrevFilterSearch(filters.search);
         setSearch(filters.search);
         setSearching(false);
-    }, [filters.search]);
+    }
 
     const navigate = useCallback((params: { search?: string; causa?: number | null }) => {
         const merged = {
@@ -155,8 +160,14 @@ export default function InstituicoesIndex({ instituicoes, causas, filters, recom
         };
 
         const query: Record<string, string> = {};
-        if (merged.search) query.search = merged.search;
-        if (merged.causa) query.causa = String(merged.causa);
+
+        if (merged.search) {
+query.search = merged.search;
+}
+
+        if (merged.causa) {
+query.causa = String(merged.causa);
+}
 
         router.get(
             instituicoesIndex(),
@@ -315,7 +326,9 @@ export default function InstituicoesIndex({ instituicoes, causas, filters, recom
                     ) : instituicoes.data.length === 0 ? (
                         <EmptyState
                             hasSearch={!!search || filters.causa !== null}
-                            onClear={() => { handleSearch(''); handleCausa(null); }}
+                            onClear={() => {
+ handleSearch(''); handleCausa(null); 
+}}
                         />
                     ) : (
                         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
