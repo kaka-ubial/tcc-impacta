@@ -1,31 +1,10 @@
-# Pipeline CI/CD — TCC Impacta (GitHub Actions)
-#
-# Espelha o gitflow do projeto — cada branch deploya seu ambiente:
-#   develop -> ambiente DEV     (integracao continua do time)
-#   release -> ambiente TEST    (staging / homologacao)
-#   main    -> ambiente PROD    (com aprovacao manual)
-#
-# A promocao entre ambientes acontece via git, como o time ja faz:
-# merge develop->release sobe pro TEST; PR release->main sobe pra PROD.
-# Toda run builda + testa antes de deployar; o deploy so roda se os
-# testes passarem.
-#
-# Requisitos no GitHub (Settings do repo, fora deste arquivo):
-#   - Environments: dev, test, prod (prod com "Required reviewers")
-#   - Secrets (Actions): DOCKERHUB_TOKEN, RENDER_HOOK_DEV, RENDER_HOOK_TEST,
-#     RENDER_HOOK_PROD
-#   - Variable (Actions): DOCKERHUB_USER
-
 name: CI/CD
 
 on:
   push:
     branches: [develop, release, main]
-  # Execucao noturna (na main) mesmo sem commits — evidencia de funcionamento
-  # continuo; roda so build+testes, sem deploy
   schedule:
     - cron: "0 3 * * *"
-  # Permite disparar manualmente pela aba Actions
   workflow_dispatch:
 
 env:
@@ -59,15 +38,11 @@ jobs:
           node-version: 22
           cache: npm
 
-      # O Wayfinder roda `php artisan` durante o build do Vite, por isso o
-      # front so builda depois do composer install + .env prontos
       - name: Build do front (Vite + Wayfinder)
         run: |
           npm ci
           npm run build
 
-      # DB via env real ganha do .env e do phpunit.xml — testes rodam em
-      # SQLite em memoria, sem depender de banco externo
       - name: Executar testes (Pest)
         env:
           DB_CONNECTION: sqlite
@@ -142,8 +117,6 @@ jobs:
     needs: build-test
     if: github.ref == 'refs/heads/main' && github.event_name != 'schedule'
     runs-on: ubuntu-latest
-    # O environment "prod" deve ter Required reviewers — a run para aqui
-    # esperando aprovacao manual antes de subir producao
     environment:
       name: prod
       url: https://impacta-prod.onrender.com
