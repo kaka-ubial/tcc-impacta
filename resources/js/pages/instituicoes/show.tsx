@@ -12,8 +12,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { VerificadaBadge } from '@/components/verificada-badge';
 import AppLayout from '@/layouts/app-layout';
-import { index as instituicoesIndex, show as instituicoesShow } from '@/routes/instituicoes';
 import type { BreadcrumbItem, CategoriaItem, InstituicaoDetalhe } from '@/types';
+import { index as instituicoesIndex, show as instituicoesShow } from '@/routes/instituicoes';
 
 const MapEmbed = lazy(() => import('@/components/map-embed'));
 

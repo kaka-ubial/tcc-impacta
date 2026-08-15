@@ -5,26 +5,23 @@ import {
     CalendarDays,
     Heart,
     Mail,
-    MapPin,
     Package,
     Phone,
     Trophy,
     User as UserIcon,
 } from 'lucide-react';
-import { lazy, Suspense } from 'react';
-import { StarDisplay } from '@/components/ui/star-display';
 import { CausaBadge } from '@/components/causa-badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { StarDisplay } from '@/components/ui/star-display';
 import AppLayout from '@/layouts/app-layout';
 import { fotoUrl } from '@/lib/foto';
+import type { BreadcrumbItem, DoadorPerfil } from '@/types';
+import { index as doadorDoacoesIndex } from '@/routes/doacoes';
 import { painel } from '@/routes/instituicao';
 import { index as doacoesIndex } from '@/routes/instituicao/doacoes';
-import { index as doadorDoacoesIndex } from '@/routes/doacoes';
-import type { BreadcrumbItem, DoadorPerfil } from '@/types';
 
-const MapEmbed = lazy(() => import('@/components/map-embed'));
 
 type Props = { doador: DoadorPerfil; isOwnProfile?: boolean };
 
@@ -66,31 +63,6 @@ function StatCard({
             <div className="flex flex-col">
                 <span className="text-2xl font-semibold leading-none">{value}</span>
                 <span className="text-muted-foreground text-xs">{label}</span>
-            </div>
-        </div>
-    );
-}
-
-function MapSection({ lat, lng, label }: { lat: number; lng: number; label: string }) {
-    const link = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=16/${lat}/${lng}`;
-
-    return (
-        <div className="isolate overflow-hidden rounded-xl border shadow-sm">
-            <div className="h-64">
-                <Suspense fallback={<div className="bg-muted h-full w-full animate-pulse" />}>
-                    <MapEmbed lat={lat} lng={lng} label={label} />
-                </Suspense>
-            </div>
-            <div className="bg-muted/40 flex items-center justify-between px-3 py-2 text-xs">
-                <span className="text-muted-foreground">{label}</span>
-                <a
-                    href={link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline"
-                >
-                    Abrir no mapa ↗
-                </a>
             </div>
         </div>
     );
@@ -145,7 +117,6 @@ export default function DoadorPerfilPage({ doador, isOwnProfile = false }: Props
               { title: doador.nome_completo, href: `/instituicao/doadores/${doador.usuario_id}` },
           ];
 
-    const hasMap = doador.latitude !== null && doador.longitude !== null;
     const voltarHref = isOwnProfile ? doadorDoacoesIndex.url() : doacoesIndex.url();
     const voltarLabel = isOwnProfile ? 'Voltar para minhas doações' : 'Voltar para doações';
 

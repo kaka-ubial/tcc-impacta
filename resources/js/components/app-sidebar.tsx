@@ -12,10 +12,10 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import type { NavItem } from '@/types';
 import admin from '@/routes/admin';
 import { index as doacoesIndex } from '@/routes/doacoes';
 import { index as instituicoesIndex } from '@/routes/instituicoes';
-import type { NavItem } from '@/types';
 
 const doadorNavItems: NavItem[] = [
     {

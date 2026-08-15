@@ -9,9 +9,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { buildEnderecoCompleto, type EnderecoFields } from '@/lib/validators';
-import { store as transferenciaStore } from '@/routes/instituicao/transferencias';
+import { buildEnderecoCompleto  } from '@/lib/validators';
+import type {EnderecoFields} from '@/lib/validators';
 import type { HorarioDisponivel, NecessidadeAtiva } from '@/types';
+import { store as transferenciaStore } from '@/routes/instituicao/transferencias';
 
 const DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
@@ -96,8 +97,10 @@ export function TransferenciaNecessidadesModal({
             if (prev[n.id] !== undefined) {
                 const next = { ...prev };
                 delete next[n.id];
+
                 return next;
             }
+
             return { ...prev, [n.id]: 1 };
         });
     }
@@ -127,8 +130,14 @@ export function TransferenciaNecessidadesModal({
     }
 
     function canAdvanceStep2() {
-        if (!dataHora) return false;
-        if (tipo === 'coleta' && (!enderecoColeta.cep || enderecoColeta.cep.replace(/\D/g, '').length !== 8 || !enderecoColeta.logradouro || !enderecoColeta.numero)) return false;
+        if (!dataHora) {
+return false;
+}
+
+        if (tipo === 'coleta' && (!enderecoColeta.cep || enderecoColeta.cep.replace(/\D/g, '').length !== 8 || !enderecoColeta.logradouro || !enderecoColeta.numero)) {
+return false;
+}
+
         return true;
     }
 
@@ -136,6 +145,7 @@ export function TransferenciaNecessidadesModal({
         setProcessing(true);
         const itens = selectedIds.map((id) => {
             const n = necessidades.find((x) => x.id === id)!;
+
             return { necessidade_id: n.id, categoria_id: n.categoria.id, quantidade: selected[id], descricao: null };
         });
         router.post(
@@ -151,7 +161,9 @@ export function TransferenciaNecessidadesModal({
                 },
             },
             {
-                onSuccess: () => { setProcessing(false); handleClose(); },
+                onSuccess: () => {
+ setProcessing(false); handleClose(); 
+},
                 onError:   () => setProcessing(false),
             },
         );
@@ -196,6 +208,7 @@ export function TransferenciaNecessidadesModal({
                                     const pct = Math.round((n.quantidade_atual / n.quantidade_objetivo) * 100);
                                     const isSelected = selected[n.id] !== undefined;
                                     const cfg = prioridadeConfig[n.prioridade];
+
                                     return (
                                         <button
                                             key={n.id}
@@ -255,7 +268,9 @@ export function TransferenciaNecessidadesModal({
                     <div className="flex flex-col gap-4">
                         <div className="flex flex-col gap-1">
                             <Label>Tipo de entrega</Label>
-                            <Select value={tipo} onValueChange={(v) => { setTipo(v as 'coleta' | 'entrega'); setDataHora(''); }}>
+                            <Select value={tipo} onValueChange={(v) => {
+ setTipo(v as 'coleta' | 'entrega'); setDataHora(''); 
+}}>
                                 <SelectTrigger>
                                     <SelectValue />
                                 </SelectTrigger>
@@ -324,6 +339,7 @@ export function TransferenciaNecessidadesModal({
                                 <ul className="list-inside list-disc space-y-0.5 pl-1">
                                     {selectedIds.map((id) => {
                                         const n = necessidades.find((x) => x.id === id)!;
+
                                         return (
                                             <li key={id}>
                                                 {selected[id]}× {n.categoria.nome}

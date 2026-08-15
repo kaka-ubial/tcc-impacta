@@ -2,6 +2,7 @@ import { Head, Link, router, useForm } from '@inertiajs/react';
 import { CalendarClock, Check, CheckCheck, ChevronLeft, ChevronRight, Clock, Phone, Plus, User, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
+import SugerirAlteracaoDialog from '@/components/doacao/SugerirAlteracaoDialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,8 +18,8 @@ import {
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import SugerirAlteracaoDialog from '@/components/doacao/SugerirAlteracaoDialog';
 import AppLayout from '@/layouts/app-layout';
+import type { BreadcrumbItem } from '@/types';
 import {
     confirm as confirmRoute,
     deliver as deliverRoute,
@@ -26,7 +27,6 @@ import {
     reject as rejectRoute,
 } from '@/routes/instituicao/doacoes';
 import { store as storeHorario } from '@/routes/instituicao/horarios';
-import type { BreadcrumbItem } from '@/types';
 
 // ─── types ──────────────────────────────────────────────────────────────────
 
@@ -124,33 +124,6 @@ function statusVisual(doacaoStatus: string, dataHora: string, agendamentoStatus?
     return { label: 'Pendente', chip: 'bg-muted text-muted-foreground', badge: 'border-border bg-muted text-muted-foreground' };
 }
 
-// ─── projeção de horários disponíveis ───────────────────────────────────────
-
-function buildUpcomingDates(horarios: Horario[], tipo: 'coleta' | 'entrega', weeks = 4) {
-    const agora = new Date();
-    const opcoes: { label: string; value: string }[] = [];
-
-    for (const h of horarios.filter((x) => x.tipo === tipo)) {
-        for (let w = 0; w < weeks; w++) {
-            const d = new Date(agora);
-            const diff = (h.dia_semana - d.getDay() + 7) % 7;
-
-            d.setDate(d.getDate() + diff + w * 7);
-            d.setHours(Number(h.hora_inicio.slice(0, 2)), Number(h.hora_inicio.slice(3, 5)), 0, 0);
-
-            if (d > agora) {
-                const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}T${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-
-                opcoes.push({
-                    label: `${DIAS[h.dia_semana]}, ${d.toLocaleDateString('pt-BR')} — ${h.hora_inicio.slice(0, 5)} às ${h.hora_fim.slice(0, 5)}`,
-                    value,
-                });
-            }
-        }
-    }
-
-    return opcoes.sort((a, b) => a.value.localeCompare(b.value));
-}
 
 // ─── add-availability dialog ────────────────────────────────────────────────
 
@@ -428,10 +401,12 @@ arr.push(new Date(ref.ano, ref.mes, d));
 
     const transferenciasPorDia = useMemo(() => {
         const map: Record<string, TransferenciaAgenda[]> = {};
+
         for (const t of transferencias) {
             const k = dateKey(new Date(t.data_hora ?? t.criado_em));
             (map[k] ??= []).push(t);
         }
+
         return map;
     }, [transferencias]);
 
