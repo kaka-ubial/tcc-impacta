@@ -59,7 +59,7 @@ const instituicaoNavItems: NavItem[] = [
     {
         title: 'Transferências',
         href: '/instituicao/transferencias',
-        icon: ArrowLeftRight,
+        icon: ArrowLeftRight    ,
     },
 ];
 

@@ -1,0 +1,9 @@
+# Atencao: public/build NAO pode entrar aqui — a pipeline builda os assets
+# antes do docker build e eles precisam ser copiados pra imagem.
+.git
+node_modules
+vendor
+tests
+.env
+storage/logs/*
+database/database.sqlite
