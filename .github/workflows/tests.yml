@@ -52,5 +52,9 @@ jobs:
       - name: Build Assets
         run: npm run build
 
+      # SQLite em memoria — o runner do CI nao tem o Postgres do docker local
       - name: Tests
         run: ./vendor/bin/pest
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ":memory:"
