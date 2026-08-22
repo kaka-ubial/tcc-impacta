@@ -82,14 +82,18 @@ class NecessidadeSeeder extends Seeder
 
             $instId = $instituicoes[array_rand($instituicoes)];
 
-            Necessidade::create([
-                'instituicao_id' => $instId,
-                'categoria_id' => $catId,
-                'descricao' => $nec['descricao'],
-                'quantidade_objetivo' => $nec['qty'],
-                'quantidade_atual' => $nec['atual'],
-                'prioridade' => $nec['prioridade'],
-            ]);
+            Necessidade::firstOrCreate(
+                [
+                    'categoria_id' => $catId,
+                    'descricao' => $nec['descricao'],
+                ],
+                [
+                    'instituicao_id' => $instId,
+                    'quantidade_objetivo' => $nec['qty'],
+                    'quantidade_atual' => $nec['atual'],
+                    'prioridade' => $nec['prioridade'],
+                ],
+            );
         }
     }
 }

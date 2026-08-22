@@ -5,12 +5,6 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-/**
- * As migrations que adicionaram 'confirmada' e 'nao_entregue' só tratavam
- * pgsql e mysql, então em sqlite o CHECK continuou preso aos 4 status
- * originais — o que impede o CI (que roda em sqlite) de testar o fluxo real.
- * Aqui o status passa a ser uma string simples nos três drivers.
- */
 return new class extends Migration
 {
     public function up(): void

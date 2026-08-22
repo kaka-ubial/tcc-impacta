@@ -108,6 +108,10 @@ class InstituicaoSeeder extends Seeder
         $causaIds = Causa::pluck('id')->toArray();
 
         foreach ($instituicoes as $inst) {
+            if (Instituicao::where('cnpj', $inst['cnpj'])->exists()) {
+                continue;
+            }
+
             $user = User::create([
                 'email' => fake()->unique()->safeEmail(),
                 'password' => Hash::make('Senha123'),
