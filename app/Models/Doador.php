@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['usuario_id','nome_completo', 'cpf','telefone','endereco_completo','foto_perfil','pontuacao_gamificacao','latitude','longitude'])]
+#[Fillable(['usuario_id','nome_completo', 'cpf','telefone','endereco_completo','foto_perfil','pontuacao_gamificacao','exibir_em_transparencia','latitude','longitude'])]
 class Doador extends Model
 {
 
@@ -21,7 +21,8 @@ class Doador extends Model
     protected function casts(): array
     {
         return [
-            'pontuacao_gamificacao' => 'integer',
+            'pontuacao_gamificacao'   => 'integer',
+            'exibir_em_transparencia' => 'boolean',
             'latitude'              => 'float',
             'longitude'             => 'float',
         ];

@@ -49,6 +49,7 @@ trait ProfileValidationRules
                     ['nullable', 'string', 'max:500'],
                 ),
             ],
+            'exibir_em_transparencia' => ['exclude_unless:tipo_usuario,doador', 'sometimes', 'boolean'],
             'latitude'          => ['nullable', 'numeric', 'between:-90,90'],
             'longitude'         => ['nullable', 'numeric', 'between:-180,180'],
             'geocoding_query'   => ['nullable', 'string', 'max:500'],

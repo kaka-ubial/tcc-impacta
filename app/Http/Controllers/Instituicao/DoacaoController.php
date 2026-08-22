@@ -121,7 +121,7 @@ class DoacaoController extends Controller
         abort_if($doacao->instituicao_id !== auth()->user()->instituicao->usuario_id, 403);
         abort_if($doacao->status !== 'confirmada', 422);
 
-        $doacao->update(['status' => 'entregue']);
+        $doacao->update(['status' => 'entregue', 'data_entrega' => now()]);
 
         Notificacao::enviar(
             $doacao->doador_id,
