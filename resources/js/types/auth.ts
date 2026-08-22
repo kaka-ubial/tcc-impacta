@@ -77,7 +77,6 @@ export type InstituicaoDetalhe = {
     horarios_disponiveis: HorarioDisponivel[];
 };
 
-
 export type Doador = {
     nome_completo: string;
     cpf: string;
@@ -86,11 +85,18 @@ export type Doador = {
     endereco_completo: string | null;
     latitude: number | null;
     longitude: number | null;
-}
+    exibir_em_transparencia?: boolean;
+};
 
 export type DoadorDoacaoResumo = {
     id: number;
-    status: 'pendente' | 'confirmada' | 'entregue' | 'cancelado' | 'recusada' | 'nao_entregue';
+    status:
+        | 'pendente'
+        | 'confirmada'
+        | 'entregue'
+        | 'cancelado'
+        | 'recusada'
+        | 'nao_entregue';
     criado_em: string;
     eh_para_esta_instituicao: boolean;
     instituicao: {
@@ -132,7 +138,7 @@ export type Instituicao = {
     cnpj: string;
     telefone: string;
     endereco_completo: string;
-}
+};
 
 export type User = {
     id: number;
@@ -143,8 +149,8 @@ export type User = {
     created_at: string;
     updated_at: string;
     tipo_usuario: 'doador' | 'instituicao';
-    instituicao ?: Instituicao;
-    doador ?: Doador;
+    instituicao?: Instituicao;
+    doador?: Doador;
     causas?: Causa[];
     [key: string]: unknown;
 };
