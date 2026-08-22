@@ -11,11 +11,13 @@ class AdminUserSeeder extends Seeder
 {
     public function run(): void
     {
-        User::create([
-            'email' => 'admin@impacta.com',
-            'password' => Hash::make('senha_segura'),
-            'tipo_usuario' => 'admin',
-            'status' => 'ativo',
-        ]);
+        User::firstOrCreate(
+            ['email' => 'admin@impacta.com'],
+            [
+                'password' => Hash::make('senha_segura'),
+                'tipo_usuario' => 'admin',
+                'status' => 'ativo',
+            ],
+        );
     }
 }

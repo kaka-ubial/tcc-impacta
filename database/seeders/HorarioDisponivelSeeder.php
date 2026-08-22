@@ -69,14 +69,16 @@ class HorarioDisponivelSeeder extends Seeder
             $template = $templates[$i % count($templates)];
 
             foreach ($template as $h) {
-                HorarioDisponivel::create([
-                    'instituicao_id' => $instId,
-                    'dia_semana' => $h['dia'],
-                    'hora_inicio' => $h['inicio'],
-                    'hora_fim' => $h['fim'],
-                    'tipo' => $h['tipo'],
-                    'ativo' => true,
-                ]);
+                HorarioDisponivel::firstOrCreate(
+                    [
+                        'instituicao_id' => $instId,
+                        'dia_semana' => $h['dia'],
+                        'hora_inicio' => $h['inicio'],
+                        'hora_fim' => $h['fim'],
+                        'tipo' => $h['tipo'],
+                    ],
+                    ['ativo' => true],
+                );
             }
         }
     }
