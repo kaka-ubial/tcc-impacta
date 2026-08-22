@@ -150,7 +150,7 @@ export default function Transparencia({
                         <p className="mt-3 text-muted-foreground">
                             Registro público de todas as doações já entregues às
                             instituições por meio da Impacta. Os nomes das
-                            pessoas doadoras só aparecem quando elas autorizam —
+                            pessoas doadoras só aparecem quando elas autorizam,
                             as demais constam como anônimas.
                         </p>
                         <p className="mt-4 text-sm font-medium">
