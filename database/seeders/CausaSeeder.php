@@ -22,7 +22,7 @@ class CausaSeeder extends Seeder
             ];
 
         foreach ($causas as $causa) {
-            Causa::create($causa);
+            Causa::firstOrCreate(['nome' => $causa['nome']], $causa);
         }
     }
 }
