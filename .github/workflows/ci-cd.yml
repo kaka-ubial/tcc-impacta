@@ -89,6 +89,19 @@ jobs:
         run: |
           docker buildx imagetools create -t "$IMAGE:dev" "$IMAGE:${{ github.run_number }}"
           curl -fsS "${{ secrets.RENDER_HOOK_DEV }}"
+      
+      - name: Health check
+        run: |
+          sleep 90   # da tempo do Render trocar a instancia
+          for i in $(seq 1 20); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 \
+              https://tcc-impacta-dev.onrender.com/up) || code=000
+            echo "tentativa $i: HTTP $code"
+            [ "$code" = "200" ] && exit 0
+            sleep 15
+          done
+          echo "::error::ambiente DEV nao respondeu 200 em /up"
+          exit 1
 
   # ---------------------------------------------------------------- DEPLOY TEST
   deploy-test:
@@ -111,6 +124,19 @@ jobs:
           docker buildx imagetools create -t "$IMAGE:test" "$IMAGE:${{ github.run_number }}"
           curl -fsS "${{ secrets.RENDER_HOOK_TEST }}"
 
+      - name: Health check
+        run: |
+          sleep 90   # da tempo do Render trocar a instancia
+          for i in $(seq 1 20); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 \
+              https://tcc-impacta-test.onrender.com/up) || code=000
+            echo "tentativa $i: HTTP $code"
+            [ "$code" = "200" ] && exit 0
+            sleep 15
+          done
+          echo "::error::ambiente TEST nao respondeu 200 em /up"
+          exit 1
+
   # ---------------------------------------------------------------- DEPLOY PROD
   deploy-prod:
     name: Deploy PROD
@@ -131,3 +157,16 @@ jobs:
         run: |
           docker buildx imagetools create -t "$IMAGE:prod" "$IMAGE:${{ github.run_number }}"
           curl -fsS "${{ secrets.RENDER_HOOK_PROD }}"
+
+      - name: Health check
+        run: |
+          sleep 90   # da tempo do Render trocar a instancia
+          for i in $(seq 1 20); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 \
+              https://tcc-impacta-prod.onrender.com/up) || code=000
+            echo "tentativa $i: HTTP $code"
+            [ "$code" = "200" ] && exit 0
+            sleep 15
+          done
+          echo "::error::ambiente PROD nao respondeu 200 em /up"
+          exit 1
