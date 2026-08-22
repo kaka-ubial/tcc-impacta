@@ -22,6 +22,7 @@ use App\Http\Controllers\Instituicao\AvaliacaoController;
 use App\Http\Controllers\Instituicao\TransferenciaController;
 use App\Http\Controllers\NecessidadeController;
 use App\Http\Controllers\NotificacaoController;
+use App\Http\Controllers\TransparenciaController;
 use App\Http\Middleware\CheckNecessidadeOwnership;
 
 Route::get('/', function () {
@@ -34,6 +35,10 @@ Route::get('/', function () {
         ],
     ]);
 })->name('home');
+
+Route::get('transparencia', [TransparenciaController::class, 'index'])
+    ->middleware('throttle:60,1')
+    ->name('transparencia');
 
 Route::get('/redirect', RedirectController::class)->middleware('auth')->name('redirect');
 

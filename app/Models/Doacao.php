@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -15,7 +16,15 @@ class Doacao extends Model
         'doador_id',
         'instituicao_id',
         'status',
+        'data_entrega',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'data_entrega' => 'datetime',
+        ];
+    }
 
     public function doador(): BelongsTo
     {
@@ -40,5 +49,13 @@ class Doacao extends Model
     public function avaliacao(): HasOne
     {
         return $this->hasOne(Avaliacao::class, 'doacao_id');
+    }
+
+    /**
+     * Apenas doações entregues podem aparecer no portal público de transparência
+     */
+    public function scopePublicas(Builder $query): Builder
+    {
+        return $query->where('status', 'entregue');
     }
 }
