@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Exceptions\DoacaoException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Doador\StoreDoacaoRequest;
 use App\Http\Resources\DoacaoResource;
@@ -34,11 +33,7 @@ class DoacaoController extends Controller
 
     public function store(StoreDoacaoRequest $request)
     {
-        try {
-            $doacao = $this->doacoes->store($request->validated(), $request->user());
-        } catch (DoacaoException $e) {
-            return response()->json(['message' => $e->getMessage()], 422);
-        }
+        $doacao = $this->doacoes->store($request->validated(), $request->user());
 
         return (new DoacaoResource($doacao))
             ->response()

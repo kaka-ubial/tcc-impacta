@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Exceptions\NecessidadeException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\NecessidadeRequest;
 use App\Http\Resources\NecessidadeResource;
@@ -30,11 +29,7 @@ class NecessidadeController extends Controller
 
     public function store(NecessidadeRequest $request)
     {
-        try {
-            $necessidade = $this->necessidades->store($request->validated(), $request->user()->instituicao);
-        } catch (NecessidadeException $e) {
-            return response()->json(['message' => $e->getMessage()], 422);
-        }
+        $necessidade = $this->necessidades->store($request->validated(), $request->user()->instituicao);
 
         return (new NecessidadeResource($necessidade))
             ->response()

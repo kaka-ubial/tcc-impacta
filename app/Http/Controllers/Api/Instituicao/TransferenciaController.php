@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\Instituicao;
 
-use App\Exceptions\TransferenciaException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instituicao\StoreTransferenciaRequest;
 use App\Http\Requests\Instituicao\SugerirDataRequest;
@@ -35,11 +34,7 @@ class TransferenciaController extends Controller
 
     public function store(StoreTransferenciaRequest $request)
     {
-        try {
-            $transferencia = $this->transferencias->store($request->validated(), $request->user());
-        } catch (TransferenciaException $e) {
-            return response()->json(['message' => $e->getMessage()], 422);
-        }
+        $transferencia = $this->transferencias->store($request->validated(), $request->user());
 
         return (new TransferenciaResource($transferencia))
             ->response()

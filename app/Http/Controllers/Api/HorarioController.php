@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Exceptions\HorarioException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instituicao\StoreHorarioRequest;
 use App\Http\Resources\HorarioResource;
@@ -41,11 +40,7 @@ class HorarioController extends Controller
 
     public function destroy(Request $request, HorarioDisponivel $horario)
     {
-        try {
-            $this->horarios->destroy($horario, $request->user()->instituicao);
-        } catch (HorarioException $e) {
-            return response()->json(['message' => $e->getMessage()], 422);
-        }
+        $this->horarios->destroy($horario, $request->user()->instituicao);
 
         return response()->json(null, 204);
     }

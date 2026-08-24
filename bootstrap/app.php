@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\DomainException;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
@@ -32,6 +33,19 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // Qualquer exception de regra de negócio (DoacaoException,
+        // HorarioException, NecessidadeException, TransferenciaException) que
+        // "escapar" de um controller de API vira automaticamente um JSON 422
+        // — os controllers de API não precisam mais de try/catch para isso.
+        // Retornar null (requisição web) deixa o Laravel seguir para o
+        // tratamento padrão; os controllers web continuam com seu próprio
+        // catch, então nem chegam a passar por aqui.
+        $exceptions->render(function (DomainException $e, Request $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return response()->json(['message' => $e->getMessage()], 422);
+            }
+        });
+
         // Requisições para a API (ou que explicitamente aceitam JSON) sempre
         // recebem erros em JSON, nunca a página de erro Inertia.
         $exceptions->shouldRenderJsonWhen(function (Request $request, Throwable $exception) {
