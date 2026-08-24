@@ -7,6 +7,7 @@ use App\Http\Requests\Doador\StoreDoacaoRequest;
 use App\Http\Resources\DoacaoResource;
 use App\Models\Doacao;
 use App\Services\DoacaoService;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
@@ -15,10 +16,16 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
  * DoacaoService (regra de negócio) e o mesmo StoreDoacaoRequest (validação)
  * usados pela UI Inertia — só a camada de apresentação muda.
  */
+#[Group('Doações (Doador)')]
 class DoacaoController extends Controller
 {
     public function __construct(private readonly DoacaoService $doacoes) {}
 
+    /**
+     * Listar doações
+     *
+     * Lista as doações feitas pelo doador autenticado.
+     */
     public function index(Request $request): AnonymousResourceCollection
     {
         $doadorId = $request->user()->doadorId();
@@ -31,6 +38,11 @@ class DoacaoController extends Controller
         return DoacaoResource::collection($doacoes);
     }
 
+    /**
+     * Criar doação
+     *
+     * Registra uma nova doação para uma instituição.
+     */
     public function store(StoreDoacaoRequest $request)
     {
         $doacao = $this->doacoes->store($request->validated(), $request->user());
@@ -40,6 +52,11 @@ class DoacaoController extends Controller
             ->setStatusCode(201);
     }
 
+    /**
+     * Cancelar doação
+     *
+     * Cancela uma doação do doador autenticado.
+     */
     public function cancel(Request $request, Doacao $doacao)
     {
         $this->doacoes->cancel($doacao, $request->user());
@@ -47,6 +64,11 @@ class DoacaoController extends Controller
         return response()->json(null, 204);
     }
 
+    /**
+     * Aceitar sugestão de alteração
+     *
+     * Aceita a sugestão de novo agendamento proposta pela instituição.
+     */
     public function aceitarSugestao(Request $request, Doacao $doacao)
     {
         $this->doacoes->aceitarSugestao($doacao, $request->user());
@@ -54,6 +76,11 @@ class DoacaoController extends Controller
         return response()->json(null, 204);
     }
 
+    /**
+     * Recusar sugestão de alteração
+     *
+     * Recusa a sugestão de novo agendamento proposta pela instituição.
+     */
     public function recusarSugestao(Request $request, Doacao $doacao)
     {
         $this->doacoes->recusarSugestao($doacao, $request->user());

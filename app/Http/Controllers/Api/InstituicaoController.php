@@ -7,6 +7,7 @@ use App\Http\Resources\InstituicaoListResource;
 use App\Http\Resources\InstituicaoShowResource;
 use App\Models\Instituicao;
 use App\Services\RecommendationService;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -16,8 +17,14 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
  * pública). Reaproveita a mesma query/filtros e a mesma RecommendationService
  * usadas pela UI Inertia.
  */
+#[Group('Instituições (Doador)')]
 class InstituicaoController extends Controller
 {
+    /**
+     * Listar instituições
+     *
+     * Lista instituições visíveis, com filtros de busca e causa.
+     */
     public function index(Request $request): AnonymousResourceCollection
     {
         $search = $request->string('search')->trim()->value();
@@ -43,6 +50,12 @@ class InstituicaoController extends Controller
         return InstituicaoListResource::collection($instituicoes);
     }
 
+    /**
+     * Instituições recomendadas
+     *
+     * Retorna instituições recomendadas ao doador autenticado (afinidade de
+     * causas e proximidade).
+     */
     public function recomendadas(Request $request, RecommendationService $recommendations): JsonResponse
     {
         abort_if($request->user()->tipo_usuario !== 'doador', 403);
@@ -55,6 +68,12 @@ class InstituicaoController extends Controller
         ]);
     }
 
+    /**
+     * Detalhar instituição
+     *
+     * Retorna os detalhes públicos de uma instituição, incluindo necessidades
+     * ativas e horários disponíveis.
+     */
     public function show(int $id): InstituicaoShowResource
     {
         $instituicao = Instituicao::with([

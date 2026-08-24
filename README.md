@@ -13,8 +13,9 @@ antes de acessar o painel.
 - **Backend:** Laravel 13 (PHP 8.3), autenticação via Laravel Fortify
 - **Frontend:** Inertia.js + React 19 (TypeScript), Tailwind CSS v4, componentes Radix UI (padrão shadcn)
 - **Banco de dados:** PostgreSQL
-- **Documentação da API:** spec OpenAPI gerada pelo [Scramble](https://scramble.dedoc.co/) e
-  publicada num site [Docusaurus](https://docusaurus.io/) (ver [`docs/`](docs/))
+- **Documentação da API:** spec OpenAPI gerada pelo [Scramble](https://scramble.dedoc.co/) a
+  partir das rotas, com UI interativa em `/docs/api` (ver seção
+  [Documentação da API](#documentação-da-api))
 
 > **Nota de arquitetura:** o backend comunica-se com o frontend por **mensagens JSON** através do
 > protocolo Inertia — cada rota entrega a uma página React as `props` de que ela precisa. As rotas
@@ -107,20 +108,26 @@ O ambiente de testes usa um banco `testing` separado, configurado automaticament
 
 ## Documentação da API
 
-A especificação OpenAPI é gerada a partir das rotas pelo Scramble e renderizada num site Docusaurus.
+A especificação OpenAPI dos endpoints REST (`routes/api.php`) é gerada automaticamente pelo
+[Scramble](https://scramble.dedoc.co/), a partir dos Form Requests (validação) e API Resources
+(resposta) já usados pelos controllers — sem duplicar documentação manualmente.
 
 ```bash
-# Regenerar a spec OpenAPI a partir das rotas do Laravel
-cd docs
-npm install
-npm run gen:api        # exporta docs/openapi/api.json via php artisan scramble:export
+# Servir a UI interativa (Stoplight Elements) em ambiente local
+php artisan serve
+# abrir http://localhost:8000/docs/api
 
-# Rodar o site de documentação localmente
-npm run start          # http://localhost:3000  (referência de serviços em /api)
+# Exportar a spec OpenAPI para um arquivo JSON
+php artisan scramble:export        # gera api.json na raiz do projeto
 ```
 
-O site documenta todos os serviços do backend (sumário, descrição e exemplos de payload),
-além de páginas sobre arquitetura, modelo de domínio, autenticação e os fluxos de doação e transferência.
+A UI em `/docs/api` só fica acessível em `APP_ENV=local` por padrão (middleware
+`RestrictedDocsAccess` do próprio Scramble). Os endpoints são agrupados por perfil
+(Autenticação, Doações, Instituições, Horários, Necessidades, Transferências, Agenda, Admin
+etc.) e as rotas autenticadas (`auth:sanctum`) aparecem com o esquema de segurança Bearer.
+
+> Um site de documentação mais completo (Docusaurus, com páginas de arquitetura, modelo de
+> domínio e fluxos de doação/transferência) é um passo futuro — ainda não implementado.
 
 ## Estrutura do projeto
 
@@ -133,9 +140,9 @@ resources/js/
   pages/              páginas React (renderizadas por Inertia), organizadas por perfil
   components/ui/       primitivos de UI (Radix/shadcn)
   routes/ actions/     helpers de rota gerados pelo Wayfinder
-routes/web.php        rotas da aplicação
+routes/web.php        rotas da aplicação (Inertia)
+routes/api.php         rotas da API REST/JSON (Sanctum, documentadas via Scramble)
 database/seeders/      dados de exemplo
-docs/                 site de documentação (Docusaurus + OpenAPI)
 ```
 
 ## Licença

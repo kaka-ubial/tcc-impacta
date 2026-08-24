@@ -19,6 +19,7 @@
         "resend/resend-php": "^1.2"
     },
     "require-dev": {
+        "dedoc/scramble": "^0.13.42",
         "fakerphp/faker": "^1.24",
         "laravel/pail": "^1.2.5",
         "laravel/pint": "^1.27",

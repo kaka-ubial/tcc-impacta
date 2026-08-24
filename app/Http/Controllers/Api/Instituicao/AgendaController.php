@@ -11,6 +11,7 @@ use App\Models\Agendamento;
 use App\Models\HorarioDisponivel;
 use App\Models\Transferencia;
 use App\Services\AgendaService;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -19,10 +20,17 @@ use Illuminate\Http\Request;
  * mesmo AgendaService usado pela UI Inertia, além das Resources de
  * horários e transferências já existentes.
  */
+#[Group('Agenda (Instituição)')]
 class AgendaController extends Controller
 {
     public function __construct(private readonly AgendaService $agenda) {}
 
+    /**
+     * Agenda da instituição
+     *
+     * Retorna agendamentos, horários ativos e transferências em andamento
+     * da instituição autenticada, para montar a visão de agenda.
+     */
     public function index(Request $request): JsonResponse
     {
         $instituicaoId = $request->user()->instituicaoId();
@@ -54,6 +62,11 @@ class AgendaController extends Controller
         ]);
     }
 
+    /**
+     * Sugerir alteração de agendamento
+     *
+     * Propõe uma nova data/horário para um agendamento de doação.
+     */
     public function sugerirAlteracao(SugerirDataRequest $request, Agendamento $agendamento): AgendamentoResource
     {
         $this->agenda->sugerirAlteracao($request->validated(), $agendamento, $request->user());

@@ -6,14 +6,22 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\DoadorPerfilResource;
 use App\Models\Doacao;
 use App\Models\Doador;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\Request;
 
 /**
  * Contraparte REST/JSON de Instituicao\DoadorController (visão da
  * instituição sobre um doador com quem já interagiu).
  */
+#[Group('Doadores (Instituição)')]
 class DoadorController extends Controller
 {
+    /**
+     * Detalhar doador
+     *
+     * Retorna o perfil de um doador que já doou para a instituição
+     * autenticada.
+     */
     public function show(Request $request, Doador $doador): DoadorPerfilResource
     {
         $instituicaoId = $request->user()->instituicaoId();

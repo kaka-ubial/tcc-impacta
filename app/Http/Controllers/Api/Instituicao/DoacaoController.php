@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\InstituicaoDoacaoResource;
 use App\Models\Doacao;
 use App\Services\DoacaoService;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
@@ -14,10 +15,16 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
  * mesmo DoacaoService usado pela UI Inertia e pelo Api\DoacaoController
  * (lado doador).
  */
+#[Group('Doações (Instituição)')]
 class DoacaoController extends Controller
 {
     public function __construct(private readonly DoacaoService $doacoes) {}
 
+    /**
+     * Listar doações recebidas
+     *
+     * Lista as doações recebidas pela instituição autenticada.
+     */
     public function index(Request $request): AnonymousResourceCollection
     {
         $instituicaoId = $request->user()->instituicaoId();
@@ -30,6 +37,11 @@ class DoacaoController extends Controller
         return InstituicaoDoacaoResource::collection($doacoes);
     }
 
+    /**
+     * Confirmar doação
+     *
+     * Confirma o recebimento agendado de uma doação.
+     */
     public function confirm(Request $request, Doacao $doacao)
     {
         $this->doacoes->confirm($doacao, $request->user());
@@ -37,6 +49,11 @@ class DoacaoController extends Controller
         return new InstituicaoDoacaoResource($doacao->fresh(['doador', 'itens.categoria', 'agendamento']));
     }
 
+    /**
+     * Rejeitar doação
+     *
+     * Rejeita uma doação pendente.
+     */
     public function reject(Request $request, Doacao $doacao)
     {
         $this->doacoes->reject($doacao, $request->user());
@@ -44,6 +61,11 @@ class DoacaoController extends Controller
         return new InstituicaoDoacaoResource($doacao->fresh(['doador', 'itens.categoria', 'agendamento']));
     }
 
+    /**
+     * Marcar doação como entregue
+     *
+     * Marca uma doação confirmada como entregue.
+     */
     public function deliver(Request $request, Doacao $doacao)
     {
         $this->doacoes->deliver($doacao, $request->user());
@@ -51,6 +73,12 @@ class DoacaoController extends Controller
         return new InstituicaoDoacaoResource($doacao->fresh(['doador', 'itens.categoria', 'agendamento']));
     }
 
+    /**
+     * Marcar doação como não entregue
+     *
+     * Marca uma doação confirmada como não entregue (ex.: doador não
+     * compareceu).
+     */
     public function notDelivered(Request $request, Doacao $doacao)
     {
         $this->doacoes->notDelivered($doacao, $request->user());
