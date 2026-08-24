@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Instituicao;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instituicao\SugerirDataRequest;
 use App\Models\Agendamento;
 use App\Models\HorarioDisponivel;
 use App\Models\Transferencia;
 use App\Services\AgendaService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -80,13 +80,9 @@ class AgendaController extends Controller
         ]);
     }
 
-    public function sugerirAlteracao(Request $request, Agendamento $agendamento): RedirectResponse
+    public function sugerirAlteracao(SugerirDataRequest $request, Agendamento $agendamento): RedirectResponse
     {
-        $validated = $request->validate([
-            'data_hora_sugerida' => ['required', 'date', 'after:now'],
-        ]);
-
-        $this->agenda->sugerirAlteracao($validated, $agendamento, auth()->user());
+        $this->agenda->sugerirAlteracao($request->validated(), $agendamento, auth()->user());
 
         return back();
     }

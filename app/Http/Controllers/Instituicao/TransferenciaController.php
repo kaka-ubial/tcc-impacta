@@ -4,12 +4,13 @@ namespace App\Http\Controllers\Instituicao;
 
 use App\Exceptions\TransferenciaException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instituicao\StoreTransferenciaRequest;
+use App\Http\Requests\Instituicao\SugerirDataRequest;
 use App\Models\HorarioDisponivel;
 use App\Models\ItemTransferencia;
 use App\Models\Transferencia;
 use App\Services\TransferenciaService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -69,23 +70,10 @@ class TransferenciaController extends Controller
         ));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreTransferenciaRequest $request): RedirectResponse
     {
-        $v = $request->validate([
-            'instituicao_destino_id' => ['required', 'integer', 'exists:instituicao,usuario_id'],
-            'itens' => ['required', 'array', 'min:1'],
-            'itens.*.categoria_id' => ['required', 'integer', 'exists:categorias_itens,id'],
-            'itens.*.necessidade_id' => ['nullable', 'integer', 'exists:necessidades,id'],
-            'itens.*.quantidade' => ['required', 'integer', 'min:1'],
-            'itens.*.descricao' => ['nullable', 'string', 'max:255'],
-            'agendamento.tipo' => ['required', 'in:coleta,entrega'],
-            'agendamento.data_hora' => ['required', 'date', 'after:now'],
-            'agendamento.horario_disponivel_id' => ['nullable', 'integer', 'exists:horarios_disponiveis,id'],
-            'agendamento.endereco_referencia' => ['nullable', 'string', 'max:500'],
-        ]);
-
         try {
-            $this->transferencias->store($v, auth()->user());
+            $this->transferencias->store($request->validated(), auth()->user());
         } catch (TransferenciaException $e) {
             abort(422, $e->getMessage());
         }
@@ -121,13 +109,9 @@ class TransferenciaController extends Controller
         return back();
     }
 
-    public function sugerirAlteracao(Request $request, Transferencia $transferencia): RedirectResponse
+    public function sugerirAlteracao(SugerirDataRequest $request, Transferencia $transferencia): RedirectResponse
     {
-        $validated = $request->validate([
-            'data_hora_sugerida' => ['required', 'date', 'after:now'],
-        ]);
-
-        $this->transferencias->sugerirAlteracao($validated, $transferencia, auth()->user());
+        $this->transferencias->sugerirAlteracao($request->validated(), $transferencia, auth()->user());
 
         return back();
     }

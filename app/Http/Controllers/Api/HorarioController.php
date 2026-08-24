@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Exceptions\HorarioException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instituicao\StoreHorarioRequest;
 use App\Http\Resources\HorarioResource;
 use App\Models\HorarioDisponivel;
 use App\Services\HorarioService;
@@ -29,16 +30,9 @@ class HorarioController extends Controller
         return HorarioResource::collection($horarios);
     }
 
-    public function store(Request $request)
+    public function store(StoreHorarioRequest $request)
     {
-        $validated = $request->validate([
-            'dia_semana' => ['required', 'integer', 'between:0,6'],
-            'hora_inicio' => ['required', 'date_format:H:i'],
-            'hora_fim' => ['required', 'date_format:H:i', 'after:hora_inicio'],
-            'tipo' => ['required', 'in:coleta,entrega'],
-        ]);
-
-        $horario = $this->horarios->store($validated, $request->user()->instituicao);
+        $horario = $this->horarios->store($request->validated(), $request->user()->instituicao);
 
         return (new HorarioResource($horario))
             ->response()

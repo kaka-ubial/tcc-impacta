@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Instituicao;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instituicao\SugerirDataRequest;
 use App\Http\Resources\AgendamentoResource;
 use App\Http\Resources\HorarioResource;
 use App\Http\Resources\TransferenciaResource;
@@ -53,13 +54,9 @@ class AgendaController extends Controller
         ]);
     }
 
-    public function sugerirAlteracao(Request $request, Agendamento $agendamento): AgendamentoResource
+    public function sugerirAlteracao(SugerirDataRequest $request, Agendamento $agendamento): AgendamentoResource
     {
-        $validated = $request->validate([
-            'data_hora_sugerida' => ['required', 'date', 'after:now'],
-        ]);
-
-        $this->agenda->sugerirAlteracao($validated, $agendamento, $request->user());
+        $this->agenda->sugerirAlteracao($request->validated(), $agendamento, $request->user());
 
         return new AgendamentoResource($agendamento->fresh(['doacao.doador']));
     }
