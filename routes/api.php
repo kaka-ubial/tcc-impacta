@@ -12,9 +12,6 @@ use App\Http\Controllers\Api\Instituicao\DoadorController as InstituicaoDoadorCo
 use App\Http\Controllers\Api\Instituicao\TransferenciaController;
 use App\Http\Controllers\Api\InstituicaoController;
 use App\Http\Controllers\Api\NecessidadeController;
-use App\Http\Middleware\CheckAdmin;
-use App\Http\Middleware\CheckDoador;
-use App\Http\Middleware\CheckInstituicao;
 use App\Http\Middleware\CheckNecessidadeOwnership;
 use App\Http\Middleware\EnsureInstitutionIsApproved;
 use Illuminate\Support\Facades\Route;
@@ -41,7 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('instituicoes/recomendadas', [InstituicaoController::class, 'recomendadas'])->name('api.instituicoes.recomendadas');
     Route::get('instituicoes/{id}', [InstituicaoController::class, 'show'])->name('api.instituicoes.show');
 
-    Route::middleware(CheckDoador::class)->group(function () {
+    Route::middleware('user_type:doador')->group(function () {
         Route::get('perfil', [PerfilController::class, 'show'])->name('api.doador.perfil');
 
         Route::get('doacoes', [DoacaoController::class, 'index'])->name('api.doacoes.index');
@@ -51,7 +48,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('doacoes/{doacao}/sugestao/recusar', [DoacaoController::class, 'recusarSugestao'])->name('api.doacoes.recusarSugestao');
     });
 
-    Route::middleware([CheckInstituicao::class, EnsureInstitutionIsApproved::class])->group(function () {
+    Route::middleware(['user_type:instituicao', EnsureInstitutionIsApproved::class])->group(function () {
         Route::get('horarios', [HorarioController::class, 'index'])->name('api.horarios.index');
         Route::post('horarios', [HorarioController::class, 'store'])->name('api.horarios.store');
         Route::delete('horarios/{horario}', [HorarioController::class, 'destroy'])->name('api.horarios.destroy');
@@ -89,7 +86,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('instituicao/doadores/{doador}', [InstituicaoDoadorController::class, 'show'])->name('api.instituicao.doadores.show');
     });
 
-    Route::middleware(CheckAdmin::class)->prefix('admin')->name('api.admin.')->group(function () {
+    Route::middleware('user_type:admin')->prefix('admin')->name('api.admin.')->group(function () {
         Route::get('institutions', [InstitutionController::class, 'index'])->name('institutions.index');
         Route::post('institutions/{instituicao}/approve', [InstitutionController::class, 'approve'])->name('institutions.approve');
         Route::post('institutions/{instituicao}/reject', [InstitutionController::class, 'reject'])->name('institutions.reject');
