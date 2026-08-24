@@ -25,7 +25,7 @@ class AgendaController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $instituicaoId = $request->user()->instituicao->usuario_id;
+        $instituicaoId = $request->user()->instituicaoId();
 
         $agendamentos = Agendamento::with(['doacao.doador'])
             ->whereHas('doacao', fn ($q) => $q

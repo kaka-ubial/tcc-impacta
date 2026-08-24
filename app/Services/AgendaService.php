@@ -19,7 +19,7 @@ class AgendaService
     public function sugerirAlteracao(array $validated, Agendamento $agendamento, User $instituicaoUser): void
     {
         abort_if(
-            $agendamento->doacao->instituicao_id !== $instituicaoUser->instituicao->usuario_id,
+            $agendamento->doacao->instituicao_id !== $instituicaoUser->instituicaoId(),
             403
         );
 

@@ -20,7 +20,7 @@ class HorarioController extends Controller
 
     public function index(Request $request): AnonymousResourceCollection
     {
-        $horarios = HorarioDisponivel::where('instituicao_id', $request->user()->instituicao->usuario_id)
+        $horarios = HorarioDisponivel::where('instituicao_id', $request->user()->instituicaoId())
             ->where('ativo', true)
             ->orderBy('dia_semana')
             ->orderBy('hora_inicio')

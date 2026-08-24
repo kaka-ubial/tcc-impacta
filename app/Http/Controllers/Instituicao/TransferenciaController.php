@@ -20,7 +20,7 @@ class TransferenciaController extends Controller
 
     public function index(): Response
     {
-        $id = auth()->user()->instituicao->usuario_id;
+        $id = auth()->user()->instituicaoId();
 
         $enviadas = Transferencia::with(['destino', 'itens.categoria'])
             ->where('instituicao_origem_id', $id)

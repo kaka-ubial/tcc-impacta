@@ -51,4 +51,14 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Causa::class, 'usuario_causa');
     }
+
+    public function instituicaoId(): ?int
+    {
+        return $this->instituicao?->usuario_id;
+    }
+
+    public function doadorId(): ?int
+    {
+        return $this->doador?->usuario_id;
+    }
 }

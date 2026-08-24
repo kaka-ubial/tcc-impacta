@@ -17,13 +17,16 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
  */
 class TransferenciaController extends Controller
 {
+    /** Relações recarregadas após cada transição de estado, antes de montar o Resource. */
+    private const RELATIONS = ['origem', 'destino', 'itens.categoria'];
+
     public function __construct(private readonly TransferenciaService $transferencias) {}
 
     public function index(Request $request): AnonymousResourceCollection
     {
-        $id = $request->user()->instituicao->usuario_id;
+        $id = $request->user()->instituicaoId();
 
-        $transferencias = Transferencia::with(['origem', 'destino', 'itens.categoria'])
+        $transferencias = Transferencia::with(self::RELATIONS)
             ->where('instituicao_origem_id', $id)
             ->orWhere('instituicao_destino_id', $id)
             ->orderBy('created_at', 'desc')
@@ -45,55 +48,55 @@ class TransferenciaController extends Controller
     {
         $this->transferencias->confirmar($transferencia, $request->user());
 
-        return new TransferenciaResource($transferencia->fresh(['origem', 'destino', 'itens.categoria']));
+        return new TransferenciaResource($transferencia->fresh(self::RELATIONS));
     }
 
     public function recusar(Request $request, Transferencia $transferencia)
     {
         $this->transferencias->recusar($transferencia, $request->user());
 
-        return new TransferenciaResource($transferencia->fresh(['origem', 'destino', 'itens.categoria']));
+        return new TransferenciaResource($transferencia->fresh(self::RELATIONS));
     }
 
     public function entregar(Request $request, Transferencia $transferencia)
     {
         $this->transferencias->entregar($transferencia, $request->user());
 
-        return new TransferenciaResource($transferencia->fresh(['origem', 'destino', 'itens.categoria']));
+        return new TransferenciaResource($transferencia->fresh(self::RELATIONS));
     }
 
     public function naoEntregue(Request $request, Transferencia $transferencia)
     {
         $this->transferencias->naoEntregue($transferencia, $request->user());
 
-        return new TransferenciaResource($transferencia->fresh(['origem', 'destino', 'itens.categoria']));
+        return new TransferenciaResource($transferencia->fresh(self::RELATIONS));
     }
 
     public function sugerirAlteracao(SugerirDataRequest $request, Transferencia $transferencia)
     {
         $this->transferencias->sugerirAlteracao($request->validated(), $transferencia, $request->user());
 
-        return new TransferenciaResource($transferencia->fresh(['origem', 'destino', 'itens.categoria']));
+        return new TransferenciaResource($transferencia->fresh(self::RELATIONS));
     }
 
     public function aceitarSugestao(Request $request, Transferencia $transferencia)
     {
         $this->transferencias->aceitarSugestao($transferencia, $request->user());
 
-        return new TransferenciaResource($transferencia->fresh(['origem', 'destino', 'itens.categoria']));
+        return new TransferenciaResource($transferencia->fresh(self::RELATIONS));
     }
 
     public function recusarSugestao(Request $request, Transferencia $transferencia)
     {
         $this->transferencias->recusarSugestao($transferencia, $request->user());
 
-        return new TransferenciaResource($transferencia->fresh(['origem', 'destino', 'itens.categoria']));
+        return new TransferenciaResource($transferencia->fresh(self::RELATIONS));
     }
 
     public function cancelar(Request $request, Transferencia $transferencia)
     {
         $this->transferencias->cancelar($transferencia, $request->user());
 
-        return new TransferenciaResource($transferencia->fresh(['origem', 'destino', 'itens.categoria']));
+        return new TransferenciaResource($transferencia->fresh(self::RELATIONS));
     }
 }

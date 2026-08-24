@@ -18,7 +18,7 @@ class CheckNecessidadeOwnership
     {
         $necessidade = Necessidade::findOrFail($request->id);
 
-        if ($necessidade->instituicao_id !== $request->user()->instituicao->usuario_id) {
+        if ($necessidade->instituicao_id !== $request->user()->instituicaoId()) {
             abort(403);
         }
         

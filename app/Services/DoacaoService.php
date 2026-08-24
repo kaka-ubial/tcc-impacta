@@ -25,7 +25,7 @@ class DoacaoService
      */
     public function store(array $validated, User $doadorUser): Doacao
     {
-        $doadorId = $doadorUser->doador->usuario_id;
+        $doadorId = $doadorUser->doadorId();
 
         $temHorarios = HorarioDisponivel::where('instituicao_id', $validated['instituicao_id'])
             ->where('ativo', true)
@@ -74,7 +74,7 @@ class DoacaoService
 
     public function cancel(Doacao $doacao, User $doadorUser): void
     {
-        abort_if($doacao->doador_id !== $doadorUser->doador->usuario_id, 403);
+        abort_if($doacao->doador_id !== $doadorUser->doadorId(), 403);
         abort_if(! in_array($doacao->status, ['pendente', 'confirmada']), 422);
 
         DB::transaction(function () use ($doacao) {
@@ -95,7 +95,7 @@ class DoacaoService
 
     public function aceitarSugestao(Doacao $doacao, User $doadorUser): void
     {
-        abort_if($doacao->doador_id !== $doadorUser->doador->usuario_id, 403);
+        abort_if($doacao->doador_id !== $doadorUser->doadorId(), 403);
 
         $agendamento = $doacao->agendamento;
         abort_if(! $agendamento || $agendamento->status !== 'alteracao_sugerida', 422);
@@ -115,7 +115,7 @@ class DoacaoService
 
     public function recusarSugestao(Doacao $doacao, User $doadorUser): void
     {
-        abort_if($doacao->doador_id !== $doadorUser->doador->usuario_id, 403);
+        abort_if($doacao->doador_id !== $doadorUser->doadorId(), 403);
 
         $agendamento = $doacao->agendamento;
         abort_if(! $agendamento || $agendamento->status !== 'alteracao_sugerida', 422);
@@ -134,7 +134,7 @@ class DoacaoService
 
     public function confirm(Doacao $doacao, User $instituicaoUser): void
     {
-        abort_if($doacao->instituicao_id !== $instituicaoUser->instituicao->usuario_id, 403);
+        abort_if($doacao->instituicao_id !== $instituicaoUser->instituicaoId(), 403);
         abort_if($doacao->status !== 'pendente', 422);
 
         DB::transaction(function () use ($doacao) {
@@ -154,7 +154,7 @@ class DoacaoService
 
     public function reject(Doacao $doacao, User $instituicaoUser): void
     {
-        abort_if($doacao->instituicao_id !== $instituicaoUser->instituicao->usuario_id, 403);
+        abort_if($doacao->instituicao_id !== $instituicaoUser->instituicaoId(), 403);
         abort_if($doacao->status !== 'pendente', 422);
 
         $doacao->update(['status' => 'recusada']);
@@ -168,7 +168,7 @@ class DoacaoService
 
     public function deliver(Doacao $doacao, User $instituicaoUser): void
     {
-        abort_if($doacao->instituicao_id !== $instituicaoUser->instituicao->usuario_id, 403);
+        abort_if($doacao->instituicao_id !== $instituicaoUser->instituicaoId(), 403);
         abort_if($doacao->status !== 'confirmada', 422);
 
         $doacao->update(['status' => 'entregue', 'data_entrega' => now()]);
@@ -182,7 +182,7 @@ class DoacaoService
 
     public function notDelivered(Doacao $doacao, User $instituicaoUser): void
     {
-        abort_if($doacao->instituicao_id !== $instituicaoUser->instituicao->usuario_id, 403);
+        abort_if($doacao->instituicao_id !== $instituicaoUser->instituicaoId(), 403);
         abort_if($doacao->status !== 'confirmada', 422);
 
         DB::transaction(function () use ($doacao) {

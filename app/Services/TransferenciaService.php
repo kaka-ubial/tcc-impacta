@@ -24,7 +24,7 @@ class TransferenciaService
      */
     public function store(array $validated, User $origemUser): Transferencia
     {
-        $origemId = $origemUser->instituicao->usuario_id;
+        $origemId = $origemUser->instituicaoId();
 
         if ($origemId === $validated['instituicao_destino_id']) {
             throw new TransferenciaException('Não é possível transferir para si mesmo.');
@@ -70,7 +70,7 @@ class TransferenciaService
 
     public function confirmar(Transferencia $transferencia, User $destinoUser): void
     {
-        abort_if($transferencia->instituicao_destino_id !== $destinoUser->instituicao->usuario_id, 403);
+        abort_if($transferencia->instituicao_destino_id !== $destinoUser->instituicaoId(), 403);
         abort_if($transferencia->status !== 'pendente', 422);
 
         DB::transaction(function () use ($transferencia) {
@@ -90,7 +90,7 @@ class TransferenciaService
 
     public function recusar(Transferencia $transferencia, User $destinoUser): void
     {
-        abort_if($transferencia->instituicao_destino_id !== $destinoUser->instituicao->usuario_id, 403);
+        abort_if($transferencia->instituicao_destino_id !== $destinoUser->instituicaoId(), 403);
         abort_if($transferencia->status !== 'pendente', 422);
 
         $transferencia->update(['status' => 'recusada']);
@@ -104,7 +104,7 @@ class TransferenciaService
 
     public function entregar(Transferencia $transferencia, User $destinoUser): void
     {
-        abort_if($transferencia->instituicao_destino_id !== $destinoUser->instituicao->usuario_id, 403);
+        abort_if($transferencia->instituicao_destino_id !== $destinoUser->instituicaoId(), 403);
         abort_if($transferencia->status !== 'confirmada', 422);
 
         $transferencia->update(['status' => 'entregue']);
@@ -118,7 +118,7 @@ class TransferenciaService
 
     public function naoEntregue(Transferencia $transferencia, User $destinoUser): void
     {
-        abort_if($transferencia->instituicao_destino_id !== $destinoUser->instituicao->usuario_id, 403);
+        abort_if($transferencia->instituicao_destino_id !== $destinoUser->instituicaoId(), 403);
         abort_if($transferencia->status !== 'confirmada', 422);
 
         DB::transaction(function () use ($transferencia) {
@@ -140,7 +140,7 @@ class TransferenciaService
      */
     public function sugerirAlteracao(array $validated, Transferencia $transferencia, User $destinoUser): void
     {
-        abort_if($transferencia->instituicao_destino_id !== $destinoUser->instituicao->usuario_id, 403);
+        abort_if($transferencia->instituicao_destino_id !== $destinoUser->instituicaoId(), 403);
 
         $transferencia->update([
             'data_hora_sugerida' => $validated['data_hora_sugerida'],
@@ -156,7 +156,7 @@ class TransferenciaService
 
     public function aceitarSugestao(Transferencia $transferencia, User $origemUser): void
     {
-        abort_if($transferencia->instituicao_origem_id !== $origemUser->instituicao->usuario_id, 403);
+        abort_if($transferencia->instituicao_origem_id !== $origemUser->instituicaoId(), 403);
         abort_if($transferencia->status !== 'alteracao_sugerida', 422);
 
         $transferencia->update([
@@ -174,7 +174,7 @@ class TransferenciaService
 
     public function recusarSugestao(Transferencia $transferencia, User $origemUser): void
     {
-        abort_if($transferencia->instituicao_origem_id !== $origemUser->instituicao->usuario_id, 403);
+        abort_if($transferencia->instituicao_origem_id !== $origemUser->instituicaoId(), 403);
         abort_if($transferencia->status !== 'alteracao_sugerida', 422);
 
         $transferencia->update([
@@ -191,7 +191,7 @@ class TransferenciaService
 
     public function cancelar(Transferencia $transferencia, User $origemUser): void
     {
-        abort_if($transferencia->instituicao_origem_id !== $origemUser->instituicao->usuario_id, 403);
+        abort_if($transferencia->instituicao_origem_id !== $origemUser->instituicaoId(), 403);
         abort_if($transferencia->status !== 'pendente', 422);
 
         $transferencia->update(['status' => 'cancelada']);

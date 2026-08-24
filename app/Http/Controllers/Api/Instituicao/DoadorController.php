@@ -16,7 +16,7 @@ class DoadorController extends Controller
 {
     public function show(Request $request, Doador $doador): DoadorPerfilResource
     {
-        $instituicaoId = $request->user()->instituicao->usuario_id;
+        $instituicaoId = $request->user()->instituicaoId();
 
         $temDoacao = Doacao::where('doador_id', $doador->usuario_id)
             ->where('instituicao_id', $instituicaoId)

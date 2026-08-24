@@ -16,7 +16,7 @@ class HorarioController extends Controller
 
     public function index(): Response
     {
-        $instituicaoId = auth()->user()->instituicao->usuario_id;
+        $instituicaoId = auth()->user()->instituicaoId();
 
         $horarios = HorarioDisponivel::where('instituicao_id', $instituicaoId)
             ->where('ativo', true)

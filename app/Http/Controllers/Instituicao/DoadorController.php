@@ -12,7 +12,7 @@ class DoadorController extends Controller
 {
     public function show(Doador $doador): Response
     {
-        $instituicaoId = auth()->user()->instituicao->usuario_id;
+        $instituicaoId = auth()->user()->instituicaoId();
 
         $temDoacao = Doacao::where('doador_id', $doador->usuario_id)
             ->where('instituicao_id', $instituicaoId)

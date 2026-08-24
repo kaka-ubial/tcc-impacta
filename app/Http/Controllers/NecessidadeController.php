@@ -21,7 +21,7 @@ class NecessidadeController extends Controller
 
         if ($user->instituicao) {
             $necessidades = Necessidade::with(['categoria'])
-                ->where('instituicao_id', $user->instituicao->usuario_id)
+                ->where('instituicao_id', $user->instituicaoId())
                 ->get();
         } else {
             $necessidades = Necessidade::with(['categoria', 'instituicao'])->get();

@@ -21,7 +21,7 @@ class NecessidadeController extends Controller
     public function index(Request $request): AnonymousResourceCollection
     {
         $necessidades = Necessidade::with('categoria')
-            ->where('instituicao_id', $request->user()->instituicao->usuario_id)
+            ->where('instituicao_id', $request->user()->instituicaoId())
             ->get();
 
         return NecessidadeResource::collection($necessidades);

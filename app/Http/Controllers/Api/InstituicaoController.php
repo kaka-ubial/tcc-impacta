@@ -29,7 +29,7 @@ class InstituicaoController extends Controller
             }])
             ->visible()
             ->when($request->user()->tipo_usuario === 'instituicao', fn ($q) => $q
-                ->where('usuario_id', '!=', $request->user()->instituicao->usuario_id))
+                ->where('usuario_id', '!=', $request->user()->instituicaoId()))
             ->when($search, fn ($q) => $q->where(function ($q) use ($search) {
                 $term = '%'.$search.'%';
                 $q->where('nome_fantasia', 'ilike', $term)

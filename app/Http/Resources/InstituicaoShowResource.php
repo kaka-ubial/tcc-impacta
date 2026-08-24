@@ -51,7 +51,7 @@ class InstituicaoShowResource extends JsonResource
             ])->values(),
             'estoque' => $this->when(
                 $request->user()?->tipo_usuario === 'instituicao',
-                fn () => TransferenciaService::calcularEstoque($request->user()->instituicao->usuario_id)
+                fn () => TransferenciaService::calcularEstoque($request->user()->instituicaoId())
             ),
         ];
     }

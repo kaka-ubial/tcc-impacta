@@ -18,7 +18,7 @@ class AvaliacaoService
      */
     public function store(array $validated, Doacao $doacao, User $instituicaoUser): Avaliacao
     {
-        abort_if($doacao->instituicao_id !== $instituicaoUser->instituicao->usuario_id, 403);
+        abort_if($doacao->instituicao_id !== $instituicaoUser->instituicaoId(), 403);
         abort_if($doacao->status !== 'entregue', 422);
         abort_if($doacao->avaliacao()->exists(), 422);
 
