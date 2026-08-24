@@ -21,7 +21,7 @@ class DoacaoController extends Controller
 
     public function index(Request $request): AnonymousResourceCollection
     {
-        $doadorId = $request->user()->doador->usuario_id;
+        $doadorId = $request->user()->doadorId();
 
         $doacoes = Doacao::with(['instituicao', 'itens.categoria', 'agendamento', 'avaliacao'])
             ->where('doador_id', $doadorId)
