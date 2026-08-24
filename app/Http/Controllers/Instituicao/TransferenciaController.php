@@ -6,11 +6,14 @@ use App\Exceptions\TransferenciaException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instituicao\StoreTransferenciaRequest;
 use App\Http\Requests\Instituicao\SugerirDataRequest;
+use App\Http\Resources\HorarioResource;
+use App\Http\Resources\TransferenciaResource;
 use App\Models\HorarioDisponivel;
 use App\Models\ItemTransferencia;
 use App\Models\Transferencia;
 use App\Services\TransferenciaService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -18,34 +21,31 @@ class TransferenciaController extends Controller
 {
     public function __construct(private readonly TransferenciaService $transferencias) {}
 
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $id = auth()->user()->instituicaoId();
 
-        $enviadas = Transferencia::with(['destino', 'itens.categoria'])
-            ->where('instituicao_origem_id', $id)
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(fn (Transferencia $t) => $this->serialize($t, 'enviada'));
+        $enviadas = TransferenciaResource::collection(
+            Transferencia::with(['destino', 'itens.categoria'])
+                ->where('instituicao_origem_id', $id)
+                ->orderBy('created_at', 'desc')
+                ->get()
+        )->resolve($request);
 
-        $recebidas = Transferencia::with(['origem', 'itens.categoria'])
-            ->where('instituicao_destino_id', $id)
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(fn (Transferencia $t) => $this->serialize($t, 'recebida'));
+        $recebidas = TransferenciaResource::collection(
+            Transferencia::with(['origem', 'itens.categoria'])
+                ->where('instituicao_destino_id', $id)
+                ->orderBy('created_at', 'desc')
+                ->get()
+        )->resolve($request);
 
-        $horarios = HorarioDisponivel::where('instituicao_id', $id)
-            ->where('ativo', true)
-            ->orderBy('dia_semana')
-            ->orderBy('hora_inicio')
-            ->get()
-            ->map(fn (HorarioDisponivel $h) => [
-                'id' => $h->id,
-                'dia_semana' => $h->dia_semana,
-                'hora_inicio' => $h->hora_inicio,
-                'hora_fim' => $h->hora_fim,
-                'tipo' => $h->tipo,
-            ]);
+        $horarios = HorarioResource::collection(
+            HorarioDisponivel::where('instituicao_id', $id)
+                ->where('ativo', true)
+                ->orderBy('dia_semana')
+                ->orderBy('hora_inicio')
+                ->get()
+        )->resolve($request);
 
         $itensEnviados = ItemTransferencia::whereHas('transferencia', fn ($q) => $q
             ->where('instituicao_origem_id', $id)
@@ -135,31 +135,5 @@ class TransferenciaController extends Controller
         $this->transferencias->cancelar($transferencia, auth()->user());
 
         return back();
-    }
-
-    private function serialize(Transferencia $t, string $direcao): array
-    {
-        $parceiro = $direcao === 'enviada' ? $t->destino : $t->origem;
-
-        return [
-            'id' => $t->id,
-            'status' => $t->status,
-            'direcao' => $direcao,
-            'criado_em' => $t->created_at->toIso8601String(),
-            'data_hora' => $t->data_hora?->toIso8601String(),
-            'data_hora_sugerida' => $t->data_hora_sugerida?->toIso8601String(),
-            'tipo' => $t->tipo,
-            'endereco_referencia' => $t->endereco_referencia,
-            'parceiro' => [
-                'usuario_id' => $parceiro->usuario_id,
-                'nome_fantasia' => $parceiro->nome_fantasia,
-            ],
-            'itens' => $t->itens->map(fn ($i) => [
-                'id' => $i->id,
-                'categoria' => $i->categoria->nome,
-                'quantidade' => $i->quantidade,
-                'descricao' => $i->descricao,
-            ]),
-        ];
     }
 }

@@ -7,6 +7,12 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
+ * Espelha o formato usado por Instituicao\HorarioController::index() (web) e
+ * pela API. 'pode_excluir' só aparece quando a query anota o virtual
+ * attribute 'tem_doacoes_ativas' via withExists() — nas demais telas
+ * (agenda, doações, transferências) essa checagem não é necessária e o
+ * campo é omitido.
+ *
  * @mixin HorarioDisponivel
  */
 class HorarioResource extends JsonResource
@@ -23,6 +29,7 @@ class HorarioResource extends JsonResource
             'hora_fim' => $this->hora_fim,
             'tipo' => $this->tipo,
             'ativo' => $this->ativo,
+            'pode_excluir' => $this->when(! is_null($this->tem_doacoes_ativas), fn () => ! $this->tem_doacoes_ativas),
         ];
     }
 }
