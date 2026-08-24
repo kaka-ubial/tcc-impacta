@@ -1,0 +1,234 @@
+<?php
+
+namespace App\Services;
+
+use App\Exceptions\TransferenciaException;
+use App\Models\ItemDoacao;
+use App\Models\ItemTransferencia;
+use App\Models\Notificacao;
+use App\Models\Transferencia;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
+
+/**
+ * Regras de negócio das transferências de itens entre instituições.
+ * Extraído de Instituicao\TransferenciaController para que a UI Inertia e a
+ * API REST reaproveitem exatamente a mesma lógica.
+ */
+class TransferenciaService
+{
+    /**
+     * @param  array{instituicao_destino_id:int, itens:array<int, array{categoria_id:int, necessidade_id?:int|null, quantidade:int, descricao?:string|null}>, agendamento:array{tipo:string, data_hora:string, horario_disponivel_id?:int|null, endereco_referencia?:string|null}}  $validated
+     *
+     * @throws TransferenciaException se for autotransferência ou a quantidade exceder o estoque disponível
+     */
+    public function store(array $validated, User $origemUser): Transferencia
+    {
+        $origemId = $origemUser->instituicao->usuario_id;
+
+        if ($origemId === $validated['instituicao_destino_id']) {
+            throw new TransferenciaException('Não é possível transferir para si mesmo.');
+        }
+
+        $estoque = self::calcularEstoque($origemId);
+
+        foreach ($validated['itens'] as $item) {
+            $disponivel = $estoque[$item['categoria_id']] ?? 0;
+            if ($item['quantidade'] > $disponivel) {
+                throw new TransferenciaException('Quantidade indisponível para transferência.');
+            }
+        }
+
+        $ag = $validated['agendamento'];
+
+        $transferencia = DB::transaction(function () use ($validated, $origemId, $ag) {
+            $t = Transferencia::create([
+                'instituicao_origem_id' => $origemId,
+                'instituicao_destino_id' => $validated['instituicao_destino_id'],
+                'status' => 'pendente',
+                'data_hora' => $ag['data_hora'],
+                'tipo' => $ag['tipo'],
+                'endereco_referencia' => $ag['endereco_referencia'] ?? null,
+                'horario_disponivel_id' => $ag['horario_disponivel_id'] ?? null,
+            ]);
+
+            foreach ($validated['itens'] as $item) {
+                $t->itens()->create($item);
+            }
+
+            return $t;
+        });
+
+        Notificacao::enviar(
+            $validated['instituicao_destino_id'],
+            'Nova solicitação de transferência',
+            $origemUser->instituicao->nome_fantasia.' enviou uma solicitação de transferência de itens.'
+        );
+
+        return $transferencia->fresh(['origem', 'destino', 'itens.categoria']);
+    }
+
+    public function confirmar(Transferencia $transferencia, User $destinoUser): void
+    {
+        abort_if($transferencia->instituicao_destino_id !== $destinoUser->instituicao->usuario_id, 403);
+        abort_if($transferencia->status !== 'pendente', 422);
+
+        DB::transaction(function () use ($transferencia) {
+            $transferencia->update(['status' => 'confirmada']);
+
+            foreach ($transferencia->itens()->whereNotNull('necessidade_id')->with('necessidade')->get() as $item) {
+                $item->necessidade->increment('quantidade_atual', $item->quantidade);
+            }
+        });
+
+        Notificacao::enviar(
+            $transferencia->instituicao_origem_id,
+            'Transferência confirmada',
+            $destinoUser->instituicao->nome_fantasia.' confirmou a sua solicitação de transferência.'
+        );
+    }
+
+    public function recusar(Transferencia $transferencia, User $destinoUser): void
+    {
+        abort_if($transferencia->instituicao_destino_id !== $destinoUser->instituicao->usuario_id, 403);
+        abort_if($transferencia->status !== 'pendente', 422);
+
+        $transferencia->update(['status' => 'recusada']);
+
+        Notificacao::enviar(
+            $transferencia->instituicao_origem_id,
+            'Transferência recusada',
+            $destinoUser->instituicao->nome_fantasia.' recusou a sua solicitação de transferência.'
+        );
+    }
+
+    public function entregar(Transferencia $transferencia, User $destinoUser): void
+    {
+        abort_if($transferencia->instituicao_destino_id !== $destinoUser->instituicao->usuario_id, 403);
+        abort_if($transferencia->status !== 'confirmada', 422);
+
+        $transferencia->update(['status' => 'entregue']);
+
+        Notificacao::enviar(
+            $transferencia->instituicao_origem_id,
+            'Transferência concluída',
+            $destinoUser->instituicao->nome_fantasia.' marcou a transferência como entregue.'
+        );
+    }
+
+    public function naoEntregue(Transferencia $transferencia, User $destinoUser): void
+    {
+        abort_if($transferencia->instituicao_destino_id !== $destinoUser->instituicao->usuario_id, 403);
+        abort_if($transferencia->status !== 'confirmada', 422);
+
+        DB::transaction(function () use ($transferencia) {
+            foreach ($transferencia->itens()->whereNotNull('necessidade_id')->with('necessidade')->get() as $item) {
+                $item->necessidade->decrement('quantidade_atual', $item->quantidade);
+            }
+            $transferencia->update(['status' => 'nao_entregue']);
+        });
+
+        Notificacao::enviar(
+            $transferencia->instituicao_origem_id,
+            'Transferência não entregue',
+            $destinoUser->instituicao->nome_fantasia.' marcou a transferência como não entregue.'
+        );
+    }
+
+    /**
+     * @param  array{data_hora_sugerida:string}  $validated
+     */
+    public function sugerirAlteracao(array $validated, Transferencia $transferencia, User $destinoUser): void
+    {
+        abort_if($transferencia->instituicao_destino_id !== $destinoUser->instituicao->usuario_id, 403);
+
+        $transferencia->update([
+            'data_hora_sugerida' => $validated['data_hora_sugerida'],
+            'status' => 'alteracao_sugerida',
+        ]);
+
+        Notificacao::enviar(
+            $transferencia->instituicao_origem_id,
+            'Nova data sugerida',
+            $destinoUser->instituicao->nome_fantasia.' sugeriu uma nova data para a transferência.'
+        );
+    }
+
+    public function aceitarSugestao(Transferencia $transferencia, User $origemUser): void
+    {
+        abort_if($transferencia->instituicao_origem_id !== $origemUser->instituicao->usuario_id, 403);
+        abort_if($transferencia->status !== 'alteracao_sugerida', 422);
+
+        $transferencia->update([
+            'data_hora' => $transferencia->data_hora_sugerida,
+            'data_hora_sugerida' => null,
+            'status' => 'pendente',
+        ]);
+
+        Notificacao::enviar(
+            $transferencia->instituicao_destino_id,
+            'Sugestão aceita',
+            $origemUser->instituicao->nome_fantasia.' aceitou a nova data sugerida.'
+        );
+    }
+
+    public function recusarSugestao(Transferencia $transferencia, User $origemUser): void
+    {
+        abort_if($transferencia->instituicao_origem_id !== $origemUser->instituicao->usuario_id, 403);
+        abort_if($transferencia->status !== 'alteracao_sugerida', 422);
+
+        $transferencia->update([
+            'data_hora_sugerida' => null,
+            'status' => 'pendente',
+        ]);
+
+        Notificacao::enviar(
+            $transferencia->instituicao_destino_id,
+            'Sugestão recusada',
+            $origemUser->instituicao->nome_fantasia.' recusou a nova data sugerida.'
+        );
+    }
+
+    public function cancelar(Transferencia $transferencia, User $origemUser): void
+    {
+        abort_if($transferencia->instituicao_origem_id !== $origemUser->instituicao->usuario_id, 403);
+        abort_if($transferencia->status !== 'pendente', 422);
+
+        $transferencia->update(['status' => 'cancelada']);
+
+        Notificacao::enviar(
+            $transferencia->instituicao_destino_id,
+            'Transferência cancelada',
+            $origemUser->instituicao->nome_fantasia.' cancelou a solicitação de transferência.'
+        );
+    }
+
+    public static function calcularEstoque(int $instituicaoId): array
+    {
+        $recebido = ItemDoacao::whereHas('doacao', fn ($q) => $q
+            ->where('instituicao_id', $instituicaoId)
+            ->where('status', 'entregue'))
+            ->selectRaw('categoria_id, SUM(quantidade) as total')
+            ->groupBy('categoria_id')
+            ->pluck('total', 'categoria_id')
+            ->toArray();
+
+        $transferido = ItemTransferencia::whereHas('transferencia', fn ($q) => $q
+            ->where('instituicao_origem_id', $instituicaoId)
+            ->whereNotIn('status', ['cancelada', 'recusada']))
+            ->selectRaw('categoria_id, SUM(quantidade) as total')
+            ->groupBy('categoria_id')
+            ->pluck('total', 'categoria_id')
+            ->toArray();
+
+        $estoque = [];
+        foreach ($recebido as $catId => $qty) {
+            $disponivel = $qty - ($transferido[$catId] ?? 0);
+            if ($disponivel > 0) {
+                $estoque[$catId] = $disponivel;
+            }
+        }
+
+        return $estoque;
+    }
+}

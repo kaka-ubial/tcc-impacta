@@ -7,6 +7,7 @@ use App\Models\CategoriaItem;
 use App\Models\Causa;
 use App\Models\Instituicao;
 use App\Services\RecommendationService;
+use App\Services\TransferenciaService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -52,7 +53,7 @@ class InstituicaoController extends Controller
                 'search' => $search,
                 'causa' => $causaId,
             ],
-            'recomendacoes' => (!$isFiltering && auth()->user()->tipo_usuario === 'doador')
+            'recomendacoes' => (! $isFiltering && auth()->user()->tipo_usuario === 'doador')
                 ? $recommendations->forDonor(auth()->user())
                 : [],
         ]);
@@ -98,10 +99,10 @@ class InstituicaoController extends Controller
                     'tipo' => $h->tipo,
                 ])->values(),
             ],
-            'categorias'   => $categorias,
-            'canTransfer'  => auth()->user()->tipo_usuario === 'instituicao',
-            'estoque'      => auth()->user()->tipo_usuario === 'instituicao'
-                ? TransferenciaController::calcularEstoque(auth()->user()->instituicao->usuario_id)
+            'categorias' => $categorias,
+            'canTransfer' => auth()->user()->tipo_usuario === 'instituicao',
+            'estoque' => auth()->user()->tipo_usuario === 'instituicao'
+                ? TransferenciaService::calcularEstoque(auth()->user()->instituicao->usuario_id)
                 : [],
         ]);
     }

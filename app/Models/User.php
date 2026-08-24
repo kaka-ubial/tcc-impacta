@@ -7,24 +7,25 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Laravel\Sanctum\HasApiTokens;
 
 #[Fillable(['email', 'password', 'tipo_usuario', 'status'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, TwoFactorAuthenticatable;
+    use HasApiTokens, HasFactory, Notifiable, TwoFactorAuthenticatable;
 
     /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
      */
-
     protected $table = 'usuarios';
 
     protected function casts(): array
@@ -36,18 +37,18 @@ class User extends Authenticatable
         ];
     }
 
-    public function doador(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function doador(): HasOne
     {
         return $this->hasOne(Doador::class, 'usuario_id');
     }
 
-    public function instituicao(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function instituicao(): HasOne
     {
         return $this->hasOne(Instituicao::class, 'usuario_id');
     }
 
     public function causas(): BelongsToMany
     {
-        return $this->belongsToMany(Causa::class, 'usuario_causa'); 
+        return $this->belongsToMany(Causa::class, 'usuario_causa');
     }
 }

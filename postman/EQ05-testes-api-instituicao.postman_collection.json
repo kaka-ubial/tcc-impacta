@@ -1,0 +1,365 @@
+{
+  "info": {
+    "_postman_id": "d3a8e5f1-6c4b-4e2a-8f0d-eq05-api-instituicao",
+    "name": "EQ05 - Fluxo institucional (API REST)",
+    "description": "Coleção para testar o ciclo de vida completo de uma instituição na API REST/JSON stateless (Sanctum): registro, bloqueio até aprovação, aprovação pelo admin, cadastro de horários e CRUD de necessidades. Nenhuma dessas requisições usa cookie de sessão — tudo via Bearer token.\n\nOrdem de execução importa: rode as pastas em ordem (1 a 6). Use o Collection Runner para rodar tudo de uma vez.\n\nAntes de rodar:\n- Ajuste `base_url` se sua app não estiver em http://localhost:8000 (rode `composer dev` ou `php artisan serve`).\n- A pasta 1 já registra uma instituição nova a cada execução (CNPJ e e-mail gerados automaticamente) e captura o token sozinha.\n- A pasta 3 (aprovação) precisa de uma conta admin já existente. Se você rodou `php artisan db:seed`, a conta `admin@impacta.com` / `senha_segura` (criada por AdminUserSeeder) já funciona sem editar nada. Se não existir, crie uma via tinker:\n\n```\nphp artisan tinker\n>>> \\App\\Models\\User::create(['email' => 'admin@impacta.com', 'password' => Hash::make('senha_segura'), 'tipo_usuario' => 'admin', 'status' => 'ativo'])\n```",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000", "type": "string" },
+    { "key": "inst_token", "value": "", "type": "string" },
+    { "key": "inst_email", "value": "", "type": "string" },
+    { "key": "inst_cnpj", "value": "", "type": "string" },
+    { "key": "inst_password", "value": "senha-teste-123", "type": "string" },
+    { "key": "instituicao_id", "value": "", "type": "string" },
+    { "key": "admin_email", "value": "admin@impacta.com", "type": "string" },
+    { "key": "admin_password", "value": "senha_segura", "type": "string" },
+    { "key": "admin_token", "value": "", "type": "string" },
+    { "key": "categoria_id", "value": "1", "type": "string" },
+    { "key": "necessidade_id", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "1. Registro da instituição",
+      "item": [
+        {
+          "name": "1a. POST /api/register (cria instituição nova)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "function calcDigit(nums, pesos) {",
+                  "    let soma = 0;",
+                  "    for (let i = 0; i < nums.length; i++) soma += nums[i] * pesos[i];",
+                  "    const resto = soma % 11;",
+                  "    return resto < 2 ? 0 : 11 - resto;",
+                  "}",
+                  "const base = Array.from({ length: 12 }, () => Math.floor(Math.random() * 9));",
+                  "const d1 = calcDigit(base, [5,4,3,2,9,8,7,6,5,4,3,2]);",
+                  "const d2 = calcDigit([...base, d1], [6,5,4,3,2,9,8,7,6,5,4,3,2]);",
+                  "pm.collectionVariables.set('inst_cnpj', [...base, d1, d2].join(''));",
+                  "pm.collectionVariables.set('inst_email', `instituicao.${Date.now()}@exemplo.com`);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "if (json.token) {",
+                  "    pm.collectionVariables.set('inst_token', json.token);",
+                  "    pm.collectionVariables.set('instituicao_id', json.user.id);",
+                  "    console.log('inst_token e instituicao_id atualizados: ' + json.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"{{inst_email}}\",\n    \"password\": \"{{inst_password}}\",\n    \"password_confirmation\": \"{{inst_password}}\",\n    \"tipo_usuario\": \"instituicao\",\n    \"nome_fantasia\": \"Instituição de Teste\",\n    \"razao_social\": \"Instituição de Teste LTDA\",\n    \"cnpj\": \"{{inst_cnpj}}\",\n    \"telefone_inst\": \"(41) 3333-4444\",\n    \"endereco_completo\": \"Rua de Teste, 123 - Curitiba/PR\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "register"]
+            },
+            "description": "Cria uma instituição nova (e-mail e CNPJ gerados no pre-request script). O status inicial em `instituicao.status` é 'pending' — ainda não pode operar. Esperado: 201 com { token, user }."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Bloqueada até aprovação (esperado 403)",
+      "item": [
+        {
+          "name": "2a. POST /api/necessidades (instituição pending)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{inst_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"categoria_id\": {{categoria_id}},\n    \"descricao\": \"Teste com instituição pendente\",\n    \"quantidade_objetivo\": 10,\n    \"prioridade\": \"media\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/necessidades",
+              "host": ["{{base_url}}"],
+              "path": ["api", "necessidades"]
+            },
+            "description": "Esperado: 403 JSON — EnsureInstitutionIsApproved bloqueia porque a instituição ainda não foi aprovada pelo admin."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Aprovação (admin)",
+      "item": [
+        {
+          "name": "3a. POST /api/login (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "if (json.token) {",
+                  "    pm.collectionVariables.set('admin_token', json.token);",
+                  "    console.log('admin_token atualizado');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"{{admin_email}}\",\n    \"password\": \"{{admin_password}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "login"]
+            },
+            "description": "Requer uma conta admin já existente (veja a descrição da coleção). Esperado: 201 com { token, user }."
+          },
+          "response": []
+        },
+        {
+          "name": "3b. GET /api/admin/institutions (pendentes)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/institutions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "institutions"]
+            },
+            "description": "Esperado: 200 com a lista de instituições status='pending', incluindo a criada em 1a."
+          },
+          "response": []
+        },
+        {
+          "name": "3c. POST /api/admin/institutions/{{instituicao_id}}/approve",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/institutions/{{instituicao_id}}/approve",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "institutions", "{{instituicao_id}}", "approve"]
+            },
+            "description": "Esperado: 200 com { data: { status: 'approved', ... } }."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Horários",
+      "item": [
+        {
+          "name": "4a. POST /api/horarios (cadastra horário ativo)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{inst_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"dia_semana\": 1,\n    \"hora_inicio\": \"08:00\",\n    \"hora_fim\": \"12:00\",\n    \"tipo\": \"entrega\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/horarios",
+              "host": ["{{base_url}}"],
+              "path": ["api", "horarios"]
+            },
+            "description": "Esperado: 201. Sem isso, criar necessidades continua bloqueado (422)."
+          },
+          "response": []
+        },
+        {
+          "name": "4b. GET /api/horarios",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{inst_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/horarios",
+              "host": ["{{base_url}}"],
+              "path": ["api", "horarios"]
+            },
+            "description": "Esperado: 200 com o horário criado em 4a."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. Necessidades (CRUD)",
+      "item": [
+        {
+          "name": "5a. POST /api/necessidades (cria)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data.id) {",
+                  "    pm.collectionVariables.set('necessidade_id', json.data.id);",
+                  "    console.log('necessidade_id atualizado: ' + json.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{inst_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"categoria_id\": {{categoria_id}},\n    \"descricao\": \"Roupas de inverno\",\n    \"quantidade_objetivo\": 10,\n    \"prioridade\": \"media\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/necessidades",
+              "host": ["{{base_url}}"],
+              "path": ["api", "necessidades"]
+            },
+            "description": "Agora a instituição está aprovada e tem horário ativo. Esperado: 201 com a necessidade criada."
+          },
+          "response": []
+        },
+        {
+          "name": "5b. GET /api/necessidades (lista)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{inst_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/necessidades",
+              "host": ["{{base_url}}"],
+              "path": ["api", "necessidades"]
+            },
+            "description": "Esperado: 200 com 1 item (a necessidade criada em 5a)."
+          },
+          "response": []
+        },
+        {
+          "name": "5c. PUT /api/necessidades/{{necessidade_id}} (atualiza)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{inst_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"categoria_id\": {{categoria_id}},\n    \"descricao\": \"Roupas de inverno (atualizado)\",\n    \"quantidade_objetivo\": 20,\n    \"prioridade\": \"alta\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/necessidades/{{necessidade_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "necessidades", "{{necessidade_id}}"]
+            },
+            "description": "Esperado: 200 com a descrição/prioridade atualizadas."
+          },
+          "response": []
+        },
+        {
+          "name": "5d. DELETE /api/necessidades/{{necessidade_id}} (exclui)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{inst_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/necessidades/{{necessidade_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "necessidades", "{{necessidade_id}}"]
+            },
+            "description": "Esperado: 204 No Content."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "6. Erro de validação (422)",
+      "item": [
+        {
+          "name": "6a. POST /api/necessidades (payload inválido)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{inst_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"categoria_id\": 999999,\n    \"descricao\": \"a\",\n    \"quantidade_objetivo\": 0,\n    \"prioridade\": \"urgente\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/necessidades",
+              "host": ["{{base_url}}"],
+              "path": ["api", "necessidades"]
+            },
+            "description": "categoria_id inexistente, descricao curta demais, quantidade_objetivo abaixo do mínimo e prioridade fora do enum. Esperado: 422 JSON com { message, errors }."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
