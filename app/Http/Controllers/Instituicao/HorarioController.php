@@ -2,17 +2,23 @@
 
 namespace App\Http\Controllers\Instituicao;
 
+use App\Exceptions\HorarioException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instituicao\StoreHorarioRequest;
+use App\Http\Resources\HorarioResource;
 use App\Models\HorarioDisponivel;
+use App\Services\HorarioService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class HorarioController extends Controller
 {
-    public function index(): Response
+    public function __construct(private readonly HorarioService $horarios) {}
+
+    public function index(Request $request): Response
     {
-        $instituicaoId = auth()->user()->instituicao->usuario_id;
+        $instituicaoId = auth()->user()->instituicaoId();
 
         $horarios = HorarioDisponivel::where('instituicao_id', $instituicaoId)
             ->where('ativo', true)
@@ -20,59 +26,27 @@ class HorarioController extends Controller
                 ->whereHas('doacao', fn ($q) => $q->whereIn('status', ['pendente', 'confirmada']))])
             ->orderBy('dia_semana')
             ->orderBy('hora_inicio')
-            ->get()
-            ->map(fn ($h) => [
-                'id'          => $h->id,
-                'dia_semana'  => $h->dia_semana,
-                'hora_inicio' => $h->hora_inicio,
-                'hora_fim'    => $h->hora_fim,
-                'tipo'        => $h->tipo,
-                'pode_excluir' => ! $h->tem_doacoes_ativas,
-            ]);
+            ->get();
 
         return Inertia::render('instituicao/horarios', [
-            'horarios' => $horarios,
+            'horarios' => HorarioResource::collection($horarios)->resolve($request),
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreHorarioRequest $request)
     {
-        $validated = $request->validate([
-            'dia_semana'  => ['required', 'integer', 'between:0,6'],
-            'hora_inicio' => ['required', 'date_format:H:i'],
-            'hora_fim'    => ['required', 'date_format:H:i', 'after:hora_inicio'],
-            'tipo'        => ['required', 'in:coleta,entrega'],
-        ]);
-
-        $instituicaoId = auth()->user()->instituicao->usuario_id;
-
-        HorarioDisponivel::create([
-            'instituicao_id' => $instituicaoId,
-            'dia_semana'     => $validated['dia_semana'],
-            'hora_inicio'    => $validated['hora_inicio'],
-            'hora_fim'       => $validated['hora_fim'],
-            'tipo'           => $validated['tipo'],
-        ]);
+        $this->horarios->store($request->validated(), auth()->user()->instituicao);
 
         return back();
     }
 
     public function destroy(HorarioDisponivel $horario)
     {
-        abort_if(
-            $horario->instituicao_id !== auth()->user()->instituicao->usuario_id,
-            403
-        );
-
-        $temDoacoesAtivas = $horario->agendamentos()
-            ->whereHas('doacao', fn ($q) => $q->whereIn('status', ['pendente', 'confirmada']))
-            ->exists();
-
-        if ($temDoacoesAtivas) {
-            return back()->with('error', 'Não é possível excluir um horário com doações agendadas em andamento.');
+        try {
+            $this->horarios->destroy($horario, auth()->user()->instituicao);
+        } catch (HorarioException $e) {
+            return back()->with('error', $e->getMessage());
         }
-
-        $horario->delete();
 
         return back();
     }

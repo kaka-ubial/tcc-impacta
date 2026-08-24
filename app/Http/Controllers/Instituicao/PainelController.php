@@ -12,7 +12,7 @@ class PainelController extends Controller
 {
     public function index(): Response
     {
-        $id = auth()->user()->instituicao->usuario_id;
+        $id = auth()->user()->instituicaoId();
 
         $doacoesPendentes = Doacao::where('instituicao_id', $id)->where('status', 'pendente')->count();
 

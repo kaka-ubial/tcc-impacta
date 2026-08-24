@@ -1,0 +1,218 @@
+{
+  "info": {
+    "_postman_id": "b6e0f3c2-2f1a-4a3e-9a6b-eq05-auth-tests",
+    "name": "EQ05 - Testes de Autenticação e Autorização",
+    "description": "Coleção para testar as regras de autenticação/autorização do projeto (Laravel + Fortify + Inertia) via sessão de cookies. Cobre: usuário não autenticado, instituição pendente/rejeitada e instituição aprovada tentando criar uma 'necessidade'.\n\nOrdem de execução importa: rode as pastas na ordem (1, 2, 3). Use o Collection Runner para rodar tudo de uma vez, começando com o cookie jar limpo.\n\nAntes de rodar:\n- Ajuste a variável `base_url`.\n- Cadastre (ou use no seeder) três contas de instituição com status diferentes: pending, rejected, approved. Preencha as variáveis de e-mail/senha correspondentes.\n- A instituição 'aprovada' precisa ter pelo menos um horário disponível ativo cadastrado, senão o controller redireciona para a tela de horários em vez de criar a necessidade.\n- Ajuste `categoria_id` para um id válido em `categorias_itens`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000", "type": "string" },
+    { "key": "xsrf_token", "value": "", "type": "string" },
+    { "key": "email_pendente", "value": "instituicao.pendente@exemplo.com", "type": "string" },
+    { "key": "password_pendente", "value": "senha-teste", "type": "string" },
+    { "key": "email_rejeitada", "value": "instituicao.rejeitada@exemplo.com", "type": "string" },
+    { "key": "password_rejeitada", "value": "senha-teste", "type": "string" },
+    { "key": "email_aprovada", "value": "instituicao.aprovada@exemplo.com", "type": "string" },
+    { "key": "password_aprovada", "value": "senha-teste", "type": "string" },
+    { "key": "categoria_id", "value": "1", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "1. Usuário não autenticado",
+      "item": [
+        {
+          "name": "1a. GET /login (obter cookie CSRF)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const xsrf = pm.cookies.get('XSRF-TOKEN');",
+                  "if (xsrf) {",
+                  "    pm.collectionVariables.set('xsrf_token', decodeURIComponent(xsrf));",
+                  "    console.log('xsrf_token atualizado');",
+                  "} else {",
+                  "    console.warn('Cookie XSRF-TOKEN não encontrado na resposta.');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "text/html" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": ["{{base_url}}"],
+              "path": ["login"]
+            },
+            "description": "Não faz login. Só visita a página pra receber o cookie XSRF-TOKEN, necessário porque o middleware de CSRF roda antes do middleware de autenticação."
+          },
+          "response": []
+        },
+        {
+          "name": "1b. POST /instituicao/necessidades (sem sessão)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-XSRF-TOKEN", "value": "{{xsrf_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"categoria_id\": {{categoria_id}},\n    \"descricao\": \"Teste sem autenticação\",\n    \"quantidade_objetivo\": 10,\n    \"prioridade\": \"media\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/instituicao/necessidades",
+              "host": ["{{base_url}}"],
+              "path": ["instituicao", "necessidades"]
+            },
+            "description": "Esperado: 401 (JSON) — o middleware 'auth' bloqueia porque não há sessão autenticada."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Instituição pendente / rejeitada",
+      "item": [
+        {
+          "name": "2a. POST /login (instituição pendente)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const xsrf = pm.cookies.get('XSRF-TOKEN');",
+                  "if (xsrf) {",
+                  "    pm.collectionVariables.set('xsrf_token', decodeURIComponent(xsrf));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-XSRF-TOKEN", "value": "{{xsrf_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"{{email_pendente}}\",\n    \"password\": \"{{password_pendente}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": ["{{base_url}}"],
+              "path": ["login"]
+            },
+            "description": "Autentica com uma conta de instituição cujo status em `instituicao.status` seja 'pending' (ou troque as variáveis para a conta 'rejected')."
+          },
+          "response": []
+        },
+        {
+          "name": "2b. POST /instituicao/necessidades (instituição não aprovada)",
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-XSRF-TOKEN", "value": "{{xsrf_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"categoria_id\": {{categoria_id}},\n    \"descricao\": \"Teste com instituição não aprovada\",\n    \"quantidade_objetivo\": 10,\n    \"prioridade\": \"media\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/instituicao/necessidades",
+              "host": ["{{base_url}}"],
+              "path": ["instituicao", "necessidades"]
+            },
+            "description": "Esperado: 302 com header Location apontando para /waiting-validation (status pending) ou /rejected (status rejected). 'followRedirects' está desligado nesta request para você ver o redirect em vez do Postman segui-lo automaticamente."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Instituição aprovada (controle - sucesso esperado)",
+      "item": [
+        {
+          "name": "3a. POST /login (instituição aprovada)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const xsrf = pm.cookies.get('XSRF-TOKEN');",
+                  "if (xsrf) {",
+                  "    pm.collectionVariables.set('xsrf_token', decodeURIComponent(xsrf));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-XSRF-TOKEN", "value": "{{xsrf_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"{{email_aprovada}}\",\n    \"password\": \"{{password_aprovada}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": ["{{base_url}}"],
+              "path": ["login"]
+            },
+            "description": "Autentica com uma conta de instituição com status 'approved' e que já tenha ao menos um horário disponível ativo cadastrado."
+          },
+          "response": []
+        },
+        {
+          "name": "3b. POST /instituicao/necessidades (esperado sucesso)",
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-XSRF-TOKEN", "value": "{{xsrf_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"categoria_id\": {{categoria_id}},\n    \"descricao\": \"Teste com instituição aprovada\",\n    \"quantidade_objetivo\": 10,\n    \"prioridade\": \"media\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/instituicao/necessidades",
+              "host": ["{{base_url}}"],
+              "path": ["instituicao", "necessidades"]
+            },
+            "description": "Esperado: 302 com Location para /instituicao/necessidades (sucesso). Se vier redirect para /instituicao/horarios, a instituição de teste não tem horário ativo cadastrado."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

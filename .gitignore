@@ -30,6 +30,7 @@ CLAUDE.md
 .claude
 .agents
 skills-lock.json
+/context 
 
 
 AGENTS.md
