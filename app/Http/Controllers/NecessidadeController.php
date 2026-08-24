@@ -2,22 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Necessidade;
-use App\Models\CategoriaItem;
+use App\Exceptions\NecessidadeException;
 use App\Http\Requests\NecessidadeRequest;
+use App\Models\CategoriaItem;
+use App\Models\Necessidade;
+use App\Services\NecessidadeService;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class NecessidadeController extends Controller
 {
-    public function index(Request $request): Response {
-        $user = $request -> user();
+    public function __construct(private readonly NecessidadeService $necessidades) {}
+
+    public function index(Request $request): Response
+    {
+        $user = $request->user();
 
         if ($user->instituicao) {
             $necessidades = Necessidade::with(['categoria'])
-            ->where('instituicao_id', $user->instituicao->usuario_id)
-            ->get();
+                ->where('instituicao_id', $user->instituicao->usuario_id)
+                ->get();
         } else {
             $necessidades = Necessidade::with(['categoria', 'instituicao'])->get();
         }
@@ -33,49 +38,41 @@ class NecessidadeController extends Controller
             'categorias' => CategoriaItem::all(),
             'auth' => [
                 'user' => $request->user()->load(['doador', 'instituicao']),
-            ]
+            ],
         ]);
     }
 
-    public function create(Request $request): Response {
+    public function create(Request $request): Response
+    {
         return Inertia::render('Necessidades/Create', [
             'categorias' => CategoriaItem::all(),
             'auth' => [
                 'user' => $request->user()->load(['doador', 'instituicao']),
-            ]
+            ],
         ]);
     }
 
-    public function store(NecessidadeRequest $request) {
-        $instituicao = $request->user()->instituicao;
-
-        if ($instituicao->horarios()->where('ativo', true)->doesntExist()) {
-            return redirect()->route('instituicao.horarios.index')
-                ->with('error', 'Cadastre ao menos um horário disponível antes de criar necessidades.');
+    public function store(NecessidadeRequest $request)
+    {
+        try {
+            $this->necessidades->store($request->validated(), $request->user()->instituicao);
+        } catch (NecessidadeException $e) {
+            return redirect()->route('instituicao.horarios.index')->with('error', $e->getMessage());
         }
-
-        $data = $request->validated();
-
-        $data['instituicao_id'] = $instituicao->usuario_id;
-        $data['quantidade_atual'] = 0;
-
-        Necessidade::create($data);
 
         return redirect()->route('instituicao.necessidades.index')->with('success', 'Necessidade criada com sucesso!');
     }
 
-    public function update(NecessidadeRequest $request, $id) {
-        $necessidade = $request->get('necessidade');
-
-        $necessidade->update($request->validated());
+    public function update(NecessidadeRequest $request, $id)
+    {
+        $this->necessidades->update($request->get('necessidade'), $request->validated());
 
         return redirect()->route('instituicao.necessidades.index');
     }
 
-    public function destroy(Request $request, $id) {
-        $necessidade = $request->get('necessidade');
-
-        $necessidade->delete();
+    public function destroy(Request $request, $id)
+    {
+        $this->necessidades->destroy($request->get('necessidade'));
 
         return redirect()->back();
     }

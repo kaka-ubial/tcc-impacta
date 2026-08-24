@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
@@ -31,7 +32,17 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // Requisições para a API (ou que explicitamente aceitam JSON) sempre
+        // recebem erros em JSON, nunca a página de erro Inertia.
+        $exceptions->shouldRenderJsonWhen(function (Request $request, Throwable $exception) {
+            return $request->is('api/*') || $request->expectsJson();
+        });
+
         $exceptions->respond(function (Response $response, Throwable $exception, Request $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return $response;
+            }
+
             if (in_array($response->getStatusCode(), [403, 404, 419, 500, 503])) {
                 return Inertia::render('error', ['status' => $response->getStatusCode()])
                     ->toResponse($request)
