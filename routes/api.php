@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\Admin\InstitutionController;
+use App\Http\Controllers\Api\Admin\UserController as ApiAdminUserController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DoacaoController;
 use App\Http\Controllers\Api\Doador\PerfilController;
@@ -30,7 +31,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('login', [AuthController::class, 'login'])->name('api.login');
 Route::post('register', [AuthController::class, 'register'])->name('api.register');
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::get('me', [AuthController::class, 'me'])->name('api.me');
     Route::post('logout', [AuthController::class, 'logout'])->name('api.logout');
 
@@ -90,5 +91,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('institutions', [InstitutionController::class, 'index'])->name('institutions.index');
         Route::post('institutions/{instituicao}/approve', [InstitutionController::class, 'approve'])->name('institutions.approve');
         Route::post('institutions/{instituicao}/reject', [InstitutionController::class, 'reject'])->name('institutions.reject');
+
+        Route::get('users', [ApiAdminUserController::class, 'index'])->name('users.index');
+        Route::get('users/{user}', [ApiAdminUserController::class, 'show'])->name('users.show');
+        Route::put('doadores/{user}', [ApiAdminUserController::class, 'updateDoador'])->name('doadores.update');
+        Route::put('instituicoes/{user}', [ApiAdminUserController::class, 'updateInstituicao'])->name('instituicoes.update');
+        Route::patch('users/{user}/status', [ApiAdminUserController::class, 'updateStatus'])->name('users.status');
     });
 });

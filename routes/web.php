@@ -8,6 +8,7 @@ use Laravel\Fortify\Features;
 use App\Actions\Auth\ValidateRegisterStepOne;
 use Inertia\Inertia;
 use App\Http\Controllers\Admin\InstitutionCheckController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Doador\DoacaoController;
 use App\Http\Controllers\Doador\PerfilController as DoadorPerfilController;
 use App\Http\Controllers\Instituicao\DoacaoController as InstituicaoDoacaoController;
@@ -101,7 +102,12 @@ Route::middleware(['auth', 'user_type:admin'])->prefix('admin')->name('admin.')-
     Route::get('institutions', [InstitutionCheckController::class, 'index'])->name('institutions.index');
     Route::post('institutions/{instituicao}/approve', [InstitutionCheckController::class, 'approve'])->name('institutions.approve');
     Route::post('institutions/{instituicao}/reject', [InstitutionCheckController::class, 'reject'])->name('institutions.reject');
-    
+
+    Route::get('users', [AdminUserController::class, 'index'])->name('users.index');
+    Route::get('users/{user}', [AdminUserController::class, 'show'])->name('users.show');
+    Route::put('doadores/{user}', [AdminUserController::class, 'updateDoador'])->name('doadores.update');
+    Route::put('instituicoes/{user}', [AdminUserController::class, 'updateInstituicao'])->name('instituicoes.update');
+    Route::patch('users/{user}/status', [AdminUserController::class, 'updateStatus'])->name('users.status');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
