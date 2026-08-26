@@ -26,7 +26,6 @@ interface Props {
 const STATUS_LABELS: Record<string, string> = {
     ativo: 'Ativo',
     suspenso: 'Suspenso',
-    aguardando_validacao: 'Aguardando validação',
 };
 
 function DoadorForm({

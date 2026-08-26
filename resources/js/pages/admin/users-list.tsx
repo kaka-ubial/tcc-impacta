@@ -31,7 +31,6 @@ interface Props {
     stats: {
         ativo: number;
         suspenso: number;
-        aguardando_validacao: number;
     };
 }
 
@@ -48,14 +47,12 @@ const TIPO_LABELS: Record<string, string> = {
 const STATUS_LABELS: Record<string, string> = {
     ativo: 'Ativo',
     suspenso: 'Suspenso',
-    aguardando_validacao: 'Aguardando validação',
 };
 
 function StatusBadge({ status }: { status: string }) {
     const styles: Record<string, string> = {
         ativo: 'border-success/40 bg-success/10 text-success',
         suspenso: 'border-destructive/40 bg-destructive/10 text-destructive',
-        aguardando_validacao: 'border-pending/40 bg-pending/10 text-pending',
     };
 
     return (
@@ -114,13 +111,9 @@ export default function UsersList({
                         title="Gestão de Usuários"
                         description="Visualize, edite e gerencie o status de doadores e instituições cadastrados."
                     />
-                    <div className="grid gap-4 md:grid-cols-3">
+                    <div className="grid gap-4 md:grid-cols-2">
                         <StatCard title="Ativos" value={stats.ativo} />
                         <StatCard title="Suspensos" value={stats.suspenso} />
-                        <StatCard
-                            title="Aguardando validação"
-                            value={stats.aguardando_validacao}
-                        />
                     </div>
 
                     <div className="flex flex-wrap gap-3">

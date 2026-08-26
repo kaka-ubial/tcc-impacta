@@ -3,7 +3,7 @@ export interface AdminUser {
     nome: string | null;
     email: string;
     tipo_usuario: 'doador' | 'instituicao' | 'admin';
-    status: 'ativo' | 'suspenso' | 'aguardando_validacao';
+    status: 'ativo' | 'suspenso';
     motivo_suspensao: string | null;
     email_verified_at: string | null;
     criado_em: string | null;

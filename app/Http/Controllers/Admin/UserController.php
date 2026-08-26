@@ -38,11 +38,10 @@ class UserController extends Controller
             'usuarios' => $usuarios,
             'filtros' => $request->only(['tipo_usuario', 'status']),
             'tipo_options' => ['doador', 'instituicao', 'admin'],
-            'status_options' => ['ativo', 'suspenso', 'aguardando_validacao'],
+            'status_options' => ['ativo', 'suspenso'],
             'stats' => [
                 'ativo' => $stats['ativo'] ?? 0,
                 'suspenso' => $stats['suspenso'] ?? 0,
-                'aguardando_validacao' => $stats['aguardando_validacao'] ?? 0,
             ],
         ]);
     }

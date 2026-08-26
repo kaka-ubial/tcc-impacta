@@ -28,9 +28,7 @@ class CreateNewUser implements CreatesNewUsers
                 'email'        => $input['email'],
                 'password'     => $input['password'],
                 'tipo_usuario' => $input['tipo_usuario'],
-                'status'       => $input['tipo_usuario'] === 'instituicao'
-                    ? 'aguardando_validacao'
-                    : 'ativo',
+                'status'       => 'ativo',
             ]);
 
             $handler = UserTypeFactory::make($input['tipo_usuario']);
