@@ -1,4 +1,3 @@
-
 export interface Instituicao {
     usuario_id: number;
     nome_fantasia: string;
@@ -6,4 +5,5 @@ export interface Instituicao {
     cnpj: string;
     telefone: string;
     endereco_completo: string;
+    status?: string;
 }

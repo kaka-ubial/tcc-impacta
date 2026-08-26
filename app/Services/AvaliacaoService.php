@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\DoacaoStatus;
 use App\Models\Avaliacao;
 use App\Models\Doacao;
 use App\Models\User;
@@ -19,7 +20,7 @@ class AvaliacaoService
     public function store(array $validated, Doacao $doacao, User $instituicaoUser): Avaliacao
     {
         abort_if($doacao->instituicao_id !== $instituicaoUser->instituicaoId(), 403);
-        abort_if($doacao->status !== 'entregue', 422);
+        abort_if($doacao->status !== DoacaoStatus::Entregue, 422);
         abort_if($doacao->avaliacao()->exists(), 422);
 
         return Avaliacao::create([

@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\DoacaoStatus;
 use App\Models\Doador;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -35,7 +36,7 @@ class DoadorPerfilResource extends JsonResource
         $isOwnProfile = $this->instituicaoId === null;
 
         $totalDoacoes = $this->doacoes()->count();
-        $totalConcluidas = $this->doacoes()->where('status', 'entregue')->count();
+        $totalConcluidas = $this->doacoes()->where('status', DoacaoStatus::Entregue)->count();
 
         $estatisticas = [
             'total_doacoes' => $totalDoacoes,
@@ -45,7 +46,7 @@ class DoadorPerfilResource extends JsonResource
         if ($isOwnProfile) {
             $estatisticas['doacoes_com_instituicao'] = 0;
         } else {
-            $avaliadas = $this->doacoes()->where('status', 'entregue')->with('avaliacao')->get();
+            $avaliadas = $this->doacoes()->where('status', DoacaoStatus::Entregue)->with('avaliacao')->get();
 
             $estatisticas['doacoes_com_instituicao'] = $this->doacoes()->where('instituicao_id', $this->instituicaoId)->count();
             $estatisticas['media_avaliacoes'] = $totalConcluidas > 0

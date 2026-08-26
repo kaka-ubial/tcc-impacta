@@ -138,6 +138,29 @@ function cnpjValido(): string
     return implode('', [...$base, $d1, $d2]);
 }
 
+function cpfValido(): string
+{
+    $calc = function (array $nums, array $pesos) {
+        $soma = 0;
+        foreach ($nums as $i => $n) {
+            $soma += $n * $pesos[$i];
+        }
+        $resto = ($soma * 10) % 11;
+
+        return $resto === 10 ? 0 : $resto;
+    };
+
+    $base = [];
+    for ($i = 0; $i < 9; $i++) {
+        $base[] = random_int(0, 9);
+    }
+
+    $d1 = $calc($base, [10, 9, 8, 7, 6, 5, 4, 3, 2]);
+    $d2 = $calc([...$base, $d1], [11, 10, 9, 8, 7, 6, 5, 4, 3, 2]);
+
+    return implode('', [...$base, $d1, $d2]);
+}
+
 function registrarInstituicao(string $password = 'senha-teste-123'): array
 {
     $email = 'inst.'.uniqid().'@exemplo.com';

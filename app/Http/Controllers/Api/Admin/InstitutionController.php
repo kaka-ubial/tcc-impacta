@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Actions\Auth\EvaluateInstitutionAction;
+use App\Enums\InstituicaoStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\RejectInstitutionRequest;
 use App\Http\Resources\InstituicaoResource;
@@ -26,7 +27,7 @@ class InstitutionController extends Controller
     public function index(): AnonymousResourceCollection
     {
         return InstituicaoResource::collection(
-            Instituicao::where('status', 'pending')->with('usuario')->get()
+            Instituicao::where('status', InstituicaoStatus::Pending)->with('usuario')->get()
         );
     }
 
@@ -37,7 +38,7 @@ class InstitutionController extends Controller
      */
     public function approve(Request $request, Instituicao $instituicao, EvaluateInstitutionAction $action)
     {
-        $action->execute($instituicao, 'approved', 'Instituição Aprovada', $request->user()->id);
+        $action->execute($instituicao, InstituicaoStatus::Approved, 'Instituição Aprovada', $request->user()->id);
 
         return new InstituicaoResource($instituicao->fresh());
     }
@@ -49,7 +50,7 @@ class InstitutionController extends Controller
      */
     public function reject(RejectInstitutionRequest $request, Instituicao $instituicao, EvaluateInstitutionAction $action)
     {
-        $action->execute($instituicao, 'rejected', $request->motivo, $request->user()->id);
+        $action->execute($instituicao, InstituicaoStatus::Rejected, $request->motivo, $request->user()->id);
 
         return new InstituicaoResource($instituicao->fresh());
     }

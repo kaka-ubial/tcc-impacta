@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api\Instituicao;
 
+use App\Enums\DoacaoStatus;
+use App\Enums\TransferenciaStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instituicao\SugerirDataRequest;
 use App\Http\Resources\AgendamentoResource;
@@ -38,7 +40,7 @@ class AgendaController extends Controller
         $agendamentos = Agendamento::with(['doacao.doador'])
             ->whereHas('doacao', fn ($q) => $q
                 ->where('instituicao_id', $instituicaoId)
-                ->whereNotIn('status', ['cancelado', 'recusada']))
+                ->whereNotIn('status', [DoacaoStatus::Cancelado, DoacaoStatus::Recusada]))
             ->orderBy('data_hora')
             ->get();
 
@@ -52,7 +54,7 @@ class AgendaController extends Controller
             ->where(fn ($q) => $q
                 ->where('instituicao_origem_id', $instituicaoId)
                 ->orWhere('instituicao_destino_id', $instituicaoId))
-            ->whereNotIn('status', ['cancelada', 'recusada'])
+            ->whereNotIn('status', [TransferenciaStatus::Cancelada, TransferenciaStatus::Recusada])
             ->get();
 
         return response()->json([

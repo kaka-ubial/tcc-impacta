@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Settings;
 
+use App\Enums\UserType;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,7 +14,7 @@ class FotoPerfilController extends Controller
     {
         $user = $request->user();
 
-        abort_unless($user->tipo_usuario === 'doador' && $user->doador, 403);
+        abort_unless($user->tipo_usuario === UserType::Doador && $user->doador, 403);
 
         $validated = $request->validate([
             'foto' => [
@@ -42,7 +43,7 @@ class FotoPerfilController extends Controller
     {
         $user = $request->user();
 
-        abort_unless($user->tipo_usuario === 'doador' && $user->doador, 403);
+        abort_unless($user->tipo_usuario === UserType::Doador && $user->doador, 403);
 
         $doador = $user->doador;
 

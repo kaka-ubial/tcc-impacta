@@ -26,14 +26,17 @@ class AnaliseSeeder extends Seeder
         ];
 
         Instituicao::orderBy('usuario_id')->get()->each(function (Instituicao $instituicao) use ($admin, $observacoes) {
+            // InstituicaoStatus e AnaliseStatus são enums PHP diferentes (mesmos
+            // valores) — passa ->value para o cast de AnaliseStatus converter, e
+            // para usar como chave de array (enum não é chave de array válida).
             Analise::firstOrCreate(
                 [
                     'instituicao_id' => $instituicao->usuario_id,
                     'admin_id'       => $admin->id,
                 ],
                 [
-                    'status'      => $instituicao->status,
-                    'observacoes' => $observacoes[$instituicao->status] ?? null,
+                    'status'      => $instituicao->status->value,
+                    'observacoes' => $observacoes[$instituicao->status->value] ?? null,
                 ],
             );
         });

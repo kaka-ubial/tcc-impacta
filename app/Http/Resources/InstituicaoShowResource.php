@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\UserType;
 use App\Models\Instituicao;
 use App\Services\TransferenciaService;
 use Illuminate\Http\Request;
@@ -50,7 +51,7 @@ class InstituicaoShowResource extends JsonResource
                 'tipo' => $h->tipo,
             ])->values(),
             'estoque' => $this->when(
-                $request->user()?->tipo_usuario === 'instituicao',
+                $request->user()?->tipo_usuario === UserType::Instituicao,
                 fn () => TransferenciaService::calcularEstoque($request->user()->instituicaoId())
             ),
         ];

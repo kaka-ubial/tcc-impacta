@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\AgendamentoStatus;
 use App\Models\Agendamento;
 use App\Models\Notificacao;
 use App\Models\User;
@@ -25,7 +26,7 @@ class AgendaService
 
         $agendamento->update([
             'data_hora_sugerida' => $validated['data_hora_sugerida'],
-            'status' => 'alteracao_sugerida',
+            'status' => AgendamentoStatus::AlteracaoSugerida,
         ]);
 
         Notificacao::enviar(

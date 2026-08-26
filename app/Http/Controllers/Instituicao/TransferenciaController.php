@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Instituicao;
 
+use App\Enums\TransferenciaStatus;
 use App\Exceptions\TransferenciaException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instituicao\StoreTransferenciaRequest;
@@ -49,7 +50,7 @@ class TransferenciaController extends Controller
 
         $itensEnviados = ItemTransferencia::whereHas('transferencia', fn ($q) => $q
             ->where('instituicao_origem_id', $id)
-            ->where('status', 'entregue'))
+            ->where('status', TransferenciaStatus::Entregue))
             ->join('categorias_itens', 'itens_transferencia.categoria_id', '=', 'categorias_itens.id')
             ->selectRaw('categorias_itens.nome as categoria, SUM(itens_transferencia.quantidade) as total')
             ->groupBy('categorias_itens.nome')
@@ -58,7 +59,7 @@ class TransferenciaController extends Controller
 
         $itensRecebidos = ItemTransferencia::whereHas('transferencia', fn ($q) => $q
             ->where('instituicao_destino_id', $id)
-            ->where('status', 'entregue'))
+            ->where('status', TransferenciaStatus::Entregue))
             ->join('categorias_itens', 'itens_transferencia.categoria_id', '=', 'categorias_itens.id')
             ->selectRaw('categorias_itens.nome as categoria, SUM(itens_transferencia.quantidade) as total')
             ->groupBy('categorias_itens.nome')

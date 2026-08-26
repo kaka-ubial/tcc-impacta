@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\AnaliseStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,11 +16,18 @@ class Analise extends Model
     protected $table = 'analises';
 
     protected $fillable = [
-        'instituicao_id', 
-        'admin_id', 
-        'status', 
+        'instituicao_id',
+        'admin_id',
+        'status',
         'observacoes'
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'status' => AnaliseStatus::class,
+        ];
+    }
 
     public function instituicao(): BelongsTo
     {
