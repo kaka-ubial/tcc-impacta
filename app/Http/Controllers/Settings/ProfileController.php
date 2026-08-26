@@ -46,7 +46,7 @@ class ProfileController extends Controller
 
         $user->save();
 
-        $handler = UserTypeFactory::make($user->tipo_usuario);
+        $handler = UserTypeFactory::make($user->tipo_usuario->value);
         $handler->update($user, $data);
 
         return to_route('profile.edit');

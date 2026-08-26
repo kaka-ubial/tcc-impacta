@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Actions\Admin\UpdateUserStatusAction;
+use App\Enums\UserStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateDoadorRequest;
 use App\Http\Requests\Admin\UpdateInstituicaoRequest;
@@ -90,7 +91,7 @@ class UserController extends Controller
             abort(403, 'Você não pode suspender a própria conta.');
         }
 
-        $action->execute($user, $request->string('status')->toString(), $request->input('motivo'));
+        $action->execute($user, UserStatus::from($request->string('status')->toString()), $request->input('motivo'));
 
         return new UserResource($user->fresh(['doador', 'instituicao']));
     }

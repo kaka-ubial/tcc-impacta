@@ -24,7 +24,7 @@ class EnsureUserType
 
     public function handle(Request $request, Closure $next, string $tipo): Response
     {
-        if (auth()->check() && auth()->user()->tipo_usuario === $tipo) {
+        if (auth()->check() && auth()->user()->tipo_usuario?->value === $tipo) {
             return $next($request);
         }
 

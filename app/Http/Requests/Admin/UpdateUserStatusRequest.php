@@ -2,19 +2,22 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\UserStatus;
+use App\Enums\UserType;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateUserStatusRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return auth()->user()->tipo_usuario === 'admin';
+        return auth()->user()->tipo_usuario === UserType::Admin;
     }
 
     public function rules(): array
     {
         return [
-            'status' => ['required', 'string', 'in:ativo,suspenso'],
+            'status' => ['required', Rule::enum(UserStatus::class)],
             'motivo' => ['nullable', 'string', 'max:255'],
         ];
     }
@@ -23,7 +26,7 @@ class UpdateUserStatusRequest extends FormRequest
     {
         return [
             'status.required' => 'É obrigatório informar o novo status.',
-            'status.in' => 'O status deve ser "ativo" ou "suspenso".',
+            'status.enum' => 'O status deve ser "ativo" ou "suspenso".',
             'motivo.max' => 'O motivo deve ter no máximo 255 caracteres.',
         ];
     }

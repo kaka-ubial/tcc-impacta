@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Actions\Admin\UpdateUserStatusAction;
+use App\Enums\UserStatus;
+use App\Enums\UserType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateDoadorRequest;
 use App\Http\Requests\Admin\UpdateInstituicaoRequest;
@@ -15,10 +17,7 @@ use Inertia\Inertia;
 
 class UserController extends Controller
 {
-    /**
-     * Listagem unificada de usuários (doadores, instituições e admins),
-     * com filtro opcional por tipo_usuario e status.
-     */
+
     public function index(Request $request)
     {
         $usuarios = User::with(['doador', 'instituicao'])
@@ -37,8 +36,8 @@ class UserController extends Controller
         return Inertia::render('admin/users-list', [
             'usuarios' => $usuarios,
             'filtros' => $request->only(['tipo_usuario', 'status']),
-            'tipo_options' => ['doador', 'instituicao', 'admin'],
-            'status_options' => ['ativo', 'suspenso'],
+            'tipo_options' => UserType::values(),
+            'status_options' => UserStatus::values(),
             'stats' => [
                 'ativo' => $stats['ativo'] ?? 0,
                 'suspenso' => $stats['suspenso'] ?? 0,
@@ -46,16 +45,13 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * Detalhe e formulário de edição de um usuário (doador ou instituição).
-     */
     public function show(Request $request, User $user)
     {
         $user->load(['doador', 'instituicao']);
 
         return Inertia::render('admin/user-edit', [
             'usuario' => (new UserResource($user))->resolve($request),
-            'perfil' => $user->tipo_usuario === 'doador' ? $user->doador : $user->instituicao,
+            'perfil' => $user->tipo_usuario === UserType::Doador ? $user->doador : $user->instituicao,
         ]);
     }
 
@@ -83,10 +79,10 @@ class UserController extends Controller
             abort(403, 'Você não pode suspender a própria conta.');
         }
 
-        $status = $request->string('status')->toString();
+        $status = UserStatus::from($request->string('status')->toString());
         $action->execute($user, $status, $request->input('motivo'));
 
-        return back()->with('message', $status === 'suspenso'
+        return back()->with('message', $status === UserStatus::Suspenso
             ? 'Usuário suspenso com sucesso.'
             : 'Usuário reativado com sucesso.');
     }

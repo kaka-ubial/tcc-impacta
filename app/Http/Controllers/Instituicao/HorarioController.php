@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Instituicao;
 
+use App\Enums\DoacaoStatus;
 use App\Exceptions\HorarioException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instituicao\StoreHorarioRequest;
@@ -23,7 +24,7 @@ class HorarioController extends Controller
         $horarios = HorarioDisponivel::where('instituicao_id', $instituicaoId)
             ->where('ativo', true)
             ->withExists(['agendamentos as tem_doacoes_ativas' => fn ($q) => $q
-                ->whereHas('doacao', fn ($q) => $q->whereIn('status', ['pendente', 'confirmada']))])
+                ->whereHas('doacao', fn ($q) => $q->whereIn('status', [DoacaoStatus::Pendente, DoacaoStatus::Confirmada]))])
             ->orderBy('dia_semana')
             ->orderBy('hora_inicio')
             ->get();

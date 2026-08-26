@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\UserType;
 use App\Rules\Cpf;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -10,7 +11,7 @@ class UpdateDoadorRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return auth()->user()->tipo_usuario === 'admin';
+        return auth()->user()->tipo_usuario === UserType::Admin;
     }
 
     public function rules(): array

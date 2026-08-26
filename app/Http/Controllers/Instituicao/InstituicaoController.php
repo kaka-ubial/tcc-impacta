@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Instituicao;
 
+use App\Enums\UserType;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\InstituicaoListResource;
 use App\Http\Resources\InstituicaoShowResource;
@@ -26,7 +27,7 @@ class InstituicaoController extends Controller
                 $query->whereColumn('quantidade_atual', '<', 'quantidade_objetivo');
             }])
             ->visible()
-            ->when(auth()->user()->tipo_usuario === 'instituicao', fn ($q) => $q
+            ->when(auth()->user()->tipo_usuario === UserType::Instituicao, fn ($q) => $q
                 ->where('usuario_id', '!=', auth()->user()->instituicaoId()))
             ->when($search, fn ($q) => $q->where(function ($q) use ($search) {
                 $term = '%'.$search.'%';
@@ -48,7 +49,7 @@ class InstituicaoController extends Controller
                 'search' => $search,
                 'causa' => $causaId,
             ],
-            'recomendacoes' => (! $isFiltering && auth()->user()->tipo_usuario === 'doador')
+            'recomendacoes' => (! $isFiltering && auth()->user()->tipo_usuario === UserType::Doador)
                 ? $recommendations->forDonor(auth()->user())
                 : [],
         ]);
@@ -68,8 +69,8 @@ class InstituicaoController extends Controller
         return Inertia::render('instituicoes/show', [
             'instituicao' => (new InstituicaoShowResource($instituicao))->resolve($request),
             'categorias' => $categorias,
-            'canTransfer' => auth()->user()->tipo_usuario === 'instituicao',
-            'estoque' => auth()->user()->tipo_usuario === 'instituicao'
+            'canTransfer' => auth()->user()->tipo_usuario === UserType::Instituicao,
+            'estoque' => auth()->user()->tipo_usuario === UserType::Instituicao
                 ? TransferenciaService::calcularEstoque(auth()->user()->instituicaoId())
                 : [],
         ]);

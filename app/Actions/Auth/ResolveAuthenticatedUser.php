@@ -2,6 +2,7 @@
 
 namespace App\Actions\Auth;
 
+use App\Enums\UserStatus;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -28,7 +29,7 @@ class ResolveAuthenticatedUser
             return null;
         }
 
-        if ($user->status === 'suspenso') {
+        if ($user->status === UserStatus::Suspenso) {
             throw ValidationException::withMessages([
                 Fortify::username() => ['Sua conta foi suspensa. Entre em contato com o suporte.'],
             ]);

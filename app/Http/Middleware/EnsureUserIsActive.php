@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\UserStatus;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,7 +21,7 @@ class EnsureUserIsActive
     {
         $user = auth()->user();
 
-        if (! $user || $user->status !== 'suspenso') {
+        if (! $user || $user->status !== UserStatus::Suspenso) {
             return $next($request);
         }
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\UserStatus;
 use App\Models\Instituicao;
 
 test('guest is redirected to login when accessing admin users list', function () {
@@ -94,7 +95,7 @@ test('admin can suspend a user with a reason and it invalidates their tokens', f
     $response->assertRedirect();
 
     $doador->refresh();
-    expect($doador->status)->toBe('suspenso');
+    expect($doador->status)->toBe(UserStatus::Suspenso);
     expect($doador->motivo_suspensao)->toBe('Comportamento inadequado reportado por instituições.');
     expect($doador->tokens()->count())->toBe(0);
 });
@@ -111,7 +112,7 @@ test('admin can reactivate a suspended user', function () {
     $response->assertRedirect();
 
     $doador->refresh();
-    expect($doador->status)->toBe('ativo');
+    expect($doador->status)->toBe(UserStatus::Ativo);
     expect($doador->motivo_suspensao)->toBeNull();
 });
 
@@ -124,7 +125,7 @@ test('admin cannot suspend their own account', function () {
     ]);
 
     $response->assertForbidden();
-    expect($admin->fresh()->status)->toBe('ativo');
+    expect($admin->fresh()->status)->toBe(UserStatus::Ativo);
 });
 
 test('a user suspended mid-session is logged out on the next request', function () {
