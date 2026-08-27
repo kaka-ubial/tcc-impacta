@@ -1,12 +1,29 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { ArrowLeftRight, Calendar, CalendarClock, Check, CheckCheck, Package, Phone, Star, User, X } from 'lucide-react';
+import {
+    ArrowLeftRight,
+    Calendar,
+    CalendarClock,
+    Check,
+    CheckCheck,
+    Package,
+    Phone,
+    Star,
+    User,
+    X,
+} from 'lucide-react';
 import { useState } from 'react';
 import SugerirAlteracaoDialog from '@/components/doacao/SugerirAlteracaoDialog';
-import type {Horario} from '@/components/doacao/SugerirAlteracaoDialog';
+import type { Horario } from '@/components/doacao/SugerirAlteracaoDialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import {
     Dialog,
     DialogContent,
@@ -38,13 +55,29 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 // ─── types ────────────────────────────────────────────────────────────────────
 
-type StatusKey = 'pendente' | 'confirmada' | 'entregue' | 'cancelado' | 'recusada' | 'nao_entregue';
+type StatusKey =
+    | 'pendente'
+    | 'confirmada'
+    | 'entregue'
+    | 'cancelado'
+    | 'recusada'
+    | 'nao_entregue';
 
 type Doacao = {
     id: number;
     status: StatusKey;
-    doador: { usuario_id: number; nome: string; telefone: string, foto_perfil: string | null };
-    itens: { id: number; categoria: string; quantidade: number; descricao: string | null }[];
+    doador: {
+        usuario_id: number;
+        nome: string;
+        telefone: string;
+        foto_perfil: string | null;
+    };
+    itens: {
+        id: number;
+        categoria: string;
+        quantidade: number;
+        descricao: string | null;
+    }[];
     agendamento: {
         id: number;
         data_hora: string;
@@ -63,17 +96,27 @@ type ItemRecebido = {
     quantidade: number;
 };
 
-type Props = { doacoes: Doacao[]; itens_recebidos: ItemRecebido[]; horarios: Horario[] };
+type Props = {
+    doacoes: Doacao[];
+    itens_recebidos: ItemRecebido[];
+    horarios: Horario[];
+};
 
 // ─── status config ────────────────────────────────────────────────────────────
 
-const statusConfig: Record<StatusKey, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-    pendente:   { label: 'Pendente',      variant: 'outline' },
-    confirmada: { label: 'Confirmada',    variant: 'default' },
-    entregue:   { label: 'Entregue',      variant: 'secondary' },
+const statusConfig: Record<
+    StatusKey,
+    {
+        label: string;
+        variant: 'default' | 'secondary' | 'destructive' | 'outline';
+    }
+> = {
+    pendente: { label: 'Pendente', variant: 'outline' },
+    confirmada: { label: 'Confirmada', variant: 'default' },
+    entregue: { label: 'Entregue', variant: 'secondary' },
     nao_entregue: { label: 'Não entregue', variant: 'destructive' },
-    cancelado:  { label: 'Cancelada',     variant: 'secondary' },
-    recusada:   { label: 'Recusada',      variant: 'destructive' },
+    cancelado: { label: 'Cancelada', variant: 'secondary' },
+    recusada: { label: 'Recusada', variant: 'destructive' },
 };
 
 const DIAS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -95,7 +138,13 @@ function iniciais(nome: string) {
 
 // ─── star picker ─────────────────────────────────────────────────────────────
 
-function StarPicker({ value, onChange }: { value: number; onChange: (n: number) => void }) {
+function StarPicker({
+    value,
+    onChange,
+}: {
+    value: number;
+    onChange: (n: number) => void;
+}) {
     const [hovered, setHovered] = useState(0);
 
     return (
@@ -124,7 +173,13 @@ function StarPicker({ value, onChange }: { value: number; onChange: (n: number) 
 
 // ─── card ─────────────────────────────────────────────────────────────────────
 
-function DoacaoCard({ doacao, horarios }: { doacao: Doacao; horarios: Horario[] }) {
+function DoacaoCard({
+    doacao,
+    horarios,
+}: {
+    doacao: Doacao;
+    horarios: Horario[];
+}) {
     const [processing, setProcessing] = useState(false);
     const [nota, setNota] = useState(5);
     const [descricao, setDescricao] = useState('');
@@ -137,11 +192,16 @@ function DoacaoCard({ doacao, horarios }: { doacao: Doacao; horarios: Horario[] 
 
     function handleAvaliar() {
         setProcessing(true);
-        router.post(avaliarRoute(doacao.id).url, { nota, descricao: descricao || null }, {
-            onFinish: () => {
- setProcessing(false); setAvaliarOpen(false); 
-},
-        });
+        router.post(
+            avaliarRoute(doacao.id).url,
+            { nota, descricao: descricao || null },
+            {
+                onFinish: () => {
+                    setProcessing(false);
+                    setAvaliarOpen(false);
+                },
+            },
+        );
     }
 
     const cfg = statusConfig[doacao.status];
@@ -154,14 +214,19 @@ function DoacaoCard({ doacao, horarios }: { doacao: Doacao; horarios: Horario[] 
                     <div className="flex flex-col gap-2">
                         <Link
                             href={`/instituicao/doadores/${doacao.doador.usuario_id}`}
-                            className="hover:text-primary flex items-center gap-2 transition-colors"
+                            className="flex items-center gap-2 transition-colors hover:text-primary"
                         >
                             <Avatar className="size-10 border">
                                 {fotoUrl(doacao.doador.foto_perfil) && (
-                                    <AvatarImage src={fotoUrl(doacao.doador.foto_perfil)} alt={doacao.doador.nome}   />
+                                    <AvatarImage
+                                        src={fotoUrl(doacao.doador.foto_perfil)}
+                                        alt={doacao.doador.nome}
+                                    />
                                 )}
                                 <AvatarFallback className="text-sm font-semibold">
-                                    {iniciais(doacao.doador.nome) || <User className="text-muted-foreground size-4 shrink-0" />}
+                                    {iniciais(doacao.doador.nome) || (
+                                        <User className="size-4 shrink-0 text-muted-foreground" />
+                                    )}
                                 </AvatarFallback>
                             </Avatar>
                             <span className="font-medium underline-offset-2 hover:underline">
@@ -169,14 +234,20 @@ function DoacaoCard({ doacao, horarios }: { doacao: Doacao; horarios: Horario[] 
                             </span>
                         </Link>
                         <div className="flex items-center gap-2">
-                            <Phone className="text-muted-foreground size-3.5 shrink-0" />
-                            <span className="text-muted-foreground text-sm">{doacao.doador.telefone}</span>
+                            <Phone className="size-3.5 shrink-0 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground">
+                                {doacao.doador.telefone}
+                            </span>
                         </div>
                     </div>
                     <div className="flex flex-col items-end gap-1">
-                        <Badge variant={cfg.variant} className="text-xs">{cfg.label}</Badge>
-                        <span className="text-muted-foreground text-xs">
-                            {new Date(doacao.criado_em).toLocaleDateString('pt-BR')}
+                        <Badge variant={cfg.variant} className="text-xs">
+                            {cfg.label}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">
+                            {new Date(doacao.criado_em).toLocaleDateString(
+                                'pt-BR',
+                            )}
                         </span>
                     </div>
                 </div>
@@ -184,18 +255,24 @@ function DoacaoCard({ doacao, horarios }: { doacao: Doacao; horarios: Horario[] 
 
             <Separator />
 
-            <CardContent className="flex flex-col gap-4 ">
+            <CardContent className="flex flex-col gap-4">
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-1.5 text-sm font-medium">
-                        <Package className="text-muted-foreground size-3.5" />
+                        <Package className="size-3.5 text-muted-foreground" />
                         Itens
                     </div>
                     <ul className="flex flex-col gap-1 pl-5">
                         {doacao.itens.map((item) => (
                             <li key={item.id} className="text-sm">
-                                <span className="font-medium">{item.quantidade}×</span> {item.categoria}
+                                <span className="font-medium">
+                                    {item.quantidade}×
+                                </span>{' '}
+                                {item.categoria}
                                 {item.descricao && (
-                                    <span className="text-muted-foreground"> — {item.descricao}</span>
+                                    <span className="text-muted-foreground">
+                                        {' '}
+                                        — {item.descricao}
+                                    </span>
                                 )}
                             </li>
                         ))}
@@ -205,29 +282,48 @@ function DoacaoCard({ doacao, horarios }: { doacao: Doacao; horarios: Horario[] 
                 {doacao.agendamento && (
                     <div className="flex flex-col gap-2">
                         <div className="flex items-center gap-1.5 text-sm font-medium">
-                            <Calendar className="text-muted-foreground size-3.5" />
+                            <Calendar className="size-3.5 text-muted-foreground" />
                             Agendamento
                         </div>
-                        <div className="bg-muted/40 flex flex-col gap-1 rounded-lg px-3 py-2 text-sm">
+                        <div className="flex flex-col gap-1 rounded-lg bg-muted/40 px-3 py-2 text-sm">
                             <div className="flex items-center gap-2">
                                 <Badge
-                                    variant={doacao.agendamento.tipo === 'coleta' ? 'default' : 'secondary'}
+                                    variant={
+                                        doacao.agendamento.tipo === 'coleta'
+                                            ? 'default'
+                                            : 'secondary'
+                                    }
                                     className="text-xs"
                                 >
-                                    {doacao.agendamento.tipo === 'coleta' ? 'Coleta' : 'Entrega'}
+                                    {doacao.agendamento.tipo === 'coleta'
+                                        ? 'Coleta'
+                                        : 'Entrega'}
                                 </Badge>
-                                <span>{formatDataHora(doacao.agendamento.data_hora)}</span>
+                                <span>
+                                    {formatDataHora(
+                                        doacao.agendamento.data_hora,
+                                    )}
+                                </span>
                             </div>
                             {doacao.agendamento.endereco_referencia && (
-                                <span className="text-muted-foreground text-xs">
-                                    Endereço: {doacao.agendamento.endereco_referencia}
+                                <span className="text-xs text-muted-foreground">
+                                    Endereço:{' '}
+                                    {doacao.agendamento.endereco_referencia}
                                 </span>
                             )}
-                            {temSugestao && doacao.agendamento.data_hora_sugerida && (
-                                <p className="text-amber-600 bg-amber-500/10 rounded-md px-3 py-2 text-xs mt-1">
-                                    Alteração sugerida para <strong>{formatDataHora(doacao.agendamento.data_hora_sugerida)}</strong> — aguardando resposta do doador.
-                                </p>
-                            )}
+                            {temSugestao &&
+                                doacao.agendamento.data_hora_sugerida && (
+                                    <p className="mt-1 rounded-md bg-amber-500/10 px-3 py-2 text-xs text-amber-600">
+                                        Alteração sugerida para{' '}
+                                        <strong>
+                                            {formatDataHora(
+                                                doacao.agendamento
+                                                    .data_hora_sugerida,
+                                            )}
+                                        </strong>{' '}
+                                        — aguardando resposta do doador.
+                                    </p>
+                                )}
                         </div>
                     </div>
                 )}
@@ -239,12 +335,21 @@ function DoacaoCard({ doacao, horarios }: { doacao: Doacao; horarios: Horario[] 
                     <Separator />
                     <CardFooter className="flex flex-col gap-3 pt-4">
                         <div className="flex w-full gap-2">
-                            <Button variant="outline" className="flex-1 gap-1.5 text-destructive hover:text-destructive"
-                                onClick={() => post(rejectRoute(doacao.id).url)} disabled={processing}>
+                            <Button
+                                variant="outline"
+                                className="flex-1 gap-1.5 text-destructive hover:text-destructive"
+                                onClick={() => post(rejectRoute(doacao.id).url)}
+                                disabled={processing}
+                            >
                                 <X className="size-4" /> Recusar
                             </Button>
-                            <Button className="flex-1 gap-1.5"
-                                onClick={() => post(confirmRoute(doacao.id).url)} disabled={processing}>
+                            <Button
+                                className="flex-1 gap-1.5"
+                                onClick={() =>
+                                    post(confirmRoute(doacao.id).url)
+                                }
+                                disabled={processing}
+                            >
                                 <Check className="size-4" /> Confirmar
                             </Button>
                         </div>
@@ -255,7 +360,11 @@ function DoacaoCard({ doacao, horarios }: { doacao: Doacao; horarios: Horario[] 
                                 tipo={doacao.agendamento.tipo}
                                 horarios={horarios}
                                 trigger={
-                                    <Button variant="outline" size="sm" className="w-full gap-1.5">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="w-full gap-1.5"
+                                    >
                                         <CalendarClock className="size-3.5" />
                                         Sugerir outra data
                                     </Button>
@@ -271,12 +380,23 @@ function DoacaoCard({ doacao, horarios }: { doacao: Doacao; horarios: Horario[] 
                     <Separator />
                     <CardFooter className="flex flex-col gap-3 pt-4">
                         <div className="flex w-full gap-2">
-                            <Button variant="outline" className="flex-1 gap-1.5 text-destructive hover:text-destructive"
-                                onClick={() => post(notDeliveredRoute(doacao.id).url)} disabled={processing}>
+                            <Button
+                                variant="outline"
+                                className="flex-1 gap-1.5 text-destructive hover:text-destructive"
+                                onClick={() =>
+                                    post(notDeliveredRoute(doacao.id).url)
+                                }
+                                disabled={processing}
+                            >
                                 <X className="size-4" /> Não entregue
                             </Button>
-                            <Button className="flex-1 gap-1.5"
-                                onClick={() => post(deliverRoute(doacao.id).url)} disabled={processing}>
+                            <Button
+                                className="flex-1 gap-1.5"
+                                onClick={() =>
+                                    post(deliverRoute(doacao.id).url)
+                                }
+                                disabled={processing}
+                            >
                                 <CheckCheck className="size-4" /> Entregue
                             </Button>
                         </div>
@@ -287,7 +407,11 @@ function DoacaoCard({ doacao, horarios }: { doacao: Doacao; horarios: Horario[] 
                                 tipo={doacao.agendamento.tipo}
                                 horarios={horarios}
                                 trigger={
-                                    <Button variant="outline" size="sm" className="w-full gap-1.5">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="w-full gap-1.5"
+                                    >
                                         <CalendarClock className="size-3.5" />
                                         Sugerir outra data
                                     </Button>
@@ -308,9 +432,16 @@ function DoacaoCard({ doacao, horarios }: { doacao: Doacao; horarios: Horario[] 
                                 <span>{doacao.avaliacao.descricao}</span>
                             </div>
                         ) : (
-                            <Dialog open={avaliarOpen} onOpenChange={setAvaliarOpen}>
+                            <Dialog
+                                open={avaliarOpen}
+                                onOpenChange={setAvaliarOpen}
+                            >
                                 <DialogTrigger asChild>
-                                    <Button variant="outline" size="sm" className="gap-1.5">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="gap-1.5"
+                                    >
                                         <Star className="size-3.5" />
                                         Avaliar doador
                                     </Button>
@@ -319,7 +450,9 @@ function DoacaoCard({ doacao, horarios }: { doacao: Doacao; horarios: Horario[] 
                                     <DialogTitle>Avaliar doador</DialogTitle>
                                     <DialogDescription>
                                         Avalie a experiência com{' '}
-                                        <span className="font-medium text-foreground">{doacao.doador.nome}</span>{' '}
+                                        <span className="font-medium text-foreground">
+                                            {doacao.doador.nome}
+                                        </span>{' '}
                                         nesta doação.
                                     </DialogDescription>
                                     <div className="flex flex-col gap-4">
@@ -327,28 +460,44 @@ function DoacaoCard({ doacao, horarios }: { doacao: Doacao; horarios: Horario[] 
                                             <StarPicker
                                                 value={nota}
                                                 onChange={(n) => {
- setNota(n); setDescricao(''); 
-}}
+                                                    setNota(n);
+                                                    setDescricao('');
+                                                }}
                                             />
                                         </div>
                                         <div className="flex flex-col gap-1.5">
                                             <label className="text-sm font-medium">
-                                                Descrição <span className="text-destructive">*</span>
+                                                Descrição{' '}
+                                                <span className="text-destructive">
+                                                    *
+                                                </span>
                                             </label>
                                             <Textarea
                                                 placeholder="Descreva a experiência com o doador. Esta descrição será visível para outros usuários."
                                                 value={descricao}
-                                                onChange={(e) => setDescricao(e.target.value)}
+                                                onChange={(e) =>
+                                                    setDescricao(e.target.value)
+                                                }
                                                 rows={3}
                                             />
                                         </div>
                                     </div>
                                     <DialogFooter className="gap-2">
-                                        <Button variant="secondary" onClick={() => setAvaliarOpen(false)}>
+                                        <Button
+                                            variant="secondary"
+                                            onClick={() =>
+                                                setAvaliarOpen(false)
+                                            }
+                                        >
                                             Cancelar
                                         </Button>
-                                        <Button disabled={processing || !descricao} onClick={handleAvaliar}>
-                                            {processing ? 'Enviando...' : 'Confirmar avaliação'}
+                                        <Button
+                                            disabled={processing || !descricao}
+                                            onClick={handleAvaliar}
+                                        >
+                                            {processing
+                                                ? 'Enviando...'
+                                                : 'Confirmar avaliação'}
                                         </Button>
                                     </DialogFooter>
                                 </DialogContent>
@@ -365,23 +514,33 @@ function DoacaoCard({ doacao, horarios }: { doacao: Doacao; horarios: Horario[] 
 
 const PER_PAGE = 10;
 
-function Section({ title, items, horarios }: { title: string; items: Doacao[]; horarios: Horario[] }) {
+function Section({
+    title,
+    items,
+    horarios,
+}: {
+    title: string;
+    items: Doacao[];
+    horarios: Horario[];
+}) {
     const [page, setPage] = useState(1);
 
     if (items.length === 0) {
-return null;
-}
+        return null;
+    }
 
     const totalPages = Math.ceil(items.length / PER_PAGE);
     const visivel = items.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
     return (
         <section className="flex flex-col gap-3">
-            <h2 className="text-muted-foreground text-sm font-semibold uppercase tracking-wide">
+            <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
                 {title} ({items.length})
             </h2>
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-2">
-                {visivel.map((d) => <DoacaoCard key={d.id} doacao={d} horarios={horarios} />)}
+                {visivel.map((d) => (
+                    <DoacaoCard key={d.id} doacao={d} horarios={horarios} />
+                ))}
             </div>
             {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-2 pt-2">
@@ -393,7 +552,7 @@ return null;
                     >
                         Anterior
                     </Button>
-                    <span className="text-muted-foreground text-sm">
+                    <span className="text-sm text-muted-foreground">
                         {page} de {totalPages}
                     </span>
                     <Button
@@ -412,63 +571,91 @@ return null;
 
 // ─── page ─────────────────────────────────────────────────────────────────────
 
-export default function InstituicaoDoacoes({ doacoes, itens_recebidos, horarios }: Props) {
-    const pendentes   = doacoes.filter((d) => d.status === 'pendente');
+export default function InstituicaoDoacoes({
+    doacoes,
+    itens_recebidos,
+    horarios,
+}: Props) {
+    const pendentes = doacoes.filter((d) => d.status === 'pendente');
     const confirmadas = doacoes.filter((d) => d.status === 'confirmada');
-    const historico   = doacoes.filter((d) => !['pendente', 'confirmada'].includes(d.status));
+    const historico = doacoes.filter(
+        (d) => !['pendente', 'confirmada'].includes(d.status),
+    );
 
     const totalAtivas = pendentes.length + confirmadas.length;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Doações" />
-                <div className="flex flex-col gap-8 p-6">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-col gap-8 p-6">
+                <div className="full-bleed -mt-6 border-b border-border bg-card py-8">
+                    <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-3 px-10 sm:px-12">
                         <div className="flex flex-col gap-1">
                             <h1 className="text-2xl font-semibold">Doações</h1>
-                            <p className="text-muted-foreground text-sm">
+                            <p className="text-sm text-muted-foreground">
                                 {totalAtivas > 0
                                     ? `${pendentes.length} pendente${pendentes.length !== 1 ? 's' : ''} · ${confirmadas.length} confirmada${confirmadas.length !== 1 ? 's' : ''}`
                                     : 'Nenhuma solicitação ativa no momento.'}
                             </p>
                         </div>
                     </div>
-                    <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
-                        {doacoes.length === 0 ? (
-                            <div className="text-muted-foreground rounded-xl border border-dashed py-16 text-center text-sm">
-                                Nenhuma solicitação de doação recebida ainda.
-                            </div>
-                        ) : (
-                            <div className="flex flex-col gap-10">
-                                <Section title="Pendentes" items={pendentes} horarios={horarios} />
-                                <Section title="Confirmadas" items={confirmadas} horarios={horarios} />
-                                <Section title="Histórico" items={historico} horarios={horarios} />
-                            </div>
-                        )}
+                </div>
+                <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+                    {doacoes.length === 0 ? (
+                        <div className="rounded-xl border border-dashed py-16 text-center text-sm text-muted-foreground">
+                            Nenhuma solicitação de doação recebida ainda.
+                        </div>
+                    ) : (
+                        <div className="flex flex-col gap-10">
+                            <Section
+                                title="Pendentes"
+                                items={pendentes}
+                                horarios={horarios}
+                            />
+                            <Section
+                                title="Confirmadas"
+                                items={confirmadas}
+                                horarios={horarios}
+                            />
+                            <Section
+                                title="Histórico"
+                                items={historico}
+                                horarios={horarios}
+                            />
+                        </div>
+                    )}
                     <div className="flex flex-col gap-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle className="text-base">Itens Disponíveis</CardTitle>
+                                <CardTitle className="text-base">
+                                    Itens Disponíveis
+                                </CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <div className="flex flex-col gap-3">
                                     <p className="text-sm text-muted-foreground">
-                                        Itens recebidos disponíveis para transferência.
+                                        Itens recebidos disponíveis para
+                                        transferência.
                                     </p>
                                     {itens_recebidos.length === 0 ? (
-                                        <p className="text-muted-foreground text-sm">Nenhum item disponível.</p>
+                                        <p className="text-sm text-muted-foreground">
+                                            Nenhum item disponível.
+                                        </p>
                                     ) : (
                                         <>
                                             <ul className="flex flex-col gap-1 text-sm">
                                                 {itens_recebidos.map((item) => (
                                                     <li key={item.categoria_id}>
-                                                        <span className="font-medium">{item.quantidade}×</span> {item.categoria}
+                                                        <span className="font-medium">
+                                                            {item.quantidade}×
+                                                        </span>{' '}
+                                                        {item.categoria}
                                                     </li>
                                                 ))}
                                             </ul>
                                             <Link
                                                 href="/instituicoes"
-                                                className="inline-flex items-center justify-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary/5 transition-colors"
+                                                className="inline-flex items-center justify-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/5"
                                             >
                                                 <ArrowLeftRight className="size-3.5" />
                                                 Transferir itens
@@ -479,8 +666,8 @@ export default function InstituicaoDoacoes({ doacoes, itens_recebidos, horarios 
                             </CardContent>
                         </Card>
                     </div>
-                    </div>
                 </div>
+            </div>
         </AppLayout>
     );
 }

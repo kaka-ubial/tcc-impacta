@@ -1,5 +1,16 @@
 import { Link, usePage } from '@inertiajs/react';
-import { LayoutDashboard, LayoutGrid, Menu } from 'lucide-react';
+import {
+    ArrowLeftRight,
+    Bell,
+    Box,
+    Building2,
+    Calendar,
+    CalendarClock,
+    Gift,
+    LayoutDashboard,
+    LayoutGrid,
+    Menu,
+} from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { Breadcrumbs } from '@/components/breadcrumbs';
@@ -10,12 +21,6 @@ import {
     DropdownMenuContent,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-    NavigationMenu,
-    NavigationMenuItem,
-    NavigationMenuList,
-    navigationMenuTriggerStyle,
-} from '@/components/ui/navigation-menu';
 import {
     Sheet,
     SheetContent,
@@ -28,6 +33,8 @@ import { useCurrentUrl } from '@/hooks/use-current-url';
 import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import type { BreadcrumbItem, NavItem } from '@/types';
+import admin from '@/routes/admin';
+import { index as doacoesIndex } from '@/routes/doacoes';
 import { index as instituicoesIndex } from '@/routes/instituicoes';
 
 type Props = {
@@ -40,6 +47,11 @@ const doadorNavItems: NavItem[] = [
         href: instituicoesIndex(),
         icon: LayoutGrid,
     },
+    {
+        title: 'Minhas Doações',
+        href: doacoesIndex(),
+        icon: Gift,
+    },
 ];
 
 const instituicaoNavItems: NavItem[] = [
@@ -48,124 +60,199 @@ const instituicaoNavItems: NavItem[] = [
         href: '/instituicao/painel',
         icon: LayoutDashboard,
     },
+    {
+        title: 'Necessidades',
+        href: '/instituicao/necessidades',
+        icon: Box,
+    },
+    {
+        title: 'Horários Disponíveis',
+        href: '/instituicao/horarios',
+        icon: Calendar,
+    },
+    {
+        title: 'Agenda',
+        href: '/instituicao/agenda',
+        icon: CalendarClock,
+    },
+    {
+        title: 'Doações Recebidas',
+        href: '/instituicao/doacoes',
+        icon: Gift,
+    },
+    {
+        title: 'Transferências',
+        href: '/instituicao/transferencias',
+        icon: ArrowLeftRight,
+    },
 ];
 
-const activeItemStyles =
-    'text-foreground dark:bg-muted dark:text-foreground';
+const adminNavItems: NavItem[] = [
+    {
+        title: 'Instituições Pendentes',
+        href: admin.institutions.index(),
+        icon: Building2,
+    },
+];
 
 export function AppHeader({ breadcrumbs = [] }: Props) {
     const page = usePage();
-    const { auth } = page.props as any;
+    const { auth, notificacoes_nao_lidas } = page.props as any;
     const getInitials = useInitials();
-    const { isCurrentUrl, whenCurrentUrl } = useCurrentUrl();
+    const { isCurrentUrl } = useCurrentUrl();
 
     const tipo: string = auth.user.tipo_usuario;
-    const mainNavItems = tipo === 'instituicao' ? instituicaoNavItems : doadorNavItems;
-    const homeHref = tipo === 'instituicao' ? '/instituicao/painel' : instituicoesIndex();
+    const naoLidas: number = notificacoes_nao_lidas ?? 0;
+
+    const navItems: NavItem[] =
+        tipo === 'admin'
+            ? adminNavItems
+            : tipo === 'instituicao'
+              ? instituicaoNavItems
+              : doadorNavItems;
+
+    const homeHref =
+        tipo === 'instituicao' ? '/instituicao/painel' : instituicoesIndex();
+
+    const notificacoesAtivo = isCurrentUrl('/notificacoes');
 
     return (
         <>
-            <div className="border-b border-sidebar-border/80">
-                <div className="mx-auto flex h-16 items-center px-4 md:max-w-7xl">
-                    {/* Mobile Menu */}
+            <div className="sticky top-0 z-50 border-b border-border bg-card">
+                <div className="mx-auto flex h-16 w-full max-w-7xl items-center gap-2 px-4 sm:px-6">
+                    {/* Mobile menu */}
                     <div className="lg:hidden">
                         <Sheet>
                             <SheetTrigger asChild>
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="mr-2 h-[34px] w-[34px]"
+                                    className="-ml-2"
+                                    aria-label="Abrir menu de navegação"
                                 >
-                                    <Menu className="h-5 w-5" />
+                                    <Menu className="size-5" />
                                 </Button>
                             </SheetTrigger>
                             <SheetContent
                                 side="left"
-                                className="flex h-full w-64 flex-col items-stretch justify-between bg-sidebar"
+                                className="flex w-72 flex-col gap-6 bg-card p-0"
                             >
                                 <SheetTitle className="sr-only">
                                     Menu de navegação
                                 </SheetTitle>
-                                <SheetHeader className="flex justify-start text-left">
-                                    <AppLogoIcon className="h-6 w-6 fill-current text-foreground" />
+                                <SheetHeader className="border-b border-border px-5 py-4">
+                                    <Link href={homeHref} className="flex items-center gap-2">
+                                        <AppLogoIcon className="size-7" />
+                                        <span className="text-sm font-semibold text-foreground">
+                                            Impacta
+                                        </span>
+                                    </Link>
                                 </SheetHeader>
-                                <div className="flex h-full flex-1 flex-col space-y-4 p-4">
-                                    <div className="flex h-full flex-col justify-between text-sm">
-                                        <div className="flex flex-col space-y-4">
-                                            {mainNavItems.map((item) => (
-                                                <Link
-                                                    key={item.title}
-                                                    href={item.href}
-                                                    className="flex items-center space-x-2 font-medium"
-                                                >
-                                                    {item.icon && (
-                                                        <item.icon className="h-5 w-5" />
-                                                    )}
-                                                    <span>{item.title}</span>
-                                                </Link>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
+                                <nav className="flex flex-col gap-1 px-3">
+                                    {navItems.map((item) => {
+                                        const ativo = isCurrentUrl(item.href);
+
+                                        return (
+                                            <Link
+                                                key={item.title}
+                                                href={item.href}
+                                                data-slot="topbar-link"
+                                                data-active={ativo || undefined}
+                                                className="flex items-center gap-2.5 rounded-full px-3.5 py-2.5 text-sm text-muted-foreground"
+                                            >
+                                                {item.icon && <item.icon className="size-4" />}
+                                                <span>{item.title}</span>
+                                            </Link>
+                                        );
+                                    })}
+                                    {tipo !== 'admin' && (
+                                        <Link
+                                            href="/notificacoes"
+                                            data-slot="topbar-link"
+                                            data-active={notificacoesAtivo || undefined}
+                                            className="flex items-center gap-2.5 rounded-full px-3.5 py-2.5 text-sm text-muted-foreground"
+                                        >
+                                            <Bell className="size-4" />
+                                            <span>Notificações</span>
+                                            {naoLidas > 0 && (
+                                                <span className="ml-auto flex size-5 items-center justify-center rounded-full bg-brand text-[0.715rem] font-semibold text-primary-foreground">
+                                                    {naoLidas}
+                                                </span>
+                                            )}
+                                        </Link>
+                                    )}
+                                </nav>
                             </SheetContent>
                         </Sheet>
                     </div>
 
+                    {/* Logo */}
                     <Link
                         href={homeHref}
                         prefetch
-                        className="flex items-center space-x-2"
+                        className="flex items-center gap-2 rounded-md transition-opacity hover:opacity-80"
                     >
                         <AppLogo />
                     </Link>
 
-                    {/* Desktop Navigation */}
-                    <div className="ml-6 hidden h-full items-center space-x-6 lg:flex">
-                        <NavigationMenu className="flex h-full items-stretch">
-                            <NavigationMenuList className="flex h-full items-stretch space-x-2">
-                                {mainNavItems.map((item, index) => (
-                                    <NavigationMenuItem
-                                        key={index}
-                                        className="relative flex h-full items-center"
-                                    >
-                                        <Link
-                                            href={item.href}
-                                            className={cn(
-                                                navigationMenuTriggerStyle(),
-                                                whenCurrentUrl(
-                                                    item.href,
-                                                    activeItemStyles,
-                                                ),
-                                                'h-9 cursor-pointer px-3',
-                                            )}
-                                        >
-                                            {item.icon && (
-                                                <item.icon className="mr-2 h-4 w-4" />
-                                            )}
-                                            {item.title}
-                                        </Link>
-                                        {isCurrentUrl(item.href) && (
-                                            <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-primary"></div>
-                                        )}
-                                    </NavigationMenuItem>
-                                ))}
-                            </NavigationMenuList>
-                        </NavigationMenu>
-                    </div>
+                    {/* Desktop nav */}
+                    <nav className="ml-4 hidden items-center gap-1 lg:flex">
+                        {navItems.map((item) => (
+                            <Link
+                                key={item.title}
+                                href={item.href}
+                                prefetch
+                                data-slot="topbar-link"
+                                data-active={isCurrentUrl(item.href) || undefined}
+                                className="flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm whitespace-nowrap text-muted-foreground"
+                            >
+                                {item.icon && <item.icon className="hidden size-4 xl:block" />}
+                                <span>{item.title}</span>
+                            </Link>
+                        ))}
+                    </nav>
 
-                    <div className="ml-auto flex items-center space-x-2">
+                    {/* Right side */}
+                    <div className="ml-auto flex items-center gap-1">
+                        {tipo !== 'admin' && (
+                            <Button
+                                asChild
+                                variant="ghost"
+                                size="icon"
+                                aria-label={
+                                    naoLidas > 0
+                                        ? `Notificações (${naoLidas} não lidas)`
+                                        : 'Notificações'
+                                }
+                                className={cn(
+                                    'relative',
+                                    notificacoesAtivo && 'bg-brand/11 text-brand hover:bg-brand/15 hover:text-brand',
+                                )}
+                            >
+                                <Link href="/notificacoes">
+                                    <Bell className="size-[1.15rem]" />
+                                    {naoLidas > 0 && (
+                                        <span className="absolute top-0.5 right-0.5 flex h-[1.125rem] min-w-[1.125rem] items-center justify-center rounded-full bg-brand px-1 text-[0.715rem] font-semibold text-primary-foreground">
+                                            {naoLidas > 9 ? '9+' : naoLidas}
+                                        </span>
+                                    )}
+                                </Link>
+                            </Button>
+                        )}
+
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button
                                     variant="ghost"
-                                    className="size-10 rounded-full p-1"
+                                    className="ml-1 size-10 rounded-full p-1"
+                                    aria-label="Menu da conta"
                                 >
                                     <Avatar className="size-8 overflow-hidden rounded-full">
                                         <AvatarImage
                                             src={auth.user.avatar}
                                             alt={auth.user.email}
                                         />
-                                        <AvatarFallback className="rounded-lg bg-muted text-foreground">
+                                        <AvatarFallback className="rounded-full bg-brand/12 text-xs font-semibold text-brand">
                                             {getInitials(auth.user.email)}
                                         </AvatarFallback>
                                     </Avatar>
@@ -178,9 +265,10 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                     </div>
                 </div>
             </div>
+
             {breadcrumbs.length > 1 && (
-                <div className="flex w-full border-b border-sidebar-border/70">
-                    <div className="mx-auto flex h-12 w-full items-center justify-start px-4 text-muted-foreground md:max-w-7xl">
+                <div className="flex w-full border-b border-border">
+                    <div className="mx-auto flex h-11 w-full max-w-7xl items-center px-4 text-muted-foreground sm:px-6">
                         <Breadcrumbs breadcrumbs={breadcrumbs} />
                     </div>
                 </div>

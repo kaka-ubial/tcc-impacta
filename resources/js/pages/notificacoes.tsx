@@ -51,15 +51,17 @@ export default function Notificacoes({ notificacoes }: Props) {
             <Head title="Notificações" />
 
             <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-6">
-                <div className="flex flex-col gap-1">
-                    <h1 className="text-2xl font-semibold">Notificações</h1>
-                    <p className="text-muted-foreground text-sm">
-                        Atualizações das suas doações e agendamentos.
-                    </p>
+                <div className="full-bleed -mt-6 border-b border-border bg-card py-8">
+                    <div className="mx-auto flex w-full max-w-2xl flex-col gap-1 px-6">
+                        <h1 className="text-2xl font-semibold">Notificações</h1>
+                        <p className="text-sm text-muted-foreground">
+                            Atualizações das suas doações e agendamentos.
+                        </p>
+                    </div>
                 </div>
 
                 {notificacoes.length === 0 ? (
-                    <div className="text-muted-foreground flex flex-col items-center gap-3 rounded-xl border border-dashed py-16 text-center text-sm">
+                    <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed py-16 text-center text-sm text-muted-foreground">
                         <Bell className="size-8 opacity-40" />
                         Nenhuma notificação ainda.
                     </div>
@@ -69,7 +71,9 @@ export default function Notificacoes({ notificacoes }: Props) {
                             <div
                                 key={n.id}
                                 className={`flex gap-3 rounded-lg border px-4 py-3 ${
-                                    n.lida ? 'border-border' : 'border-primary/30 bg-primary/5'
+                                    n.lida
+                                        ? 'border-border'
+                                        : 'border-primary/30 bg-primary/5'
                                 }`}
                             >
                                 <div
@@ -79,12 +83,16 @@ export default function Notificacoes({ notificacoes }: Props) {
                                 />
                                 <div className="flex flex-col gap-0.5">
                                     <div className="flex flex-wrap items-baseline gap-2">
-                                        <span className="font-medium">{n.titulo}</span>
-                                        <span className="text-muted-foreground text-xs">
+                                        <span className="font-medium">
+                                            {n.titulo}
+                                        </span>
+                                        <span className="text-xs text-muted-foreground">
                                             {tempoRelativo(n.criado_em)}
                                         </span>
                                     </div>
-                                    <p className="text-muted-foreground text-sm">{n.mensagem}</p>
+                                    <p className="text-sm text-muted-foreground">
+                                        {n.mensagem}
+                                    </p>
                                 </div>
                             </div>
                         ))}

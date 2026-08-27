@@ -1,0 +1,72 @@
+{
+  "title": "Minhas Doações — escolha a estrutura",
+  "question": "Três estruturas para a página do doador, todas dentro do mundo visual já definido (terracota + sálvia, paper quente, Playfair/Instrument). A escolha aqui é de composição — trave uma para eu construir.",
+  "options": [
+    {
+      "id": "next-handoff",
+      "label": "The Next Hand-off",
+      "kicker": "THE ROLL",
+      "lineage": "o quadro de avisos do salão comunitário",
+      "thesis": "Seu próximo compromisso real — a entrega ou coleta marcada — abre a página em escala de destaque; todo o resto entra em fila atrás dele.",
+      "palette": ["#B0512B", "#F6F2E9", "#FBF9F4", "#5E8367"],
+      "materials": ["warm paper", "Playfair numerals", "status pills"],
+      "viewport": "Saudação + botão Nova doação no topo; um cartão largo carrega a próxima coleta/entrega com o dia em numeral Playfair grande, instituição, itens e ações de resposta; abaixo, Em andamento e Histórico em grade de duas colunas.",
+      "risk": "Sem nada agendado, a zona de destaque precisa colapsar em um empty state caloroso sem deixar buraco.",
+      "wireframe": {
+        "cols": 12,
+        "rows": 10,
+        "regions": [
+          { "x": 0, "y": 0, "w": 8, "h": 1.2, "label": "Saudação + nome" },
+          { "x": 9, "y": 0, "w": 3, "h": 1.2, "label": "Nova doação", "accent": true },
+          { "x": 0, "y": 1.6, "w": 12, "h": 3.4, "label": "Próxima entrega — data grande" },
+          { "x": 0, "y": 5.4, "w": 6, "h": 4.4, "label": "Em andamento" },
+          { "x": 6, "y": 5.4, "w": 6, "h": 4.4, "label": "Histórico" }
+        ]
+      }
+    },
+    {
+      "id": "donor-ledger",
+      "label": "The Donor's Ledger",
+      "lineage": "o cartão de sócio bem guardado",
+      "thesis": "Um trilho lateral fixo carrega seu nome e seu impacto enquanto as doações fluem em uma coluna única e calma.",
+      "palette": ["#B0512B", "#F6F2E9", "#FBF9F4", "#CD9B30"],
+      "materials": ["warm paper", "hairline rules", "status pills"],
+      "viewport": "Trilho esquerdo: nome em Playfair, números de impacto empilhados com separadores finos, botão Nova doação; direita: cartões de doação em coluna larga agrupados por status.",
+      "risk": "No mobile o trilho precisa dobrar em um cabeçalho compacto sem perder a história do impacto.",
+      "wireframe": {
+        "cols": 12,
+        "rows": 10,
+        "regions": [
+          { "x": 0, "y": 0, "w": 3.6, "h": 10, "label": "Identidade + impacto + CTA", "accent": true },
+          { "x": 4, "y": 0, "w": 8, "h": 4.8, "label": "Em andamento" },
+          { "x": 4, "y": 5.2, "w": 8, "h": 4.8, "label": "Histórico" }
+        ]
+      }
+    },
+    {
+      "id": "giving-journal",
+      "label": "The Giving Journal",
+      "lineage": "o diário de boas ações",
+      "thesis": "As doações leem como uma crônica — mês a mês sobre uma linha do tempo quente, com o status como marcadores no trilho.",
+      "palette": ["#B0512B", "#F6F2E9", "#5E8367", "#CD9B30"],
+      "materials": ["warm paper", "timeline rail", "status dots"],
+      "viewport": "Saudação compacta + CTA; abaixo, uma linha do tempo: títulos de mês, entradas presas a uma régua vertical com pontos de status, itens e agendamento dentro de cada entrada.",
+      "risk": "Cartões que pedem resposta (nova data sugerida) precisam ser levantados visualmente para o diário não enterrá-los.",
+      "wireframe": {
+        "cols": 12,
+        "rows": 10,
+        "regions": [
+          { "x": 0, "y": 0, "w": 8, "h": 1.2, "label": "Saudação" },
+          { "x": 9, "y": 0, "w": 3, "h": 1.2, "label": "Nova doação", "accent": true },
+          { "x": 0.8, "y": 1.8, "w": 0.4, "h": 8, "label": "trilho" },
+          { "x": 2, "y": 1.8, "w": 10, "h": 2.4, "label": "Junho — entrega" },
+          { "x": 2, "y": 4.6, "w": 10, "h": 2.4, "label": "Maio — entrega" },
+          { "x": 2, "y": 7.4, "w": 10, "h": 2.4, "label": "Abril — entrega" }
+        ]
+      }
+    }
+  ],
+  "reroll": { "registers": ["safer", "bolder"] },
+  "steer": true,
+  "buildPath": { "value": "code", "toggle": true }
+}

@@ -6,14 +6,36 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, HorarioDisponivel } from '@/types';
-import { destroy as destroyHorario, store as storeHorario } from '@/routes/instituicao/horarios';
+import {
+    destroy as destroyHorario,
+    store as storeHorario,
+} from '@/routes/instituicao/horarios';
 
-const DIAS = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+const DIAS = [
+    'Domingo',
+    'Segunda-feira',
+    'Terça-feira',
+    'Quarta-feira',
+    'Quinta-feira',
+    'Sexta-feira',
+    'Sábado',
+];
 
 const HORAS = Array.from({ length: 24 }, (_, i) => {
     const h = String(i).padStart(2, '0');
@@ -59,11 +81,16 @@ export default function Horarios({ horarios }: Props) {
             <Head title="Horários disponíveis" />
 
             <div className="flex flex-col gap-8 p-6">
-                <div className="flex flex-col gap-1">
-                    <h1 className="text-2xl font-semibold">Horários disponíveis</h1>
-                    <p className="text-muted-foreground text-sm">
-                        Configure os dias e horários em que aceita receber doações ou fazer coletas.
-                    </p>
+                <div className="full-bleed -mt-6 border-b border-border bg-card py-8">
+                    <div className="mx-auto flex w-full max-w-7xl flex-col gap-1 px-10 sm:px-12">
+                        <h1 className="text-2xl font-semibold">
+                            Horários disponíveis
+                        </h1>
+                        <p className="text-sm text-muted-foreground">
+                            Configure os dias e horários em que aceita receber
+                            doações ou fazer coletas.
+                        </p>
+                    </div>
                 </div>
 
                 <div className="grid gap-6 lg:grid-cols-2">
@@ -76,74 +103,145 @@ export default function Horarios({ horarios }: Props) {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                            <form
+                                onSubmit={handleSubmit}
+                                className="flex flex-col gap-4"
+                            >
                                 <div className="flex flex-col gap-1">
                                     <Label>Tipo</Label>
-                                    <Select value={data.tipo} onValueChange={(v) => setData('tipo', v)}>
+                                    <Select
+                                        value={data.tipo}
+                                        onValueChange={(v) =>
+                                            setData('tipo', v)
+                                        }
+                                    >
                                         <SelectTrigger>
                                             <SelectValue placeholder="Selecione" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="entrega">Entrega (doador traz)</SelectItem>
-                                            <SelectItem value="coleta">Coleta (buscamos no doador)</SelectItem>
+                                            <SelectItem value="entrega">
+                                                Entrega (doador traz)
+                                            </SelectItem>
+                                            <SelectItem value="coleta">
+                                                Coleta (buscamos no doador)
+                                            </SelectItem>
                                         </SelectContent>
                                     </Select>
-                                    {errors.tipo && <p className="text-destructive text-xs">{errors.tipo}</p>}
+                                    {errors.tipo && (
+                                        <p className="text-xs text-destructive">
+                                            {errors.tipo}
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div className="flex flex-col gap-1">
                                     <Label>Dia da semana</Label>
-                                    <Select value={data.dia_semana} onValueChange={(v) => setData('dia_semana', v)}>
+                                    <Select
+                                        value={data.dia_semana}
+                                        onValueChange={(v) =>
+                                            setData('dia_semana', v)
+                                        }
+                                    >
                                         <SelectTrigger>
                                             <SelectValue placeholder="Selecione" />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {DIAS.map((d, i) => (
-                                                <SelectItem key={i} value={String(i)}>
+                                                <SelectItem
+                                                    key={i}
+                                                    value={String(i)}
+                                                >
                                                     {d}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                    {errors.dia_semana && <p className="text-destructive text-xs">{errors.dia_semana}</p>}
+                                    {errors.dia_semana && (
+                                        <p className="text-xs text-destructive">
+                                            {errors.dia_semana}
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-3">
                                     <div className="flex flex-col gap-1">
                                         <Label>Início</Label>
-                                        <Select value={data.hora_inicio} onValueChange={(v) => setData('hora_inicio', v)}>
+                                        <Select
+                                            value={data.hora_inicio}
+                                            onValueChange={(v) =>
+                                                setData('hora_inicio', v)
+                                            }
+                                        >
                                             <SelectTrigger>
                                                 <SelectValue placeholder="00:00" />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {HORAS.map((h) => (
-                                                    <SelectItem key={h} value={h}>{h}</SelectItem>
+                                                    <SelectItem
+                                                        key={h}
+                                                        value={h}
+                                                    >
+                                                        {h}
+                                                    </SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>
-                                        {errors.hora_inicio && <p className="text-destructive text-xs">{errors.hora_inicio}</p>}
+                                        {errors.hora_inicio && (
+                                            <p className="text-xs text-destructive">
+                                                {errors.hora_inicio}
+                                            </p>
+                                        )}
                                     </div>
                                     <div className="flex flex-col gap-1">
                                         <Label>Fim</Label>
-                                        <Select value={data.hora_fim} onValueChange={(v) => setData('hora_fim', v)}>
+                                        <Select
+                                            value={data.hora_fim}
+                                            onValueChange={(v) =>
+                                                setData('hora_fim', v)
+                                            }
+                                        >
                                             <SelectTrigger>
                                                 <SelectValue placeholder="00:00" />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {HORAS.map((h) => (
-                                                    <SelectItem key={h} value={h}>{h}</SelectItem>
+                                                    <SelectItem
+                                                        key={h}
+                                                        value={h}
+                                                    >
+                                                        {h}
+                                                    </SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>
-                                        {errors.hora_fim && <p className="text-destructive text-xs">{errors.hora_fim}</p>}
+                                        {errors.hora_fim && (
+                                            <p className="text-xs text-destructive">
+                                                {errors.hora_fim}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
 
-                                {data.hora_inicio && data.hora_fim && data.hora_fim <= data.hora_inicio && (
-                                    <p className="text-destructive text-xs">Horário de fim deve ser depois do horário de início</p>
-                                )}
+                                {data.hora_inicio &&
+                                    data.hora_fim &&
+                                    data.hora_fim <= data.hora_inicio && (
+                                        <p className="text-xs text-destructive">
+                                            Horário de fim deve ser depois do
+                                            horário de início
+                                        </p>
+                                    )}
 
-                                <Button type="submit" disabled={processing || !data.tipo || !data.dia_semana || !data.hora_inicio || !data.hora_fim || data.hora_fim <= data.hora_inicio}>
+                                <Button
+                                    type="submit"
+                                    disabled={
+                                        processing ||
+                                        !data.tipo ||
+                                        !data.dia_semana ||
+                                        !data.hora_inicio ||
+                                        !data.hora_fim ||
+                                        data.hora_fim <= data.hora_inicio
+                                    }
+                                >
                                     Adicionar
                                 </Button>
                             </form>
@@ -153,7 +251,7 @@ export default function Horarios({ horarios }: Props) {
                     {/* listagem */}
                     <div className="flex flex-col gap-4">
                         {horarios.length === 0 ? (
-                            <div className="text-muted-foreground rounded-xl border border-dashed px-6 py-10 text-center text-sm">
+                            <div className="rounded-xl border border-dashed px-6 py-10 text-center text-sm text-muted-foreground">
                                 Nenhum horário cadastrado ainda.
                             </div>
                         ) : (
@@ -163,23 +261,55 @@ export default function Horarios({ horarios }: Props) {
                                     { label: 'Coleta', items: coleta },
                                 ].map(({ label, items }) =>
                                     items.length > 0 ? (
-                                        <div key={label} className="flex flex-col gap-2">
-                                            <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wide">{label}</p>
+                                        <div
+                                            key={label}
+                                            className="flex flex-col gap-2"
+                                        >
+                                            <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                                                {label}
+                                            </p>
                                             {items.map((h) => (
-                                                <div key={h.id} className="flex items-center justify-between rounded-lg border px-4 py-3">
+                                                <div
+                                                    key={h.id}
+                                                    className="flex items-center justify-between rounded-lg border px-4 py-3"
+                                                >
                                                     <div className="flex items-center gap-3">
-                                                        <Badge variant="outline">{DIAS[h.dia_semana]}</Badge>
+                                                        <Badge variant="outline">
+                                                            {DIAS[h.dia_semana]}
+                                                        </Badge>
                                                         <span className="text-sm">
-                                                            {h.hora_inicio.slice(0, 5)} – {h.hora_fim.slice(0, 5)}
+                                                            {h.hora_inicio.slice(
+                                                                0,
+                                                                5,
+                                                            )}{' '}
+                                                            –{' '}
+                                                            {h.hora_fim.slice(
+                                                                0,
+                                                                5,
+                                                            )}
                                                         </span>
                                                     </div>
-                                                    <TooltipProvider delayDuration={100}>
+                                                    <TooltipProvider
+                                                        delayDuration={100}
+                                                    >
                                                         <Tooltip>
-                                                            <TooltipTrigger asChild>
-                                                                <span tabIndex={0}>
+                                                            <TooltipTrigger
+                                                                asChild
+                                                            >
+                                                                <span
+                                                                    tabIndex={0}
+                                                                >
                                                                     <button
-                                                                        onClick={() => handleDelete(h.id)}
-                                                                        disabled={deleting || h.pode_excluir === false}
+                                                                        onClick={() =>
+                                                                            handleDelete(
+                                                                                h.id,
+                                                                            )
+                                                                        }
+                                                                        disabled={
+                                                                            deleting ||
+                                                                            h.pode_excluir ===
+                                                                                false
+                                                                        }
                                                                         className="text-muted-foreground hover:text-destructive disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:text-muted-foreground"
                                                                     >
                                                                         <Trash2 className="size-4" />
@@ -187,7 +317,8 @@ export default function Horarios({ horarios }: Props) {
                                                                 </span>
                                                             </TooltipTrigger>
                                                             <TooltipContent>
-                                                                {h.pode_excluir === false
+                                                                {h.pode_excluir ===
+                                                                false
                                                                     ? 'Não é possível excluir: há doações pendentes ou confirmadas neste horário.'
                                                                     : 'Excluir horário'}
                                                             </TooltipContent>
@@ -197,7 +328,7 @@ export default function Horarios({ horarios }: Props) {
                                             ))}
                                             <Separator />
                                         </div>
-                                    ) : null
+                                    ) : null,
                                 )}
                             </>
                         )}

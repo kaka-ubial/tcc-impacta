@@ -35,12 +35,19 @@ export default function InstitutionsList({ instituicoes, stats }: Props) {
             <Head title="Instituições Pendentes" />
             <div>
                 <div className="flex flex-1 flex-col gap-4 p-4">
-                    <Heading
-                        title="Fila de Validação"
-                        description="Revise novos cadastros de instituição e regule a plataforma."
-                    />
+                    <div className="full-bleed -mt-4 border-b border-border bg-card py-8">
+                        <div className="mx-auto w-full max-w-7xl px-8 sm:px-10">
+                            <Heading
+                                title="Fila de Validação"
+                                description="Revise novos cadastros de instituição e regule a plataforma."
+                            />
+                        </div>
+                    </div>
                     <div className="grid gap-4 md:grid-cols-3">
-                        <StatCard title="Instituições Pendentes" value={stats.pending} />
+                        <StatCard
+                            title="Instituições Pendentes"
+                            value={stats.pending}
+                        />
                         <StatCard title="Aprovadas" value={stats.approved} />
                         <StatCard title="Rejeitadas" value={stats.rejected} />
                     </div>
@@ -54,7 +61,9 @@ export default function InstitutionsList({ instituicoes, stats }: Props) {
                                 label: 'Instituição',
                                 render: (inst) => (
                                     <div>
-                                        <p className="font-medium">{inst.nome_fantasia}</p>
+                                        <p className="font-medium">
+                                            {inst.nome_fantasia}
+                                        </p>
                                         <p className="text-xs text-muted-foreground">
                                             ID: {inst.usuario_id}
                                         </p>
@@ -75,7 +84,7 @@ export default function InstitutionsList({ instituicoes, stats }: Props) {
                                     <Badge
                                         variant="outline"
                                         data-badge-status="pending"
-                                        className="border-pending/40 bg-pending/10 text-pending font-medium"
+                                        className="border-pending/40 bg-pending/10 font-medium text-pending"
                                     >
                                         Pendente
                                     </Badge>
