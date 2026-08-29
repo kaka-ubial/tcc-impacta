@@ -1,15 +1,19 @@
 <?php
 
+use App\Http\Controllers\MetricsController;
 use App\Exceptions\DomainException;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\EnsureUserType;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\VerifyMetricsToken;
+use App\Http\Middleware\CollectMetrics;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -19,11 +23,11 @@ return Application::configure(basePath: dirname(__DIR__))
         api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
+        then: function () {
+            Route::middleware('metrics.token')->get('/metrics', MetricsController::class);
+        },
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Atras do proxy do Render — confiar nos headers X-Forwarded-* para
-        // gerar URLs https corretas (senao os assets saem como http e o
-        // navegador bloqueia por mixed content)
         $middleware->trustProxies(at: '*');
 
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
@@ -31,6 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'user_type' => EnsureUserType::class,
             'active' => EnsureUserIsActive::class,
+            'metrics.token' => VerifyMetricsToken::class,
         ]);
 
         $middleware->web(append: [
@@ -38,6 +43,7 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
             EnsureUserIsActive::class,
+            CollectMetrics::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

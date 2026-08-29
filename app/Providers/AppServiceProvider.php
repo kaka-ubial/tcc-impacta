@@ -9,6 +9,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use App\Models\Instituicao;
 use App\Observers\InstituicaoObserver;
+use Prometheus\CollectorRegistry;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -17,7 +18,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(CollectorRegistry::class, fn () => new CollectorRegistry(
+            new \Prometheus\Storage\APC()
+        ));
     }
 
     /**
