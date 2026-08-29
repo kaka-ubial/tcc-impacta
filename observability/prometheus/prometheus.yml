@@ -36,6 +36,12 @@ scrape_configs:
           app: impacta
           env: prod
 
+  - job_name: windows
+    static_configs:
+      - targets: ['localhost:9182']
+        labels:
+          app: impacta
+
   - job_name: prometheus
     static_configs:
       - targets: ['localhost:9090']
