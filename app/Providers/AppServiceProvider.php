@@ -46,16 +46,11 @@ class AppServiceProvider extends ServiceProvider
         $this->configureMetrics();
     }
 
-    /**
-     * Instrumentacao de negocio: contadores que alimentam o Prometheus.
-     */
     protected function configureMetrics(): void
     {
         Doacao::observe(DoacaoMetricsObserver::class);
         Transferencia::observe(TransferenciaMetricsObserver::class);
 
-        // Rotulado por connection, nunca pela mensagem da exception: texto de
-        // erro tem cardinalidade infinita e derruba o Prometheus.
         Queue::failing(function (JobFailed $event): void {
             app(CollectorRegistry::class)->getOrRegisterCounter(
                 'impacta',
