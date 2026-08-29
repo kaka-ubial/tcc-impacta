@@ -2,13 +2,22 @@
 
 namespace App\Providers;
 
+use App\Models\Doacao;
+use App\Models\Instituicao;
+use App\Models\Transferencia;
+use App\Observers\DoacaoMetricsObserver;
+use App\Observers\InstituicaoObserver;
+use App\Observers\TransferenciaMetricsObserver;
 use Carbon\CarbonImmutable;
+use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
-use App\Models\Instituicao;
-use App\Observers\InstituicaoObserver;
+use Prometheus\CollectorRegistry;
+use Prometheus\Storage\APC;
+use Prometheus\Storage\InMemory;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -17,7 +26,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(CollectorRegistry::class, function () {
+            $storage = extension_loaded('apcu') && apcu_enabled()
+                ? new APC
+                : new InMemory;
+
+            return new CollectorRegistry($storage);
+        });
     }
 
     /**
@@ -27,6 +42,23 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
         Instituicao::observe(InstituicaoObserver::class);
+
+        $this->configureMetrics();
+    }
+
+    protected function configureMetrics(): void
+    {
+        Doacao::observe(DoacaoMetricsObserver::class);
+        Transferencia::observe(TransferenciaMetricsObserver::class);
+
+        Queue::failing(function (JobFailed $event): void {
+            app(CollectorRegistry::class)->getOrRegisterCounter(
+                'impacta',
+                'jobs_falhados_total',
+                'Jobs que falharam apos esgotar as tentativas',
+                ['connection'],
+            )->inc([$event->connectionName]);
+        });
     }
 
     /**

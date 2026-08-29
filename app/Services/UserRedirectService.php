@@ -2,12 +2,13 @@
 
 namespace App\Services;
 
+use App\Enums\UserType;
 use App\Models\User;
 
 class UserRedirectService {
     public function getRedirectRoute(User $user): string
     {
-        if ($user->tipo_usuario === 'instituicao') {
+        if ($user->tipo_usuario === UserType::Instituicao) {
             $instituicao = $user->instituicao;
 
             if (! $instituicao) {
@@ -22,7 +23,7 @@ class UserRedirectService {
             };
         }
 
-        if ($user->tipo_usuario === 'admin') {
+        if ($user->tipo_usuario === UserType::Admin) {
             return route('admin.institutions.index');
         }
 

@@ -8,6 +8,10 @@ RUN apt-get update && apt-get install -y libpq-dev libzip-dev unzip \
     && docker-php-ext-install pdo_pgsql zip \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+RUN pecl install apcu \
+    && docker-php-ext-enable apcu \
+    && echo "apc.enable_cli=1" > /usr/local/etc/php/conf.d/zz-apcu.ini
+
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
@@ -22,3 +26,4 @@ EXPOSE 8080
 # O migrate --force garante que cada ambiente atualiza o proprio banco (Neon)
 # a cada deploy.
 CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8080
+

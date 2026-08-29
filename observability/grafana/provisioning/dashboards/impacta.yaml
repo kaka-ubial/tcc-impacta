@@ -1,0 +1,13 @@
+apiVersion: 1
+
+providers:
+    - name: impacta
+      orgId: 1
+      folder: Impacta
+      type: file
+      disableDeletion: false
+      updateIntervalSeconds: 30
+      allowUiUpdates: false
+      options:
+          path: C:\Users\kakau\projetos\impacta\observability\grafana\dashboards
+          foldersFromFilesStructure: false

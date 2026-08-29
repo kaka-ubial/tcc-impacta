@@ -56,7 +56,7 @@ type TransferenciaAgenda = {
     direcao: 'enviada' | 'recebida';
     criado_em: string;
     data_hora: string | null;
-    parceiro: string;
+    parceiro: { usuario_id: number; nome_fantasia: string };
 };
 
 type Props = { agendamentos: Agendamento[]; horarios: Horario[]; transferencias: TransferenciaAgenda[] };
@@ -507,7 +507,7 @@ arr.push(new Date(ref.ano, ref.mes, d));
                                                 )}
                                                 {(transferenciasPorDia[k] ?? []).slice(0, 2).map((t) => (
                                                     <span key={`t-${t.id}`} className="truncate rounded px-1 py-0.5 text-[10px] font-medium bg-fuchsia-500/15 text-fuchsia-700 dark:text-fuchsia-400">
-                                                        Transf. {t.parceiro.split(' ')[0]}
+                                                        Transf. {t.parceiro.nome_fantasia.split(' ')[0]}
                                                     </span>
                                                 ))}
                                             </div>
@@ -556,7 +556,7 @@ arr.push(new Date(ref.ano, ref.mes, d));
                                             transferenciasDoDia.map((t) => (
                                                 <Link key={t.id} href="/instituicao/transferencias" className="flex items-center justify-between gap-2 rounded-lg border px-3 py-2 text-sm hover:bg-muted/50 transition-colors">
                                                     <div className="flex flex-col gap-0.5">
-                                                        <span className="font-medium">{t.parceiro}</span>
+                                                        <span className="font-medium">{t.parceiro.nome_fantasia}</span>
                                                         <span className="text-muted-foreground text-xs">{t.direcao === 'enviada' ? 'Enviada' : 'Recebida'}</span>
                                                     </div>
                                                     <span className="rounded px-1.5 py-0.5 text-xs font-medium bg-fuchsia-500/15 text-fuchsia-700 dark:text-fuchsia-400">Transf.</span>

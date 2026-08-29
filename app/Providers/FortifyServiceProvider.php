@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Actions\Auth\ResolveAuthenticatedUser;
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
+use App\Models\Causa;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -12,7 +14,6 @@ use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
-use App\Models\Causa;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -41,6 +42,11 @@ class FortifyServiceProvider extends ServiceProvider
     {
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
         Fortify::createUsersUsing(CreateNewUser::class);
+
+        Fortify::authenticateUsing(fn (Request $request) => app(ResolveAuthenticatedUser::class)->resolve(
+            $request->{Fortify::username()},
+            $request->password
+        ));
     }
 
     /**
@@ -66,7 +72,7 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::verifyEmailView(fn (Request $request) => Inertia::render('auth/verify-email', [
             'status' => $request->session()->get('status'),
         ]));
-        
+
         Fortify::registerView(function () {
             return Inertia::render('auth/register', [
                 'causas' => Causa::select('id', 'nome', 'icone')->get(),
