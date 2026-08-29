@@ -37,3 +37,5 @@ AGENTS.md
 DESIGN.json
 DESIGN.md
 PRODUCT.md
+observability/prometheus/token-test.txt
+observability/prometheus/token-prod.txt
