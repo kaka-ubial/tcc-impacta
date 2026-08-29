@@ -1,0 +1,19 @@
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+
+scrape_configs:
+  - job_name: impacta-dev
+    scheme: https
+    metrics_path: /metrics
+    authorization:
+      credentials_file: token-dev.txt
+    static_configs:
+      - targets: ['tcc-impacta-dev.onrender.com']
+        labels:
+          app: impacta
+          env: dev
+
+  - job_name: prometheus
+    static_configs:
+      - targets: ['localhost:9090']

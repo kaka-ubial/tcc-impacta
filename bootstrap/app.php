@@ -45,6 +45,10 @@ return Application::configure(basePath: dirname(__DIR__))
             EnsureUserIsActive::class,
             CollectMetrics::class,
         ]);
+
+        $middleware->api(append: [
+            CollectMetrics::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Qualquer exception de regra de negócio (DoacaoException,
