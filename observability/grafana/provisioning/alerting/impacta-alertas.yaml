@@ -1,19 +1,4 @@
 apiVersion: 1
-# Regras de alerta do Impacta, avaliadas pelo Grafana a cada minuto.
-#
-# Cada regra consulta TODOS os ambientes de uma vez e agrupa por `env`. O
-# Grafana cria uma instancia de alerta por serie retornada, entao adicionar
-# test e prod ao prometheus.yml faz os alertas passarem a cobri-los sem
-# precisar duplicar regra nenhuma aqui.
-#
-# Limitacao conhecida: o Grafana roda como servico na maquina de
-# desenvolvimento, entao as regras so sao avaliadas enquanto o PC esta
-# ligado. Nao e monitoramento 24h — para queda fora do horario de trabalho
-# seria preciso um verificador externo sempre ligado.
-#
-# noDataState: OK de proposito. "Sem dado" aqui quase sempre significa "sem
-# trafego" (os ambientes ficam ociosos), e tratar ausencia de trafego como
-# incidente geraria alarme falso o tempo todo.
 
 groups:
     - orgId: 1
