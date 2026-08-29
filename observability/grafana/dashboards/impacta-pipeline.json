@@ -1,0 +1,318 @@
+{
+  "uid": "impacta-pipeline",
+  "title": "Impacta — Pipeline",
+  "description": "Saúde do CI/CD no GitHub Actions: duração dos builds, taxa de sucesso e tendência. Os dados chegam pelo coleta-github-actions.ps1, que lê a API do GitHub e escreve um arquivo lido pelo windows_exporter.",
+  "tags": ["impacta", "pipeline", "devops"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "refresh": "1m",
+  "time": { "from": "now-7d", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "branch",
+        "label": "Branch",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "prometheus-impacta" },
+        "query": { "query": "label_values(impacta_pipeline_duracao_segundos, branch)", "refId": "branch" },
+        "definition": "label_values(impacta_pipeline_duracao_segundos, branch)",
+        "refresh": 1,
+        "includeAll": true,
+        "multi": true,
+        "current": { "text": ["develop"], "value": ["develop"] },
+        "sort": 1
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Último build",
+      "description": "Resultado da execução mais recente de cada workflow na branch selecionada.",
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-impacta" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "impacta_pipeline_ultimo_resultado{branch=~\"$branch\"}",
+          "legendFormat": "{{workflow}}",
+          "instant": true
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": { "text": "FALHOU", "color": "red", "index": 1 },
+                "1": { "text": "PASSOU", "color": "green", "index": 0 }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "green", "value": 1 }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Duração do último build",
+      "description": "Alvo do SLO: CI/CD abaixo de 4 minutos. Acima disso o ciclo de feedback começa a atrapalhar o desenvolvimento.",
+      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-impacta" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "impacta_pipeline_duracao_segundos{branch=~\"$branch\"}",
+          "legendFormat": "{{workflow}}",
+          "instant": true
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 240 },
+              { "color": "red", "value": 480 }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Taxa de sucesso",
+      "description": "Proporção de execuções concluídas com sucesso, nas últimas 100 execuções coletadas. Abaixo de 90% indica pipeline instável — o que corrói a confiança no CI e leva a equipe a ignorar builds vermelhos.",
+      "gridPos": { "h": 5, "w": 6, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-impacta" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(impacta_pipeline_execucoes{branch=~\"$branch\", resultado=\"success\"}) / sum(impacta_pipeline_execucoes{branch=~\"$branch\"})",
+          "legendFormat": "sucesso"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "background",
+        "graphMode": "area",
+        "textMode": "auto",
+        "justifyMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 1,
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "orange", "value": 0.8 },
+              { "color": "green", "value": 0.9 }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Idade da coleta",
+      "description": "Há quanto tempo o coleta-github-actions.ps1 rodou pela última vez. A tarefa agendada roda a cada 10 min — se este número passar de 30, o coletor parou e TODOS os painéis desta tela estão mostrando dado velho.",
+      "gridPos": { "h": 5, "w": 6, "x": 18, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-impacta" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "time() - impacta_pipeline_coleta_timestamp_segundos",
+          "legendFormat": "idade"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 1800 },
+              { "color": "red", "value": 3600 }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Duração dos builds ao longo do tempo",
+      "description": "A tendência é o que importa aqui, não o valor pontual. Uma subida sustentada significa que o ciclo de feedback está piorando — e é o tipo de achado que rende um ciclo documentado no REVISOES.md.",
+      "gridPos": { "h": 10, "w": 16, "x": 0, "y": 5 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-impacta" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "impacta_pipeline_duracao_segundos{branch=~\"$branch\"}",
+          "legendFormat": "{{workflow}} · {{branch}}"
+        }
+      ],
+      "options": {
+        "legend": { "displayMode": "table", "placement": "right", "showLegend": true, "calcs": ["mean", "max", "lastNotNull"] },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 0,
+          "min": 0,
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "auto",
+            "pointSize": 5,
+            "spanNulls": true
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "transparent", "value": null },
+              { "color": "red", "value": 240 }
+            ]
+          },
+          "custom.thresholdsStyle": { "mode": "dashed" }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 6,
+      "type": "bargauge",
+      "title": "Execuções por resultado",
+      "description": "Distribuição das últimas 100 execuções. 'cancelled' costuma ser push em cima de push, não problema real.",
+      "gridPos": { "h": 10, "w": 8, "x": 16, "y": 5 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-impacta" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (resultado) (impacta_pipeline_execucoes{branch=~\"$branch\"})",
+          "legendFormat": "{{resultado}}",
+          "instant": true
+        }
+      ],
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "showUnfilled": true,
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0,
+          "color": { "mode": "fixed", "fixedColor": "blue" }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "failure" },
+            "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "success" },
+            "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } }]
+          }
+        ]
+      }
+    },
+    {
+      "id": 7,
+      "type": "table",
+      "title": "Situação por workflow e branch",
+      "description": "Visão tabular de tudo que é coletado. Útil para achar rapidamente qual combinação está quebrada.",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 15 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-impacta" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "impacta_pipeline_duracao_segundos",
+          "legendFormat": "",
+          "instant": true,
+          "format": "table"
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "sortBy": [{ "displayName": "Value", "desc": true }]
+      },
+      "fieldConfig": {
+        "defaults": { "unit": "s", "decimals": 0 },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Time" },
+            "properties": [{ "id": "custom.hidden", "value": true }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "__name__" },
+            "properties": [{ "id": "custom.hidden", "value": true }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "job" },
+            "properties": [{ "id": "custom.hidden", "value": true }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "instance" },
+            "properties": [{ "id": "custom.hidden", "value": true }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "app" },
+            "properties": [{ "id": "custom.hidden", "value": true }]
+          }
+        ]
+      }
+    }
+  ]
+}
