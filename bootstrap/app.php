@@ -1,13 +1,13 @@
 <?php
 
-use App\Http\Controllers\MetricsController;
 use App\Exceptions\DomainException;
+use App\Http\Controllers\MetricsController;
+use App\Http\Middleware\CollectMetrics;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\EnsureUserType;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\VerifyMetricsToken;
-use App\Http\Middleware\CollectMetrics;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
