@@ -31,7 +31,7 @@ CLAUDE.md
 .agents
 skills-lock.json
 /context 
-
+observability/prometheus/token-dev.txt
 
 AGENTS.md
 DESIGN.json
