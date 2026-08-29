@@ -2,6 +2,7 @@
 
 use App\Exceptions\DomainException;
 use App\Http\Controllers\MetricsController;
+use App\Http\Middleware\AssignRequestId;
 use App\Http\Middleware\CollectMetrics;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\EnsureUserType;
@@ -28,6 +29,8 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->prepend(AssignRequestId::class);
+
         $middleware->trustProxies(at: '*');
 
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);

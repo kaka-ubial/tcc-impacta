@@ -1,0 +1,199 @@
+apiVersion: 1
+
+groups:
+    - orgId: 1
+      name: impacta-disponibilidade
+      folder: Impacta
+      interval: 1m
+      rules:
+          - uid: impacta-fora-do-ar
+            title: Site fora do ar
+            condition: C
+            for: 10m
+            noDataState: OK
+            execErrState: Error
+            labels:
+                severity: critical
+                servico: impacta-dev
+            annotations:
+                summary: O ambiente de dev nao responde ha 10 minutos.
+                description: >-
+                    O Prometheus nao consegue raspar https://tcc-impacta-dev.onrender.com/metrics.
+                    Causas provaveis, em ordem: deploy em andamento, instancia do Render
+                    hibernando, ou o servico realmente fora do ar. Confira o painel do
+                    Render antes de investigar a aplicacao.
+            data:
+                - refId: A
+                  relativeTimeRange:
+                      from: 600
+                      to: 0
+                  datasourceUid: prometheus-impacta
+                  model:
+                      refId: A
+                      expr: up{job="impacta-dev"}
+                      instant: false
+                      range: true
+                - refId: B
+                  datasourceUid: __expr__
+                  model:
+                      refId: B
+                      type: reduce
+                      reducer: last
+                      expression: A
+                - refId: C
+                  datasourceUid: __expr__
+                  model:
+                      refId: C
+                      type: threshold
+                      expression: B
+                      conditions:
+                          - evaluator:
+                                type: lt
+                                params:
+                                    - 1
+
+    - orgId: 1
+      name: impacta-aplicacao
+      folder: Impacta
+      interval: 1m
+      rules:
+          - uid: impacta-taxa-erro
+            title: Taxa de erro acima de 5%
+            condition: C
+            for: 5m
+            noDataState: OK
+            execErrState: Error
+            labels:
+                severity: critical
+                servico: impacta-dev
+            annotations:
+                summary: Mais de 5% das requisicoes estao respondendo 5xx.
+                description: >-
+                    Verifique o painel "Requisicoes por status HTTP" para identificar
+                    quais rotas estao falhando, e os logs no painel do Render para a
+                    exception correspondente.
+            data:
+                - refId: A
+                  relativeTimeRange:
+                      from: 600
+                      to: 0
+                  datasourceUid: prometheus-impacta
+                  model:
+                      refId: A
+                      expr: sum(rate(impacta_http_requests_total{status=~"5.."}[5m])) / sum(rate(impacta_http_requests_total[5m]))
+                      instant: false
+                      range: true
+                - refId: B
+                  datasourceUid: __expr__
+                  model:
+                      refId: B
+                      type: reduce
+                      reducer: last
+                      expression: A
+                - refId: C
+                  datasourceUid: __expr__
+                  model:
+                      refId: C
+                      type: threshold
+                      expression: B
+                      conditions:
+                          - evaluator:
+                                type: gt
+                                params:
+                                    - 0.05
+
+          - uid: impacta-latencia-alta
+            title: Site lento (p95 acima de 2s)
+            condition: C
+            for: 15m
+            noDataState: OK
+            execErrState: Error
+            labels:
+                severity: warning
+                servico: impacta-dev
+            annotations:
+                summary: O p95 de latencia passou de 2 segundos por 15 minutos.
+                description: >-
+                    1 em cada 20 requisicoes esta demorando mais de 2s. Use o painel
+                    "Rotas mais lentas (p95)" para descobrir qual rota puxa a media.
+                    Picos isolados logo apos periodos ociosos costumam ser cold start
+                    da instancia gratuita do Render, nao um problema da aplicacao.
+            data:
+                - refId: A
+                  relativeTimeRange:
+                      from: 900
+                      to: 0
+                  datasourceUid: prometheus-impacta
+                  model:
+                      refId: A
+                      expr: histogram_quantile(0.95, sum(rate(impacta_http_request_duration_seconds_bucket[5m])) by (le))
+                      instant: false
+                      range: true
+                - refId: B
+                  datasourceUid: __expr__
+                  model:
+                      refId: B
+                      type: reduce
+                      reducer: last
+                      expression: A
+                - refId: C
+                  datasourceUid: __expr__
+                  model:
+                      refId: C
+                      type: threshold
+                      expression: B
+                      conditions:
+                          - evaluator:
+                                type: gt
+                                params:
+                                    - 2
+
+    - orgId: 1
+      name: impacta-negocio
+      folder: Impacta
+      interval: 1m
+      rules:
+          - uid: impacta-jobs-falhando
+            title: Jobs falhando
+            condition: C
+            for: 0m
+            noDataState: OK
+            execErrState: Error
+            labels:
+                severity: warning
+                servico: impacta-dev
+            annotations:
+                summary: Mais de 5 jobs falharam nos ultimos 15 minutos.
+                description: >-
+                    Jobs que esgotaram as tentativas. Como a fila processa envio de
+                    e-mail e notificacoes, falha aqui significa usuario que nao foi
+                    avisado. Consulte a tabela failed_jobs para a exception.
+            data:
+                - refId: A
+                  relativeTimeRange:
+                      from: 900
+                      to: 0
+                  datasourceUid: prometheus-impacta
+                  model:
+                      refId: A
+                      expr: sum(increase(impacta_jobs_falhados_total[15m]))
+                      instant: false
+                      range: true
+                - refId: B
+                  datasourceUid: __expr__
+                  model:
+                      refId: B
+                      type: reduce
+                      reducer: last
+                      expression: A
+                - refId: C
+                  datasourceUid: __expr__
+                  model:
+                      refId: C
+                      type: threshold
+                      expression: B
+                      conditions:
+                          - evaluator:
+                                type: gt
+                                params:
+                                    - 5
