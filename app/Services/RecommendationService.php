@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\InstituicaoStatus;
 use App\Models\Instituicao;
 use App\Models\User;
 use Illuminate\Support\Collection;
@@ -19,7 +20,7 @@ class RecommendationService
         $hasCauses = count($donorCauseIds) > 0;
 
         $institutions = Instituicao::with('causas')
-            ->where('status', 'approved')
+            ->where('status', InstituicaoStatus::Approved)
             ->get();
 
         return $institutions

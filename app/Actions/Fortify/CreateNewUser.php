@@ -5,6 +5,7 @@ namespace App\Actions\Fortify;
 use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
 use App\Actions\UserTypes\UserTypeFactory;
+use App\Enums\UserStatus;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -28,9 +29,7 @@ class CreateNewUser implements CreatesNewUsers
                 'email'        => $input['email'],
                 'password'     => $input['password'],
                 'tipo_usuario' => $input['tipo_usuario'],
-                'status'       => $input['tipo_usuario'] === 'instituicao'
-                    ? 'aguardando_validacao'
-                    : 'ativo',
+                'status'       => UserStatus::Ativo,
             ]);
 
             $handler = UserTypeFactory::make($input['tipo_usuario']);

@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Enums\InstituicaoStatus;
 use App\Models\Instituicao;
 
 class InstituicaoObserver
@@ -14,7 +15,7 @@ class InstituicaoObserver
     public function updating(Instituicao $instituicao): void
     {
         if ($instituicao->isRejected() && !$instituicao->isDirty('status')) {
-            $instituicao->status = 'pending';
+            $instituicao->status = InstituicaoStatus::Pending;
         }
     }
 

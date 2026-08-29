@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\UserType;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -9,7 +10,7 @@ class RejectInstitutionRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return auth()->user()->tipo_usuario === 'admin';
+        return auth()->user()->tipo_usuario === UserType::Admin;
     }
 
     public function rules(): array

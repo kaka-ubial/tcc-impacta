@@ -1,0 +1,2933 @@
+{
+  "info": {
+    "_postman_id": "a1c2d3e4-5f6a-4b7c-8d9e-eq05-fluxos-manual",
+    "name": "EQ05 - Fluxos por papel (manual, para demonstracao)",
+    "description": "Versao MANUAL da colecao EQ05-fluxos-por-papel: mesma cobertura (42 rotas da API REST/JSON, todos os papeis - Admin, Instituicao A, Instituicao B, Doador), mas SEM nenhum script de pre-request ou test. Nada e capturado ou verificado automaticamente - cada passo mostra explicitamente no campo 'description' da requisicao qual valor da resposta anterior deve ser copiado manualmente (aba Variables da colecao, ou icone de olho no canto superior direito) antes de rodar a proxima. Feita para apresentar o fluxo de autenticacao e autorizacao passo a passo (ex: para um professor), mostrando de forma visivel como o token Bearer e obtido em login/register e reaproveitado nas chamadas seguintes.\n\nCPF, CNPJ, e-mails e senhas ja vem preenchidos como valores fixos e validos nas variaveis de colecao (nada para digitar ou calcular na hora) - a parte manual e so copiar os campos derivados da resposta (token, id, etc.) entre as variaveis indicadas em cada passo.\n\nIMPORTANTE - pre-requisito de codigo: restaure app/Services/DoacaoService.php a partir do commit a54eca4 antes de rodar (`git checkout a54eca4 -- app/Services/DoacaoService.php`), senao os endpoints de doacao retornam 500.\n\nIMPORTANTE - banco de dados: como o CPF/CNPJ/e-mail sao fixos (nao gerados a cada execucao), rode `php artisan migrate:fresh --seed` antes de cada demonstracao - caso contrario os registros em 2a/3a/4a/8b vao falhar com 422 'ja cadastrado' numa segunda execucao.\n\nOrdem de execucao importa: siga as pastas 1 a 10 em ordem. Para a colecao equivalente que roda sozinha (auto-semeada, com asserts automaticos) use EQ05-fluxos-por-papel.postman_collection.json - essa e a versao ja validada com `newman run` (77/77 requisicoes, 93/93 asserts) e serve como prova de que a API funciona; esta aqui e so para apresentacao guiada.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "admin_email",
+      "value": "admin@impacta.com",
+      "type": "string"
+    },
+    {
+      "key": "admin_password",
+      "value": "senha_segura",
+      "type": "string"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "inst_a_email",
+      "value": "instituicao.a.demo@exemplo.com",
+      "type": "string"
+    },
+    {
+      "key": "inst_a_cnpj",
+      "value": "15604579477811",
+      "type": "string"
+    },
+    {
+      "key": "inst_a_password",
+      "value": "senha-teste-123",
+      "type": "string"
+    },
+    {
+      "key": "inst_a_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "inst_a_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "inst_b_email",
+      "value": "instituicao.b.demo@exemplo.com",
+      "type": "string"
+    },
+    {
+      "key": "inst_b_cnpj",
+      "value": "67633606770836",
+      "type": "string"
+    },
+    {
+      "key": "inst_b_password",
+      "value": "senha-teste-123",
+      "type": "string"
+    },
+    {
+      "key": "inst_b_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "inst_b_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "inst_c_email",
+      "value": "instituicao.c.demo@exemplo.com",
+      "type": "string"
+    },
+    {
+      "key": "inst_c_cnpj",
+      "value": "10793094930308",
+      "type": "string"
+    },
+    {
+      "key": "inst_c_password",
+      "value": "senha-teste-123",
+      "type": "string"
+    },
+    {
+      "key": "inst_c_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "inst_c_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "doador_email",
+      "value": "doador.demo@exemplo.com",
+      "type": "string"
+    },
+    {
+      "key": "doador_cpf",
+      "value": "93857083921",
+      "type": "string"
+    },
+    {
+      "key": "doador_password",
+      "value": "senha-teste-123",
+      "type": "string"
+    },
+    {
+      "key": "doador_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "doador_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "categoria_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "necessidade_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "necessidade_tmp_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "horario_a_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "horario_tmp_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "horario_b_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "doacao_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "doacao_reject_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "doacao_nd_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "doacao_cancel_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "doacao_sug1_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "doacao_sug2_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "agendamento_sug1_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "agendamento_sug2_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "transferencia_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "transferencia_recusar_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "transferencia_cancelar_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "transferencia_nd_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "transferencia_sug1_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "transferencia_sug2_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Setup - Admin",
+      "item": [
+        {
+          "name": "1a. POST /api/login (admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "login"
+              ]
+            },
+            "description": "Login da conta admin semeada por AdminUserSeeder (admin@impacta.com / senha_segura). Esperado: 201 com { token, user }.\n\nPASSO MANUAL - depois de rodar: copie `token` da resposta para a variavel de colecao `admin_token`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"{{admin_email}}\",\n    \"password\": \"{{admin_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Instituicao A - onboarding e catalogo",
+      "item": [
+        {
+          "name": "2a. POST /api/register (cria Instituicao A)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "register"
+              ]
+            },
+            "description": "Cria a instituicao ORIGEM da doacao e da transferencia deste fluxo. CNPJ e e-mail ja vem prontos (validos) nas variaveis de colecao - nao precisam ser digitados. Status inicial 'pending'. Esperado: 201 com { token, user }.\n\nPASSO MANUAL - depois de rodar: copie `token` da resposta para a variavel de colecao `inst_a_token`; copie `user.id` da resposta para a variavel de colecao `inst_a_id`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"{{inst_a_email}}\",\n    \"password\": \"{{inst_a_password}}\",\n    \"password_confirmation\": \"{{inst_a_password}}\",\n    \"tipo_usuario\": \"instituicao\",\n    \"nome_fantasia\": \"Instituicao A de Teste\",\n    \"razao_social\": \"Instituicao A de Teste LTDA\",\n    \"cnpj\": \"{{inst_a_cnpj}}\",\n    \"telefone_inst\": \"(41) 3333-4444\",\n    \"endereco_completo\": \"Rua de Teste A, 123 - Curitiba/PR\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2b. [Guard] POST /api/necessidades (Instituicao A pendente)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/necessidades",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "necessidades"
+              ]
+            },
+            "description": "Esperado: 403 Forbidden - EnsureInstitutionIsApproved bloqueia porque a Instituicao A ainda nao foi aprovada pelo admin. (Requer inst_a_token ja preenchido em 2a.)",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"categoria_id\": {{categoria_id}},\n    \"descricao\": \"Teste com instituicao ainda nao aprovada\",\n    \"quantidade_objetivo\": 10,\n    \"prioridade\": \"media\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2c. [Admin] POST /api/admin/institutions/{{inst_a_id}}/approve",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/institutions/{{inst_a_id}}/approve",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "institutions",
+                "{{inst_a_id}}",
+                "approve"
+              ]
+            },
+            "description": "Aprova a Instituicao A. Requer admin_token (1a) e inst_a_id (2a) ja preenchidos. Esperado: 200 com { data: { status: 'approved', ... } }."
+          },
+          "response": []
+        },
+        {
+          "name": "2d. POST /api/horarios (Instituicao A cadastra horario ativo)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/horarios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "horarios"
+              ]
+            },
+            "description": "Sem ao menos um horario ativo a instituicao nao pode receber doacoes (DoacaoService::store bloqueia com 422). Esperado: 201.\n\nPASSO MANUAL - depois de rodar: copie `data.id` da resposta para a variavel de colecao `horario_a_id`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"dia_semana\": 1,\n    \"hora_inicio\": \"08:00\",\n    \"hora_fim\": \"12:00\",\n    \"tipo\": \"entrega\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2e. GET /api/horarios (Instituicao A)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/horarios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "horarios"
+              ]
+            },
+            "description": "Esperado: 200 com o horario criado em 2d."
+          },
+          "response": []
+        },
+        {
+          "name": "2f. POST /api/horarios (horario temporario)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/horarios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "horarios"
+              ]
+            },
+            "description": "Cria um segundo horario so para demonstrar o destroy a seguir. Esperado: 201.\n\nPASSO MANUAL - depois de rodar: copie `data.id` da resposta para a variavel de colecao `horario_tmp_id`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"dia_semana\": 2,\n    \"hora_inicio\": \"13:00\",\n    \"hora_fim\": \"17:00\",\n    \"tipo\": \"coleta\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2g. DELETE /api/horarios/{{horario_tmp_id}}",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/horarios/{{horario_tmp_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "horarios",
+                "{{horario_tmp_id}}"
+              ]
+            },
+            "description": "Requer horario_tmp_id (2f) ja preenchido. Esperado: 204 No Content."
+          },
+          "response": []
+        },
+        {
+          "name": "2h. POST /api/necessidades (cria necessidade principal)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/necessidades",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "necessidades"
+              ]
+            },
+            "description": "Esta necessidade fica ativa (nao e excluida) para ser vinculada a doacao real do doador na secao 5. Esperado: 201.\n\nPASSO MANUAL - depois de rodar: copie `data.id` da resposta para a variavel de colecao `necessidade_id`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"categoria_id\": {{categoria_id}},\n    \"descricao\": \"Roupas de inverno para doacao\",\n    \"quantidade_objetivo\": 50,\n    \"prioridade\": \"media\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2i. GET /api/necessidades (Instituicao A)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/necessidades",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "necessidades"
+              ]
+            },
+            "description": "Esperado: 200 com a necessidade criada em 2h."
+          },
+          "response": []
+        },
+        {
+          "name": "2j. PUT /api/necessidades/{{necessidade_id}} (atualiza)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/necessidades/{{necessidade_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "necessidades",
+                "{{necessidade_id}}"
+              ]
+            },
+            "description": "Requer necessidade_id (2h). Exercita CheckNecessidadeOwnership + update. Esperado: 200 com prioridade 'alta'.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"categoria_id\": {{categoria_id}},\n    \"descricao\": \"Roupas de inverno para doacao (atualizado)\",\n    \"quantidade_objetivo\": 60,\n    \"prioridade\": \"alta\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2k. POST /api/necessidades (necessidade temporaria)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/necessidades",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "necessidades"
+              ]
+            },
+            "description": "Criada apenas para demonstrar o destroy a seguir. Esperado: 201.\n\nPASSO MANUAL - depois de rodar: copie `data.id` da resposta para a variavel de colecao `necessidade_tmp_id`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"categoria_id\": {{categoria_id}},\n    \"descricao\": \"Necessidade temporaria para teste de exclusao\",\n    \"quantidade_objetivo\": 5,\n    \"prioridade\": \"baixa\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2l. DELETE /api/necessidades/{{necessidade_tmp_id}}",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/necessidades/{{necessidade_tmp_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "necessidades",
+                "{{necessidade_tmp_id}}"
+              ]
+            },
+            "description": "Requer necessidade_tmp_id (2k). Esperado: 204 No Content. Exercita CheckNecessidadeOwnership no destroy."
+          },
+          "response": []
+        },
+        {
+          "name": "2m. [Guard] POST /api/necessidades (payload invalido)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/necessidades",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "necessidades"
+              ]
+            },
+            "description": "categoria_id inexistente, descricao curta demais, quantidade_objetivo abaixo do minimo e prioridade fora do enum. Esperado: 422 com { message, errors }.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"categoria_id\": 999999,\n    \"descricao\": \"a\",\n    \"quantidade_objetivo\": 0,\n    \"prioridade\": \"urgente\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Instituicao B - destino de transferencia",
+      "item": [
+        {
+          "name": "3a. POST /api/register (cria Instituicao B)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "register"
+              ]
+            },
+            "description": "Sera o DESTINO na transferencia da secao 6. Esperado: 201 com { token, user }.\n\nPASSO MANUAL - depois de rodar: copie `token` da resposta para a variavel de colecao `inst_b_token`; copie `user.id` da resposta para a variavel de colecao `inst_b_id`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"{{inst_b_email}}\",\n    \"password\": \"{{inst_b_password}}\",\n    \"password_confirmation\": \"{{inst_b_password}}\",\n    \"tipo_usuario\": \"instituicao\",\n    \"nome_fantasia\": \"Instituicao B de Teste\",\n    \"razao_social\": \"Instituicao B de Teste LTDA\",\n    \"cnpj\": \"{{inst_b_cnpj}}\",\n    \"telefone_inst\": \"(41) 3333-5555\",\n    \"endereco_completo\": \"Rua de Teste B, 456 - Curitiba/PR\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3b. [Admin] POST /api/admin/institutions/{{inst_b_id}}/approve",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/institutions/{{inst_b_id}}/approve",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "institutions",
+                "{{inst_b_id}}",
+                "approve"
+              ]
+            },
+            "description": "Requer inst_b_id (3a). Esperado: 200."
+          },
+          "response": []
+        },
+        {
+          "name": "3c. POST /api/horarios (Instituicao B)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_b_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/horarios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "horarios"
+              ]
+            },
+            "description": "Esperado: 201.\n\nPASSO MANUAL - depois de rodar: copie `data.id` da resposta para a variavel de colecao `horario_b_id`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"dia_semana\": 3,\n    \"hora_inicio\": \"09:00\",\n    \"hora_fim\": \"12:00\",\n    \"tipo\": \"entrega\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Doador - cadastro e navegacao",
+      "item": [
+        {
+          "name": "4a. POST /api/register (cria Doador)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "register"
+              ]
+            },
+            "description": "Cria a conta que vai doar para a Instituicao A na secao 5. Esperado: 201 com { token, user }.\n\nPASSO MANUAL - depois de rodar: copie `token` da resposta para a variavel de colecao `doador_token`; copie `user.id` da resposta para a variavel de colecao `doador_id`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"{{doador_email}}\",\n    \"password\": \"{{doador_password}}\",\n    \"password_confirmation\": \"{{doador_password}}\",\n    \"tipo_usuario\": \"doador\",\n    \"nome_completo\": \"Doadora de Teste\",\n    \"cpf\": \"{{doador_cpf}}\",\n    \"telefone\": \"(41) 99999-8888\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "4b. GET /api/me (Doador)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doador_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "me"
+              ]
+            },
+            "description": "Esperado: 200 com { data: { tipo_usuario: 'doador', ... } }."
+          },
+          "response": []
+        },
+        {
+          "name": "4c. GET /api/instituicoes (lista publica)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doador_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/instituicoes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "instituicoes"
+              ]
+            },
+            "description": "Esperado: 200 com { data: [...] } paginado, incluindo a Instituicao A (ja aprovada)."
+          },
+          "response": []
+        },
+        {
+          "name": "4d. GET /api/instituicoes/recomendadas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doador_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/instituicoes/recomendadas",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "instituicoes",
+                "recomendadas"
+              ]
+            },
+            "description": "Endpoint exclusivo do doador (RecommendationService::forDonor). Esperado: 200 com um array de recomendacoes."
+          },
+          "response": []
+        },
+        {
+          "name": "4e. GET /api/instituicoes/{{inst_a_id}} (detalhe)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doador_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/instituicoes/{{inst_a_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "instituicoes",
+                "{{inst_a_id}}"
+              ]
+            },
+            "description": "Requer inst_a_id (2a). Esperado: 200 com detalhe da Instituicao A, incluindo a necessidade ativa criada em 2h."
+          },
+          "response": []
+        },
+        {
+          "name": "4f. GET /api/perfil (Doador)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doador_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/perfil",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "perfil"
+              ]
+            },
+            "description": "Esperado: 200 com o perfil do proprio doador (ainda sem doacoes entregues)."
+          },
+          "response": []
+        },
+        {
+          "name": "4g. [Guard] GET /api/necessidades (Doador, papel errado)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doador_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/necessidades",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "necessidades"
+              ]
+            },
+            "description": "Esperado: 403 - CheckInstituicao bloqueia porque o usuario autenticado e doador, nao instituicao."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. Doacao - ciclo doador e instituicao",
+      "item": [
+        {
+          "name": "5a. [Doador] POST /api/doacoes (doacao principal)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doador_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/doacoes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "doacoes"
+              ]
+            },
+            "description": "Doacao vinculada a necessidade criada em 2h, com quantidade generosa (20) para sobrar estoque para as transferencias da secao 6 apos a entrega. Esperado: 201, status 'pendente'.\n\nPASSO MANUAL - depois de rodar: copie `data.id` da resposta para a variavel de colecao `doacao_id`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"instituicao_id\": {{inst_a_id}},\n    \"itens\": [\n        { \"categoria_id\": {{categoria_id}}, \"necessidade_id\": {{necessidade_id}}, \"quantidade\": 20, \"descricao\": \"Casacos e cobertores de inverno\" }\n    ],\n    \"agendamento\": {\n        \"tipo\": \"entrega\",\n        \"data_hora\": \"2026-12-10T10:00:00-03:00\"\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5b. [Doador] GET /api/doacoes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doador_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/doacoes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "doacoes"
+              ]
+            },
+            "description": "Esperado: 200 com a doacao criada em 5a, status 'pendente'."
+          },
+          "response": []
+        },
+        {
+          "name": "5c. [Instituicao A] GET /api/instituicao/doacoes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/instituicao/doacoes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "instituicao",
+                "doacoes"
+              ]
+            },
+            "description": "Esperado: 200 com a doacao recebida do doador (visao da instituicao, InstituicaoDoacaoResource)."
+          },
+          "response": []
+        },
+        {
+          "name": "5d. [Instituicao A] POST .../doacoes/{{doacao_id}}/confirm",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/instituicao/doacoes/{{doacao_id}}/confirm",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "instituicao",
+                "doacoes",
+                "{{doacao_id}}",
+                "confirm"
+              ]
+            },
+            "description": "Requer doacao_id (5a). Esperado: 200, status 'confirmada'."
+          },
+          "response": []
+        },
+        {
+          "name": "5e. [Instituicao A] POST .../doacoes/{{doacao_id}}/deliver",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/instituicao/doacoes/{{doacao_id}}/deliver",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "instituicao",
+                "doacoes",
+                "{{doacao_id}}",
+                "deliver"
+              ]
+            },
+            "description": "Esperado: 200, status 'entregue'. So a partir daqui essa quantidade entra no estoque calculado por TransferenciaService::calcularEstoque (usado na secao 6)."
+          },
+          "response": []
+        },
+        {
+          "name": "5f. [Instituicao A] POST .../doacoes/{{doacao_id}}/avaliar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/instituicao/doacoes/{{doacao_id}}/avaliar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "instituicao",
+                "doacoes",
+                "{{doacao_id}}",
+                "avaliar"
+              ]
+            },
+            "description": "So permitido quando a doacao esta 'entregue' e ainda nao tem avaliacao (AvaliacaoService). Esperado: 201.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nota\": 5,\n    \"descricao\": \"Doacao entregue em otimo estado, muito obrigado!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5g. [Instituicao A] GET /api/instituicao/doadores/{{doador_id}}",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/instituicao/doadores/{{doador_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "instituicao",
+                "doadores",
+                "{{doador_id}}"
+              ]
+            },
+            "description": "Requer doador_id (4a). So funciona porque a instituicao ja recebeu ao menos 1 doacao desse doador (5a). Esperado: 200 com o perfil do doador."
+          },
+          "response": []
+        },
+        {
+          "name": "5h. [Doador] POST /api/doacoes (para recusar)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doador_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/doacoes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "doacoes"
+              ]
+            },
+            "description": "Doacao dedicada ao teste de recusa (reject) pela instituicao. Esperado: 201.\n\nPASSO MANUAL - depois de rodar: copie `data.id` da resposta para a variavel de colecao `doacao_reject_id`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"instituicao_id\": {{inst_a_id}},\n    \"itens\": [\n        { \"categoria_id\": {{categoria_id}}, \"quantidade\": 1, \"descricao\": \"Item de teste para recusa\" }\n    ],\n    \"agendamento\": {\n        \"tipo\": \"entrega\",\n        \"data_hora\": \"2026-12-11T10:00:00-03:00\"\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5i. [Instituicao A] POST .../doacoes/{{doacao_reject_id}}/reject",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/instituicao/doacoes/{{doacao_reject_id}}/reject",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "instituicao",
+                "doacoes",
+                "{{doacao_reject_id}}",
+                "reject"
+              ]
+            },
+            "description": "Requer doacao_reject_id (5h). Esperado: 200, status 'recusada'."
+          },
+          "response": []
+        },
+        {
+          "name": "5j. [Doador] POST /api/doacoes (para nao-entregue)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doador_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/doacoes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "doacoes"
+              ]
+            },
+            "description": "Doacao dedicada ao teste de notDelivered. Esperado: 201.\n\nPASSO MANUAL - depois de rodar: copie `data.id` da resposta para a variavel de colecao `doacao_nd_id`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"instituicao_id\": {{inst_a_id}},\n    \"itens\": [\n        { \"categoria_id\": {{categoria_id}}, \"quantidade\": 1, \"descricao\": \"Item de teste para nao entregue\" }\n    ],\n    \"agendamento\": {\n        \"tipo\": \"entrega\",\n        \"data_hora\": \"2026-12-12T10:00:00-03:00\"\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5k. [Instituicao A] POST .../doacoes/{{doacao_nd_id}}/confirm",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/instituicao/doacoes/{{doacao_nd_id}}/confirm",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "instituicao",
+                "doacoes",
+                "{{doacao_nd_id}}",
+                "confirm"
+              ]
+            },
+            "description": "Requer doacao_nd_id (5j). notDelivered exige status 'confirmada' antes. Esperado: 200."
+          },
+          "response": []
+        },
+        {
+          "name": "5l. [Instituicao A] POST .../doacoes/{{doacao_nd_id}}/notDelivered",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/instituicao/doacoes/{{doacao_nd_id}}/notDelivered",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "instituicao",
+                "doacoes",
+                "{{doacao_nd_id}}",
+                "notDelivered"
+              ]
+            },
+            "description": "Esperado: 200, status 'nao_entregue'."
+          },
+          "response": []
+        },
+        {
+          "name": "5m. [Doador] POST /api/doacoes (para cancelar)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doador_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/doacoes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "doacoes"
+              ]
+            },
+            "description": "Doacao dedicada ao teste de cancelamento pelo proprio doador. Esperado: 201.\n\nPASSO MANUAL - depois de rodar: copie `data.id` da resposta para a variavel de colecao `doacao_cancel_id`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"instituicao_id\": {{inst_a_id}},\n    \"itens\": [\n        { \"categoria_id\": {{categoria_id}}, \"quantidade\": 1, \"descricao\": \"Item de teste para cancelamento\" }\n    ],\n    \"agendamento\": {\n        \"tipo\": \"entrega\",\n        \"data_hora\": \"2026-12-13T10:00:00-03:00\"\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5n. [Doador] POST /api/doacoes/{{doacao_cancel_id}}/cancel",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doador_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/doacoes/{{doacao_cancel_id}}/cancel",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "doacoes",
+                "{{doacao_cancel_id}}",
+                "cancel"
+              ]
+            },
+            "description": "Requer doacao_cancel_id (5m). Cancelamento pelo proprio doador enquanto 'pendente'. Esperado: 204 No Content."
+          },
+          "response": []
+        },
+        {
+          "name": "5o. [Doador] POST /api/doacoes (para sugestao aceita)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doador_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/doacoes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "doacoes"
+              ]
+            },
+            "description": "Doacao dedicada ao teste de sugestao de data (instituicao sugere, doador aceita). Esperado: 201.\n\nPASSO MANUAL - depois de rodar: copie `data.id` da resposta para a variavel de colecao `doacao_sug1_id`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"instituicao_id\": {{inst_a_id}},\n    \"itens\": [\n        { \"categoria_id\": {{categoria_id}}, \"quantidade\": 1, \"descricao\": \"Item de teste para sugestao de data aceita\" }\n    ],\n    \"agendamento\": {\n        \"tipo\": \"entrega\",\n        \"data_hora\": \"2026-12-14T10:00:00-03:00\"\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5p. [Instituicao A] POST .../doacoes/{{doacao_sug1_id}}/confirm",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/instituicao/doacoes/{{doacao_sug1_id}}/confirm",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "instituicao",
+                "doacoes",
+                "{{doacao_sug1_id}}",
+                "confirm"
+              ]
+            },
+            "description": "Confirma so para obter o id do agendamento de forma direta na resposta (data.agendamento.id). Esperado: 200.\n\nPASSO MANUAL - depois de rodar: copie `data.agendamento.id` da resposta para a variavel de colecao `agendamento_sug1_id`."
+          },
+          "response": []
+        },
+        {
+          "name": "5q. [Instituicao A] POST /api/agendamentos/{{agendamento_sug1_id}}/sugerir",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/agendamentos/{{agendamento_sug1_id}}/sugerir",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "agendamentos",
+                "{{agendamento_sug1_id}}",
+                "sugerir"
+              ]
+            },
+            "description": "Instituicao sugere uma nova data para o agendamento da doacao. Esperado: 200, agendamento status 'alteracao_sugerida'.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"data_hora_sugerida\": \"2026-12-20T10:00:00-03:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5r. [Doador] POST /api/doacoes/{{doacao_sug1_id}}/sugestao/aceitar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doador_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/doacoes/{{doacao_sug1_id}}/sugestao/aceitar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "doacoes",
+                "{{doacao_sug1_id}}",
+                "sugestao",
+                "aceitar"
+              ]
+            },
+            "description": "Doador aceita a nova data sugerida em 5q. Esperado: 204 No Content."
+          },
+          "response": []
+        },
+        {
+          "name": "5s. [Doador] POST /api/doacoes (para sugestao recusada)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doador_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/doacoes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "doacoes"
+              ]
+            },
+            "description": "Doacao dedicada ao teste de sugestao de data recusada pelo doador. Esperado: 201.\n\nPASSO MANUAL - depois de rodar: copie `data.id` da resposta para a variavel de colecao `doacao_sug2_id`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"instituicao_id\": {{inst_a_id}},\n    \"itens\": [\n        { \"categoria_id\": {{categoria_id}}, \"quantidade\": 1, \"descricao\": \"Item de teste para sugestao de data recusada\" }\n    ],\n    \"agendamento\": {\n        \"tipo\": \"entrega\",\n        \"data_hora\": \"2026-12-15T10:00:00-03:00\"\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5t. [Instituicao A] POST .../doacoes/{{doacao_sug2_id}}/confirm",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/instituicao/doacoes/{{doacao_sug2_id}}/confirm",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "instituicao",
+                "doacoes",
+                "{{doacao_sug2_id}}",
+                "confirm"
+              ]
+            },
+            "description": "Mesma tecnica de 5p, agora para doacao_sug2_id. Esperado: 200.\n\nPASSO MANUAL - depois de rodar: copie `data.agendamento.id` da resposta para a variavel de colecao `agendamento_sug2_id`."
+          },
+          "response": []
+        },
+        {
+          "name": "5u. [Instituicao A] POST /api/agendamentos/{{agendamento_sug2_id}}/sugerir",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/agendamentos/{{agendamento_sug2_id}}/sugerir",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "agendamentos",
+                "{{agendamento_sug2_id}}",
+                "sugerir"
+              ]
+            },
+            "description": "Esperado: 200, agendamento status 'alteracao_sugerida'.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"data_hora_sugerida\": \"2026-12-21T10:00:00-03:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5v. [Doador] POST /api/doacoes/{{doacao_sug2_id}}/sugestao/recusar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doador_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/doacoes/{{doacao_sug2_id}}/sugestao/recusar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "doacoes",
+                "{{doacao_sug2_id}}",
+                "sugestao",
+                "recusar"
+              ]
+            },
+            "description": "Doador recusa a nova data sugerida em 5u (agendamento volta para 'confirmado' com a data original). Esperado: 204 No Content."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "6. Transferencia - Instituicao A para Instituicao B",
+      "item": [
+        {
+          "name": "6a. [Instituicao A] POST /api/transferencias (principal)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/transferencias",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "transferencias"
+              ]
+            },
+            "description": "So funciona porque a Instituicao A ja tem estoque de categoria_id=1 (20 unidades entregues em 5e). Esperado: 201, status 'pendente'.\n\nPASSO MANUAL - depois de rodar: copie `data.id` da resposta para a variavel de colecao `transferencia_id`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"instituicao_destino_id\": {{inst_b_id}},\n    \"itens\": [\n        { \"categoria_id\": {{categoria_id}}, \"quantidade\": 2, \"descricao\": \"Repasse de casacos excedentes\" }\n    ],\n    \"agendamento\": {\n        \"tipo\": \"entrega\",\n        \"data_hora\": \"2026-12-22T10:00:00-03:00\"\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6b. GET /api/transferencias",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/transferencias",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "transferencias"
+              ]
+            },
+            "description": "Esperado: 200 com a transferencia criada em 6a (direcao 'enviada' do ponto de vista da Instituicao A)."
+          },
+          "response": []
+        },
+        {
+          "name": "6c. [Instituicao B] POST .../transferencias/{{transferencia_id}}/confirmar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_b_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/transferencias/{{transferencia_id}}/confirmar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "transferencias",
+                "{{transferencia_id}}",
+                "confirmar"
+              ]
+            },
+            "description": "Confirmar e uma acao do DESTINO. Requer transferencia_id (6a). Esperado: 200, status 'confirmada'."
+          },
+          "response": []
+        },
+        {
+          "name": "6d. [Instituicao B] POST .../transferencias/{{transferencia_id}}/entregar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_b_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/transferencias/{{transferencia_id}}/entregar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "transferencias",
+                "{{transferencia_id}}",
+                "entregar"
+              ]
+            },
+            "description": "Entregar tambem e do DESTINO, exige status 'confirmada'. Esperado: 200, status 'entregue'."
+          },
+          "response": []
+        },
+        {
+          "name": "6e. [Instituicao A] POST /api/transferencias (para recusar)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/transferencias",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "transferencias"
+              ]
+            },
+            "description": "Esperado: 201.\n\nPASSO MANUAL - depois de rodar: copie `data.id` da resposta para a variavel de colecao `transferencia_recusar_id`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"instituicao_destino_id\": {{inst_b_id}},\n    \"itens\": [\n        { \"categoria_id\": {{categoria_id}}, \"quantidade\": 2, \"descricao\": \"Repasse de teste para recusa\" }\n    ],\n    \"agendamento\": {\n        \"tipo\": \"entrega\",\n        \"data_hora\": \"2026-12-23T10:00:00-03:00\"\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6f. [Instituicao B] POST .../recusar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_b_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/transferencias/{{transferencia_recusar_id}}/recusar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "transferencias",
+                "{{transferencia_recusar_id}}",
+                "recusar"
+              ]
+            },
+            "description": "Recusar e do DESTINO, exige status 'pendente'. Requer transferencia_recusar_id (6e). Esperado: 200, status 'recusada'."
+          },
+          "response": []
+        },
+        {
+          "name": "6g. [Instituicao A] POST /api/transferencias (para cancelar)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/transferencias",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "transferencias"
+              ]
+            },
+            "description": "Esperado: 201.\n\nPASSO MANUAL - depois de rodar: copie `data.id` da resposta para a variavel de colecao `transferencia_cancelar_id`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"instituicao_destino_id\": {{inst_b_id}},\n    \"itens\": [\n        { \"categoria_id\": {{categoria_id}}, \"quantidade\": 2, \"descricao\": \"Repasse de teste para cancelamento\" }\n    ],\n    \"agendamento\": {\n        \"tipo\": \"entrega\",\n        \"data_hora\": \"2026-12-24T10:00:00-03:00\"\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6h. [Instituicao A] POST .../cancelar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/transferencias/{{transferencia_cancelar_id}}/cancelar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "transferencias",
+                "{{transferencia_cancelar_id}}",
+                "cancelar"
+              ]
+            },
+            "description": "Cancelar e da ORIGEM, exige status 'pendente'. Requer transferencia_cancelar_id (6g). Esperado: 200, status 'cancelada'."
+          },
+          "response": []
+        },
+        {
+          "name": "6i. [Instituicao A] POST /api/transferencias (para nao-entregue)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/transferencias",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "transferencias"
+              ]
+            },
+            "description": "Esperado: 201.\n\nPASSO MANUAL - depois de rodar: copie `data.id` da resposta para a variavel de colecao `transferencia_nd_id`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"instituicao_destino_id\": {{inst_b_id}},\n    \"itens\": [\n        { \"categoria_id\": {{categoria_id}}, \"quantidade\": 2, \"descricao\": \"Repasse de teste para nao entregue\" }\n    ],\n    \"agendamento\": {\n        \"tipo\": \"entrega\",\n        \"data_hora\": \"2026-12-25T10:00:00-03:00\"\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6j. [Instituicao B] POST .../confirmar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_b_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/transferencias/{{transferencia_nd_id}}/confirmar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "transferencias",
+                "{{transferencia_nd_id}}",
+                "confirmar"
+              ]
+            },
+            "description": "Pre-condicao para nao-entregue. Requer transferencia_nd_id (6i). Esperado: 200."
+          },
+          "response": []
+        },
+        {
+          "name": "6k. [Instituicao B] POST .../nao-entregue",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_b_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/transferencias/{{transferencia_nd_id}}/nao-entregue",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "transferencias",
+                "{{transferencia_nd_id}}",
+                "nao-entregue"
+              ]
+            },
+            "description": "Do DESTINO, exige status 'confirmada'. Esperado: 200, status 'nao_entregue'."
+          },
+          "response": []
+        },
+        {
+          "name": "6l. [Instituicao A] POST /api/transferencias (para sugestao aceita)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/transferencias",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "transferencias"
+              ]
+            },
+            "description": "Esperado: 201.\n\nPASSO MANUAL - depois de rodar: copie `data.id` da resposta para a variavel de colecao `transferencia_sug1_id`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"instituicao_destino_id\": {{inst_b_id}},\n    \"itens\": [\n        { \"categoria_id\": {{categoria_id}}, \"quantidade\": 2, \"descricao\": \"Repasse de teste para sugestao aceita\" }\n    ],\n    \"agendamento\": {\n        \"tipo\": \"entrega\",\n        \"data_hora\": \"2026-12-26T10:00:00-03:00\"\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6m. [Instituicao B] POST .../sugerir",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_b_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/transferencias/{{transferencia_sug1_id}}/sugerir",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "transferencias",
+                "{{transferencia_sug1_id}}",
+                "sugerir"
+              ]
+            },
+            "description": "Sugerir nova data e do DESTINO. Requer transferencia_sug1_id (6l). Esperado: 200, status 'alteracao_sugerida'.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"data_hora_sugerida\": \"2026-12-27T10:00:00-03:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6n. [Instituicao A] POST .../sugestao/aceitar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/transferencias/{{transferencia_sug1_id}}/sugestao/aceitar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "transferencias",
+                "{{transferencia_sug1_id}}",
+                "sugestao",
+                "aceitar"
+              ]
+            },
+            "description": "Aceitar/recusar a sugestao e da ORIGEM. Esperado: 200, status volta para 'pendente' com a nova data."
+          },
+          "response": []
+        },
+        {
+          "name": "6o. [Instituicao A] POST /api/transferencias (para sugestao recusada)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/transferencias",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "transferencias"
+              ]
+            },
+            "description": "Esperado: 201.\n\nPASSO MANUAL - depois de rodar: copie `data.id` da resposta para a variavel de colecao `transferencia_sug2_id`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"instituicao_destino_id\": {{inst_b_id}},\n    \"itens\": [\n        { \"categoria_id\": {{categoria_id}}, \"quantidade\": 2, \"descricao\": \"Repasse de teste para sugestao recusada\" }\n    ],\n    \"agendamento\": {\n        \"tipo\": \"entrega\",\n        \"data_hora\": \"2026-12-28T10:00:00-03:00\"\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6p. [Instituicao B] POST .../sugerir",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_b_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/transferencias/{{transferencia_sug2_id}}/sugerir",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "transferencias",
+                "{{transferencia_sug2_id}}",
+                "sugerir"
+              ]
+            },
+            "description": "Requer transferencia_sug2_id (6o). Esperado: 200, status 'alteracao_sugerida'.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"data_hora_sugerida\": \"2026-12-29T10:00:00-03:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6q. [Instituicao A] POST .../sugestao/recusar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/transferencias/{{transferencia_sug2_id}}/sugestao/recusar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "transferencias",
+                "{{transferencia_sug2_id}}",
+                "sugestao",
+                "recusar"
+              ]
+            },
+            "description": "Esperado: 200, status volta para 'pendente' mantendo a data original."
+          },
+          "response": []
+        },
+        {
+          "name": "6r. [Guard] POST /api/transferencias (auto-transferencia)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/transferencias",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "transferencias"
+              ]
+            },
+            "description": "instituicao_destino_id igual a origem. Esperado: 422 (TransferenciaException).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"instituicao_destino_id\": {{inst_a_id}},\n    \"itens\": [\n        { \"categoria_id\": {{categoria_id}}, \"quantidade\": 1, \"descricao\": \"Tentativa invalida de transferir para si mesma\" }\n    ],\n    \"agendamento\": {\n        \"tipo\": \"entrega\",\n        \"data_hora\": \"2026-12-30T10:00:00-03:00\"\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6s. [Guard] POST /api/transferencias (estoque insuficiente)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/transferencias",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "transferencias"
+              ]
+            },
+            "description": "Quantidade muito acima do estoque disponivel na categoria. Esperado: 422 (TransferenciaException).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"instituicao_destino_id\": {{inst_b_id}},\n    \"itens\": [\n        { \"categoria_id\": {{categoria_id}}, \"quantidade\": 999999, \"descricao\": \"Tentativa invalida acima do estoque disponivel\" }\n    ],\n    \"agendamento\": {\n        \"tipo\": \"entrega\",\n        \"data_hora\": \"2026-12-31T10:00:00-03:00\"\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "7. Agenda - Instituicao",
+      "item": [
+        {
+          "name": "7a. [Instituicao A] GET /api/agenda",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/agenda",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "agenda"
+              ]
+            },
+            "description": "Visao consolidada: { agendamentos, horarios, transferencias } da Instituicao A. Note que este endpoint NAO envolve o wrapper 'data' (retorno manual via response()->json()). Esperado: 200."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "8. Admin - gestao de instituicoes",
+      "item": [
+        {
+          "name": "8a. [Admin] GET /api/admin/institutions (pendentes)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/institutions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "institutions"
+              ]
+            },
+            "description": "Esperado: 200. A esta altura A e B ja foram aprovadas, entao a lista deve conter apenas instituicoes ainda pendentes (ou vazia)."
+          },
+          "response": []
+        },
+        {
+          "name": "8b. POST /api/register (cria Instituicao C, para rejeitar)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "register"
+              ]
+            },
+            "description": "Instituicao dedicada ao teste de rejeicao pelo admin. Esperado: 201.\n\nPASSO MANUAL - depois de rodar: copie `token` da resposta para a variavel de colecao `inst_c_token`; copie `user.id` da resposta para a variavel de colecao `inst_c_id`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"{{inst_c_email}}\",\n    \"password\": \"{{inst_c_password}}\",\n    \"password_confirmation\": \"{{inst_c_password}}\",\n    \"tipo_usuario\": \"instituicao\",\n    \"nome_fantasia\": \"Instituicao C de Teste\",\n    \"razao_social\": \"Instituicao C de Teste LTDA\",\n    \"cnpj\": \"{{inst_c_cnpj}}\",\n    \"telefone_inst\": \"(41) 3333-6666\",\n    \"endereco_completo\": \"Rua de Teste C, 789 - Curitiba/PR\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "8c. [Admin] POST /api/admin/institutions/{{inst_c_id}}/reject",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/institutions/{{inst_c_id}}/reject",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "institutions",
+                "{{inst_c_id}}",
+                "reject"
+              ]
+            },
+            "description": "Requer inst_c_id (8b). Validado por RejectInstitutionRequest (motivo min 10 max 255 caracteres). Esperado: 200, status 'rejected'.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"motivo\": \"Documentacao cadastral incompleta para validacao.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "8d. [Guard] GET /api/admin/institutions (Doador, papel errado)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doador_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/institutions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "institutions"
+              ]
+            },
+            "description": "Esperado: 403 - CheckAdmin bloqueia porque o usuario autenticado e doador, nao admin."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "9. Guards e validacao (negativos)",
+      "item": [
+        {
+          "name": "9a. [401] GET /api/doacoes (sem Authorization)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/doacoes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "doacoes"
+              ]
+            },
+            "description": "Nenhum header Authorization enviado. Esperado: 401 JSON { message: 'Unauthenticated.' } - auth:sanctum bloqueia."
+          },
+          "response": []
+        },
+        {
+          "name": "9b. [422] POST /api/doacoes (payload invalido: sem itens e sem data)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doador_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/doacoes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "doacoes"
+              ]
+            },
+            "description": "itens vazio (min:1) e agendamento.data_hora ausente (required). Esperado: 422 com { message, errors: { itens, 'agendamento.data_hora' } }.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"instituicao_id\": {{inst_a_id}},\n    \"itens\": [],\n    \"agendamento\": {\n        \"tipo\": \"entrega\"\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "10. Logout (todos os atores)",
+      "item": [
+        {
+          "name": "10a. [Doador] POST /api/logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doador_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "logout"
+              ]
+            },
+            "description": "Esperado: 204 No Content. Revoga o token do doador."
+          },
+          "response": []
+        },
+        {
+          "name": "10b. [Doador] GET /api/me (token ja revogado)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doador_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "me"
+              ]
+            },
+            "description": "Esperado: 401 - o token do doador foi revogado em 10a."
+          },
+          "response": []
+        },
+        {
+          "name": "10c. [Instituicao A] POST /api/logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_a_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "logout"
+              ]
+            },
+            "description": "Esperado: 204 No Content."
+          },
+          "response": []
+        },
+        {
+          "name": "10d. [Instituicao B] POST /api/logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{inst_b_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "logout"
+              ]
+            },
+            "description": "Esperado: 204 No Content."
+          },
+          "response": []
+        },
+        {
+          "name": "10e. [Admin] POST /api/logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "logout"
+              ]
+            },
+            "description": "Esperado: 204 No Content."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

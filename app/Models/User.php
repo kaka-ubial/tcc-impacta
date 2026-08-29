@@ -3,28 +3,31 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\UserStatus;
+use App\Enums\UserType;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['email', 'password', 'tipo_usuario', 'status'])]
+#[Fillable(['email', 'password', 'tipo_usuario', 'status', 'motivo_suspensao'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, TwoFactorAuthenticatable;
+    use HasApiTokens, HasFactory, Notifiable, TwoFactorAuthenticatable;
 
     /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
      */
-
     protected $table = 'usuarios';
 
     protected function casts(): array
@@ -33,21 +36,33 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
+            'tipo_usuario' => UserType::class,
+            'status' => UserStatus::class,
         ];
     }
 
-    public function doador(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function doador(): HasOne
     {
         return $this->hasOne(Doador::class, 'usuario_id');
     }
 
-    public function instituicao(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function instituicao(): HasOne
     {
         return $this->hasOne(Instituicao::class, 'usuario_id');
     }
 
     public function causas(): BelongsToMany
     {
-        return $this->belongsToMany(Causa::class, 'usuario_causa'); 
+        return $this->belongsToMany(Causa::class, 'usuario_causa');
+    }
+
+    public function instituicaoId(): ?int
+    {
+        return $this->instituicao?->usuario_id;
+    }
+
+    public function doadorId(): ?int
+    {
+        return $this->doador?->usuario_id;
     }
 }

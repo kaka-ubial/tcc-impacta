@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\InstituicaoStatus;
 use App\Models\Doacao;
 use App\Models\Instituicao;
 use Illuminate\Http\Request;
@@ -52,7 +53,7 @@ class TransparenciaController extends Controller
         return Inertia::render('transparencia', [
             'doacoes'      => $doacoes,
             'filtros'      => $filtros,
-            'instituicoes' => Instituicao::where('status', 'approved')
+            'instituicoes' => Instituicao::where('status', InstituicaoStatus::Approved)
                 ->orderBy('nome_fantasia')
                 ->get(['usuario_id', 'nome_fantasia']),
             'total'        => Doacao::publicas()->count(),

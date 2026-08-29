@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\TransferenciaStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -26,6 +27,7 @@ class Transferencia extends Model
         return [
             'data_hora'          => 'datetime',
             'data_hora_sugerida' => 'datetime',
+            'status'             => TransferenciaStatus::class,
         ];
     }
 

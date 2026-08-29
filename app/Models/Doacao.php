@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\DoacaoStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,6 +24,7 @@ class Doacao extends Model
     {
         return [
             'data_entrega' => 'datetime',
+            'status' => DoacaoStatus::class,
         ];
     }
 
@@ -56,6 +58,6 @@ class Doacao extends Model
      */
     public function scopePublicas(Builder $query): Builder
     {
-        return $query->where('status', 'entregue');
+        return $query->where('status', DoacaoStatus::Entregue);
     }
 }

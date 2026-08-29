@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Enums\UserStatus;
+use App\Enums\UserType;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -28,8 +30,8 @@ class UserFactory extends Factory
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
-            'tipo_usuario' => 'doador',
-            'status' => 'ativo',
+            'tipo_usuario' => UserType::Doador,
+            'status' => UserStatus::Ativo,
             'remember_token' => Str::random(10),
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
@@ -43,7 +45,7 @@ class UserFactory extends Factory
     public function instituicao(): static
     {
         return $this->state(fn (array $attributes) => [
-            'tipo_usuario' => 'instituicao',
+            'tipo_usuario' => UserType::Instituicao,
         ]);
     }
 
