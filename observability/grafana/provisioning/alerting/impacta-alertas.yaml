@@ -1,4 +1,19 @@
 apiVersion: 1
+# Regras de alerta do Impacta, avaliadas pelo Grafana a cada minuto.
+#
+# Cada regra consulta TODOS os ambientes de uma vez e agrupa por `env`. O
+# Grafana cria uma instancia de alerta por serie retornada, entao adicionar
+# test e prod ao prometheus.yml faz os alertas passarem a cobri-los sem
+# precisar duplicar regra nenhuma aqui.
+#
+# Limitacao conhecida: o Grafana roda como servico na maquina de
+# desenvolvimento, entao as regras so sao avaliadas enquanto o PC esta
+# ligado. Nao e monitoramento 24h — para queda fora do horario de trabalho
+# seria preciso um verificador externo sempre ligado.
+#
+# noDataState: OK de proposito. "Sem dado" aqui quase sempre significa "sem
+# trafego" (os ambientes ficam ociosos), e tratar ausencia de trafego como
+# incidente geraria alarme falso o tempo todo.
 
 groups:
     - orgId: 1
@@ -14,7 +29,7 @@ groups:
             execErrState: Error
             labels:
                 severity: critical
-                servico: impacta-dev
+                app: impacta
             annotations:
                 summary: O ambiente de dev nao responde ha 10 minutos.
                 description: >-
@@ -30,7 +45,7 @@ groups:
                   datasourceUid: prometheus-impacta
                   model:
                       refId: A
-                      expr: up{job="impacta-dev"}
+                      expr: up{app="impacta"}
                       instant: false
                       range: true
                 - refId: B
@@ -65,7 +80,7 @@ groups:
             execErrState: Error
             labels:
                 severity: critical
-                servico: impacta-dev
+                app: impacta
             annotations:
                 summary: Mais de 5% das requisicoes estao respondendo 5xx.
                 description: >-
@@ -80,7 +95,7 @@ groups:
                   datasourceUid: prometheus-impacta
                   model:
                       refId: A
-                      expr: sum(rate(impacta_http_requests_total{status=~"5.."}[5m])) / sum(rate(impacta_http_requests_total[5m]))
+                      expr: sum by (env) (rate(impacta_http_requests_total{status=~"5.."}[5m])) / sum by (env) (rate(impacta_http_requests_total[5m]))
                       instant: false
                       range: true
                 - refId: B
@@ -110,7 +125,7 @@ groups:
             execErrState: Error
             labels:
                 severity: warning
-                servico: impacta-dev
+                app: impacta
             annotations:
                 summary: O p95 de latencia passou de 2 segundos por 15 minutos.
                 description: >-
@@ -126,7 +141,7 @@ groups:
                   datasourceUid: prometheus-impacta
                   model:
                       refId: A
-                      expr: histogram_quantile(0.95, sum(rate(impacta_http_request_duration_seconds_bucket[5m])) by (le))
+                      expr: histogram_quantile(0.95, sum by (env, le) (rate(impacta_http_request_duration_seconds_bucket[5m])))
                       instant: false
                       range: true
                 - refId: B
@@ -161,7 +176,7 @@ groups:
             execErrState: Error
             labels:
                 severity: warning
-                servico: impacta-dev
+                app: impacta
             annotations:
                 summary: Mais de 5 jobs falharam nos ultimos 15 minutos.
                 description: >-
@@ -176,7 +191,7 @@ groups:
                   datasourceUid: prometheus-impacta
                   model:
                       refId: A
-                      expr: sum(increase(impacta_jobs_falhados_total[15m]))
+                      expr: sum by (env) (increase(impacta_jobs_falhados_total[15m]))
                       instant: false
                       range: true
                 - refId: B
