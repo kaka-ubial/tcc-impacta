@@ -3,12 +3,6 @@ global:
   evaluation_interval: 30s
 
 scrape_configs:
-  # Um job por ambiente. O rotulo `env` e o que separa os tres nos dashboards
-  # (seletor "Ambiente") e nos alertas — sem ele os graficos somariam dev,
-  # test e prod num numero so.
-  #
-  # Cada ambiente tem seu proprio token, em arquivo separado e no .gitignore:
-  # se o de dev vazar, prod continua protegido.
   - job_name: impacta-dev
     scheme: https
     metrics_path: /metrics
@@ -20,37 +14,27 @@ scrape_configs:
           app: impacta
           env: dev
 
-  # ---------------------------------------------------------------------
-  # test e prod: descomente UM DE CADA VEZ, e so depois de:
-  #   1. a branch (release / main) ter recebido o merge com a instrumentacao
-  #   2. METRICS_TOKEN e LOG_STACK=json cadastrados no painel do Render
-  #   3. o arquivo token-test.txt / token-prod.txt criado com o token
-  #
-  # Descomentar antes disso faz o alvo ficar DOWN e o alerta "Site fora do
-  # ar" disparar sem parar — e alerta que vive vermelho e alerta ignorado.
-  # ---------------------------------------------------------------------
-  #
-  # - job_name: impacta-test
-  #   scheme: https
-  #   metrics_path: /metrics
-  #   authorization:
-  #     credentials_file: token-test.txt
-  #   static_configs:
-  #     - targets: ['tcc-impacta-test.onrender.com']
-  #       labels:
-  #         app: impacta
-  #         env: test
-  #
-  # - job_name: impacta-prod
-  #   scheme: https
-  #   metrics_path: /metrics
-  #   authorization:
-  #     credentials_file: token-prod.txt
-  #   static_configs:
-  #     - targets: ['tcc-impacta-prod.onrender.com']
-  #       labels:
-  #         app: impacta
-  #         env: prod
+  - job_name: impacta-test
+    scheme: https
+    metrics_path: /metrics
+    authorization:
+      credentials_file: token-test.txt
+    static_configs:
+      - targets: ['tcc-impacta-test.onrender.com']
+        labels:
+          app: impacta
+          env: test
+
+  - job_name: impacta-prod
+    scheme: https
+    metrics_path: /metrics
+    authorization:
+      credentials_file: token-prod.txt
+    static_configs:
+      - targets: ['tcc-impacta-prod.onrender.com']
+        labels:
+          app: impacta
+          env: prod
 
   - job_name: prometheus
     static_configs:
