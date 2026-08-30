@@ -1,6 +1,18 @@
 global:
   scrape_interval: 30s
   evaluation_interval: 30s
+  external_labels:
+    origem: prometheus-local
+
+remote_write:
+  - url: https://prometheus-prod-40-prod-sa-east-1.grafana.net/api/prom/push
+    basic_auth:
+      username: '3548186'
+      password_file: grafana-cloud-token.txt
+    queue_config:
+      max_samples_per_send: 1000
+      capacity: 10000
+      max_shards: 10
 
 scrape_configs:
   - job_name: impacta-dev
