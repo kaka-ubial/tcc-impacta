@@ -7,6 +7,9 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+$raizRepo = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
+Set-Location $raizRepo
+
 
 $temp = "$Saida.tmp"
 $dir = Split-Path $Saida -Parent
@@ -14,6 +17,10 @@ if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Ou
 
 $runs = gh run list --limit $Limite --json name,headBranch,status,conclusion,createdAt,updatedAt |
         ConvertFrom-Json
+
+if (-not $runs -or $runs.Count -eq 0) {
+    throw "gh run list nao retornou execucoes. Verifique 'gh auth status' e se $raizRepo e um repositorio com Actions."
+}
 
 $principais = @("develop", "release", "main")
 foreach ($r in $runs) {
@@ -70,7 +77,7 @@ Add-Metrica "impacta_pipeline_execucoes" `
 # --- 4. quando esta coleta rodou ------------------------------------------
 Add-Metrica "impacta_pipeline_coleta_timestamp_segundos" `
             "Momento da ultima coleta bem-sucedida" `
-            "gauge" @("impacta_pipeline_coleta_timestamp_segundos $([int][double]::Parse((Get-Date -UFormat %s)))")
+            "gauge" @("impacta_pipeline_coleta_timestamp_segundos $([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())")
 
 [IO.File]::WriteAllText($temp, ($linhas -join "`n") + "`n")
 Move-Item -Path $temp -Destination $Saida -Force
