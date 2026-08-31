@@ -17,7 +17,8 @@
         "laravel/tinker": "^3.0",
         "laravel/wayfinder": "^0.1.14",
         "promphp/prometheus_client_php": "^2.15",
-        "resend/resend-php": "^1.2"
+        "resend/resend-php": "^1.2",
+        "tomas-kulhanek/monolog-loki": "^1.0"
     },
     "require-dev": {
         "dedoc/scramble": "^0.13.42",

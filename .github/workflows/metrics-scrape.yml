@@ -1,0 +1,47 @@
+name: Scrape de metricas (Prometheus efemero)
+
+# Sem PC ligado ninguem rasca /metrics dos ambientes. Este workflow sobe um
+# Prometheus descartavel a cada execucao so pra fazer 1-2 ciclos de scrape e
+# empurrar (remote_write) pro Grafana Cloud, depois derruba tudo. Resolucao de
+# minutos, nao de segundos -- ver docs/observabilidade/LIMITACOES.md.
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    name: Raspar e enviar
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Escrever tokens
+        working-directory: observability/prometheus
+        run: |
+          printf '%s' "${{ secrets.GRAFANA_CLOUD_REMOTE_WRITE_TOKEN }}" > grafana-cloud-token.txt
+          printf '%s' "${{ secrets.METRICS_TOKEN_DEV }}" > token-dev.txt
+          printf '%s' "${{ secrets.METRICS_TOKEN_TEST }}" > token-test.txt
+          printf '%s' "${{ secrets.METRICS_TOKEN_PROD }}" > token-prod.txt
+
+      - name: Subir Prometheus efemero
+        working-directory: observability/prometheus
+        run: |
+          docker run -d --name prom-cron \
+            -v "$PWD:/etc/prometheus:ro" \
+            -v "/tmp/prom-data:/prometheus" \
+            prom/prometheus:latest \
+            --config.file=/etc/prometheus/prometheus.ci.yml \
+            --storage.tsdb.path=/prometheus
+
+      - name: Aguardar 1-2 ciclos de scrape + flush do remote_write
+        run: sleep 45
+
+      - name: Logs (diagnostico em caso de falha)
+        if: always()
+        run: docker logs prom-cron
+
+      - name: Derrubar Prometheus
+        if: always()
+        run: docker rm -f prom-cron
