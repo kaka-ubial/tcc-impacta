@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\InstituicaoStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -25,7 +26,7 @@ class Instituicao extends Model
     protected function casts(): array
     {
         return [
-            'status' => 'string',
+            'status' => InstituicaoStatus::class,
             'latitude' => 'float',
             'longitude' => 'float',
             'distancia_km' => 'float',
@@ -44,22 +45,22 @@ class Instituicao extends Model
 
     public function isPending(): bool
     {
-        return $this->status === 'pending';
+        return $this->status === InstituicaoStatus::Pending;
     }
 
     public function isApproved(): bool
     {
-        return $this->status === 'approved';
+        return $this->status === InstituicaoStatus::Approved;
     }
 
     public function isRejected(): bool
     {
-        return $this->status === 'rejected';
+        return $this->status === InstituicaoStatus::Rejected;
     }
 
     public function scopeVisible(Builder $query): void
     {
-        $query->whereIn('status', ['pending', 'approved']);
+        $query->whereIn('status', [InstituicaoStatus::Pending, InstituicaoStatus::Approved]);
     }
 
     public function causas(): BelongsToMany

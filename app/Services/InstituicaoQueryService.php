@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
+use App\Enums\UserType;
 use App\Models\Instituicao;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\Paginator;
-
 
 class InstituicaoQueryService
 {
@@ -32,7 +32,7 @@ class InstituicaoQueryService
                 $query->whereColumn('quantidade_atual', '<', 'quantidade_objetivo');
             }])
             ->visible()
-            ->when($user->tipo_usuario === 'instituicao', fn ($q) => $q
+            ->when($user->tipo_usuario === UserType::Instituicao, fn ($q) => $q
                 ->where('usuario_id', '!=', $user->instituicaoId()))
             ->when($search, fn ($q) => $q->where(function ($q) use ($search) {
                 $term = '%'.$search.'%';
@@ -57,10 +57,9 @@ class InstituicaoQueryService
             ->withQueryString();
     }
 
-
     private function originFor(User $user): ?array
     {
-        $doador = $user->tipo_usuario === 'doador' ? $user->doador : null;
+        $doador = $user->tipo_usuario === UserType::Doador ? $user->doador : null;
 
         if (! $doador || $doador->latitude === null || $doador->longitude === null) {
             return null;

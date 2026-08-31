@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\UserType;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\InstituicaoListResource;
 use App\Http\Resources\InstituicaoShowResource;
@@ -48,7 +49,7 @@ class InstituicaoController extends Controller
      */
     public function recomendadas(Request $request, RecommendationService $recommendations): JsonResponse
     {
-        abort_if($request->user()->tipo_usuario !== 'doador', 403);
+        abort_if($request->user()->tipo_usuario !== UserType::Doador, 403);
 
         // RecommendationService já devolve arrays prontos (usuario_id,
         // nome_fantasia, causas, causa_overlap, distancia_km) — não models

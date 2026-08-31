@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\InstituicaoStatus;
 use App\Models\Instituicao;
 use App\Models\User;
 use Illuminate\Support\Collection;
@@ -19,9 +20,11 @@ class RecommendationService
         $hasLocation = $doador->latitude !== null && $doador->longitude !== null;
         $hasCauses = count($donorCauseIds) > 0;
 
-
+        // Distância calculada no banco (RF4 — earthdistance no pgsql,
+        // haversine em SQL no fallback) em vez de um haversine em PHP
+        // carregado em memória — ver App\Models\Instituicao::scopeSelectDistance().
         $institutions = Instituicao::with('causas')
-            ->where('status', 'approved')
+            ->where('status', InstituicaoStatus::Approved)
             ->when(
                 $hasLocation,
                 fn ($q) => $q->selectDistance($doador->latitude, $doador->longitude)

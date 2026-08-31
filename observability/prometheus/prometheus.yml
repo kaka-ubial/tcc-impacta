@@ -1,0 +1,59 @@
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+  external_labels:
+    origem: prometheus-local
+
+remote_write:
+  - url: https://prometheus-prod-40-prod-sa-east-1.grafana.net/api/prom/push
+    basic_auth:
+      username: '3548186'
+      password_file: grafana-cloud-token.txt
+    queue_config:
+      max_samples_per_send: 1000
+      capacity: 10000
+      max_shards: 10
+
+scrape_configs:
+  - job_name: impacta-dev
+    scheme: https
+    metrics_path: /metrics
+    authorization:
+      credentials_file: token-dev.txt
+    static_configs:
+      - targets: ['tcc-impacta-dev.onrender.com']
+        labels:
+          app: impacta
+          env: dev
+
+  - job_name: impacta-test
+    scheme: https
+    metrics_path: /metrics
+    authorization:
+      credentials_file: token-test.txt
+    static_configs:
+      - targets: ['tcc-impacta-test.onrender.com']
+        labels:
+          app: impacta
+          env: test
+
+  - job_name: impacta-prod
+    scheme: https
+    metrics_path: /metrics
+    authorization:
+      credentials_file: token-prod.txt
+    static_configs:
+      - targets: ['tcc-impacta-prod.onrender.com']
+        labels:
+          app: impacta
+          env: prod
+
+  - job_name: windows
+    static_configs:
+      - targets: ['localhost:9182']
+        labels:
+          app: impacta
+
+  - job_name: prometheus
+    static_configs:
+      - targets: ['localhost:9090']

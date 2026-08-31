@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Enums\DoacaoStatus;
+use App\Enums\TransferenciaStatus;
 use App\Exceptions\TransferenciaException;
 use App\Models\ItemDoacao;
 use App\Models\ItemTransferencia;
@@ -45,7 +47,7 @@ class TransferenciaService
             $t = Transferencia::create([
                 'instituicao_origem_id' => $origemId,
                 'instituicao_destino_id' => $validated['instituicao_destino_id'],
-                'status' => 'pendente',
+                'status' => TransferenciaStatus::Pendente,
                 'data_hora' => $ag['data_hora'],
                 'tipo' => $ag['tipo'],
                 'endereco_referencia' => $ag['endereco_referencia'] ?? null,
@@ -71,10 +73,10 @@ class TransferenciaService
     public function confirmar(Transferencia $transferencia, User $destinoUser): void
     {
         abort_if($transferencia->instituicao_destino_id !== $destinoUser->instituicaoId(), 403);
-        abort_if($transferencia->status !== 'pendente', 422);
+        abort_if($transferencia->status !== TransferenciaStatus::Pendente, 422);
 
         DB::transaction(function () use ($transferencia) {
-            $transferencia->update(['status' => 'confirmada']);
+            $transferencia->update(['status' => TransferenciaStatus::Confirmada]);
 
             foreach ($transferencia->itens()->whereNotNull('necessidade_id')->with('necessidade')->get() as $item) {
                 $item->necessidade->increment('quantidade_atual', $item->quantidade);
@@ -91,9 +93,9 @@ class TransferenciaService
     public function recusar(Transferencia $transferencia, User $destinoUser): void
     {
         abort_if($transferencia->instituicao_destino_id !== $destinoUser->instituicaoId(), 403);
-        abort_if($transferencia->status !== 'pendente', 422);
+        abort_if($transferencia->status !== TransferenciaStatus::Pendente, 422);
 
-        $transferencia->update(['status' => 'recusada']);
+        $transferencia->update(['status' => TransferenciaStatus::Recusada]);
 
         Notificacao::enviar(
             $transferencia->instituicao_origem_id,
@@ -105,9 +107,9 @@ class TransferenciaService
     public function entregar(Transferencia $transferencia, User $destinoUser): void
     {
         abort_if($transferencia->instituicao_destino_id !== $destinoUser->instituicaoId(), 403);
-        abort_if($transferencia->status !== 'confirmada', 422);
+        abort_if($transferencia->status !== TransferenciaStatus::Confirmada, 422);
 
-        $transferencia->update(['status' => 'entregue']);
+        $transferencia->update(['status' => TransferenciaStatus::Entregue]);
 
         Notificacao::enviar(
             $transferencia->instituicao_origem_id,
@@ -119,13 +121,13 @@ class TransferenciaService
     public function naoEntregue(Transferencia $transferencia, User $destinoUser): void
     {
         abort_if($transferencia->instituicao_destino_id !== $destinoUser->instituicaoId(), 403);
-        abort_if($transferencia->status !== 'confirmada', 422);
+        abort_if($transferencia->status !== TransferenciaStatus::Confirmada, 422);
 
         DB::transaction(function () use ($transferencia) {
             foreach ($transferencia->itens()->whereNotNull('necessidade_id')->with('necessidade')->get() as $item) {
                 $item->necessidade->decrement('quantidade_atual', $item->quantidade);
             }
-            $transferencia->update(['status' => 'nao_entregue']);
+            $transferencia->update(['status' => TransferenciaStatus::NaoEntregue]);
         });
 
         Notificacao::enviar(
@@ -144,7 +146,7 @@ class TransferenciaService
 
         $transferencia->update([
             'data_hora_sugerida' => $validated['data_hora_sugerida'],
-            'status' => 'alteracao_sugerida',
+            'status' => TransferenciaStatus::AlteracaoSugerida,
         ]);
 
         Notificacao::enviar(
@@ -157,12 +159,12 @@ class TransferenciaService
     public function aceitarSugestao(Transferencia $transferencia, User $origemUser): void
     {
         abort_if($transferencia->instituicao_origem_id !== $origemUser->instituicaoId(), 403);
-        abort_if($transferencia->status !== 'alteracao_sugerida', 422);
+        abort_if($transferencia->status !== TransferenciaStatus::AlteracaoSugerida, 422);
 
         $transferencia->update([
             'data_hora' => $transferencia->data_hora_sugerida,
             'data_hora_sugerida' => null,
-            'status' => 'pendente',
+            'status' => TransferenciaStatus::Pendente,
         ]);
 
         Notificacao::enviar(
@@ -175,11 +177,11 @@ class TransferenciaService
     public function recusarSugestao(Transferencia $transferencia, User $origemUser): void
     {
         abort_if($transferencia->instituicao_origem_id !== $origemUser->instituicaoId(), 403);
-        abort_if($transferencia->status !== 'alteracao_sugerida', 422);
+        abort_if($transferencia->status !== TransferenciaStatus::AlteracaoSugerida, 422);
 
         $transferencia->update([
             'data_hora_sugerida' => null,
-            'status' => 'pendente',
+            'status' => TransferenciaStatus::Pendente,
         ]);
 
         Notificacao::enviar(
@@ -192,9 +194,9 @@ class TransferenciaService
     public function cancelar(Transferencia $transferencia, User $origemUser): void
     {
         abort_if($transferencia->instituicao_origem_id !== $origemUser->instituicaoId(), 403);
-        abort_if($transferencia->status !== 'pendente', 422);
+        abort_if($transferencia->status !== TransferenciaStatus::Pendente, 422);
 
-        $transferencia->update(['status' => 'cancelada']);
+        $transferencia->update(['status' => TransferenciaStatus::Cancelada]);
 
         Notificacao::enviar(
             $transferencia->instituicao_destino_id,
@@ -207,7 +209,7 @@ class TransferenciaService
     {
         $recebido = ItemDoacao::whereHas('doacao', fn ($q) => $q
             ->where('instituicao_id', $instituicaoId)
-            ->where('status', 'entregue'))
+            ->where('status', DoacaoStatus::Entregue))
             ->selectRaw('categoria_id, SUM(quantidade) as total')
             ->groupBy('categoria_id')
             ->pluck('total', 'categoria_id')
@@ -215,7 +217,7 @@ class TransferenciaService
 
         $transferido = ItemTransferencia::whereHas('transferencia', fn ($q) => $q
             ->where('instituicao_origem_id', $instituicaoId)
-            ->whereNotIn('status', ['cancelada', 'recusada']))
+            ->whereNotIn('status', [TransferenciaStatus::Cancelada, TransferenciaStatus::Recusada]))
             ->selectRaw('categoria_id, SUM(quantidade) as total')
             ->groupBy('categoria_id')
             ->pluck('total', 'categoria_id')

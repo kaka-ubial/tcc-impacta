@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Doador;
 
+use App\Enums\DoacaoStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\DoadorPerfilResource;
 use Illuminate\Http\Request;
@@ -18,7 +19,7 @@ class PerfilController extends Controller
 
         $doador->load([
             'usuario.causas',
-            'doacoes' => fn ($q) => $q->where('status', 'entregue')
+            'doacoes' => fn ($q) => $q->where('status', DoacaoStatus::Entregue)
                 ->orderBy('created_at', 'desc')
                 ->limit(10),
             'doacoes.instituicao',

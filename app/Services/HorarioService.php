@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\DoacaoStatus;
 use App\Exceptions\HorarioException;
 use App\Models\HorarioDisponivel;
 use App\Models\Instituicao;
@@ -35,7 +36,7 @@ class HorarioService
         abort_if($horario->instituicao_id !== $instituicao->usuario_id, 403);
 
         $temDoacoesAtivas = $horario->agendamentos()
-            ->whereHas('doacao', fn ($q) => $q->whereIn('status', ['pendente', 'confirmada']))
+            ->whereHas('doacao', fn ($q) => $q->whereIn('status', [DoacaoStatus::Pendente, DoacaoStatus::Confirmada]))
             ->exists();
 
         if ($temDoacoesAtivas) {

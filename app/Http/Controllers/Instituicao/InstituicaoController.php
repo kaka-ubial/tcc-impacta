@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Instituicao;
 
+use App\Enums\UserType;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\InstituicaoListResource;
 use App\Http\Resources\InstituicaoShowResource;
@@ -37,7 +38,7 @@ class InstituicaoController extends Controller
         $instituicoes = $query->search($request->user(), $filters)
             ->through(fn ($inst) => (new InstituicaoListResource($inst))->resolve($request));
 
-        $doador = $request->user()->tipo_usuario === 'doador' ? $request->user()->doador : null;
+        $doador = $request->user()->tipo_usuario === UserType::Doador ? $request->user()->doador : null;
         $isFiltering = $search !== '' || $causaId !== null || $categoriaId !== null || $raioKm !== null;
 
         return Inertia::render('instituicoes/index', [
@@ -46,7 +47,7 @@ class InstituicaoController extends Controller
             'categorias' => CategoriaItem::orderBy('nome')->get(['id', 'nome']),
             'hasLocation' => $doador !== null && $doador->latitude !== null && $doador->longitude !== null,
             'filters' => $filters,
-            'recomendacoes' => (! $isFiltering && $request->user()->tipo_usuario === 'doador')
+            'recomendacoes' => (! $isFiltering && $request->user()->tipo_usuario === UserType::Doador)
                 ? $recommendations->forDonor($request->user())
                 : [],
         ]);
@@ -66,8 +67,8 @@ class InstituicaoController extends Controller
         return Inertia::render('instituicoes/show', [
             'instituicao' => (new InstituicaoShowResource($instituicao))->resolve($request),
             'categorias' => $categorias,
-            'canTransfer' => auth()->user()->tipo_usuario === 'instituicao',
-            'estoque' => auth()->user()->tipo_usuario === 'instituicao'
+            'canTransfer' => auth()->user()->tipo_usuario === UserType::Instituicao,
+            'estoque' => auth()->user()->tipo_usuario === UserType::Instituicao
                 ? TransferenciaService::calcularEstoque(auth()->user()->instituicaoId())
                 : [],
         ]);

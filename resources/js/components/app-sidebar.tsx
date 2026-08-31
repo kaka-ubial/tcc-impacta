@@ -1,5 +1,16 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Building2, Gift, LayoutGrid, LayoutDashboard, Box, Calendar, CalendarClock, Bell, ArrowLeftRight } from 'lucide-react';
+import {
+    Building2,
+    Gift,
+    LayoutGrid,
+    LayoutDashboard,
+    Box,
+    Calendar,
+    CalendarClock,
+    Bell,
+    ArrowLeftRight,
+    Users,
+} from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -59,7 +70,7 @@ const instituicaoNavItems: NavItem[] = [
     {
         title: 'Transferências',
         href: '/instituicao/transferencias',
-        icon: ArrowLeftRight    ,
+        icon: ArrowLeftRight,
     },
 ];
 
@@ -68,6 +79,11 @@ const adminNavItems: NavItem[] = [
         title: 'Instituições Pendentes',
         href: admin.institutions.index(),
         icon: Building2,
+    },
+    {
+        title: 'Usuários',
+        href: admin.users.index(),
+        icon: Users,
     },
 ];
 
@@ -89,16 +105,17 @@ export function AppSidebar() {
             : [
                   ...baseItems,
                   {
-                      title: naoLidas > 0 ? `Notificações (${naoLidas})` : 'Notificações',
+                      title:
+                          naoLidas > 0
+                              ? `Notificações (${naoLidas})`
+                              : 'Notificações',
                       href: '/notificacoes',
                       icon: Bell,
                   },
               ];
 
     const homeHref =
-        tipo === 'instituicao'
-            ? '/instituicao/painel'
-            : instituicoesIndex();
+        tipo === 'instituicao' ? '/instituicao/painel' : instituicoesIndex();
 
     return (
         <Sidebar collapsible="icon" variant="inset">

@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Enums\AgendamentoStatus;
+use App\Enums\DoacaoStatus;
 use App\Exceptions\DoacaoException;
 use App\Models\Agendamento;
 use App\Models\Doacao;
@@ -39,7 +41,7 @@ class DoacaoService
             $doacao = Doacao::create([
                 'doador_id' => $doadorId,
                 'instituicao_id' => $validated['instituicao_id'],
-                'status' => 'pendente',
+                'status' => DoacaoStatus::Pendente,
             ]);
 
             foreach ($validated['itens'] as $item) {
@@ -75,15 +77,15 @@ class DoacaoService
     public function cancel(Doacao $doacao, User $doadorUser): void
     {
         abort_if($doacao->doador_id !== $doadorUser->doadorId(), 403);
-        abort_if(! in_array($doacao->status, ['pendente', 'confirmada']), 422);
+        abort_if(! in_array($doacao->status, [DoacaoStatus::Pendente, DoacaoStatus::Confirmada], true), 422);
 
         DB::transaction(function () use ($doacao) {
-            if ($doacao->status === 'confirmada') {
+            if ($doacao->status === DoacaoStatus::Confirmada) {
                 foreach ($doacao->itens()->whereNotNull('necessidade_id')->with('necessidade')->get() as $item) {
                     $item->necessidade->decrement('quantidade_atual', $item->quantidade);
                 }
             }
-            $doacao->update(['status' => 'cancelado']);
+            $doacao->update(['status' => DoacaoStatus::Cancelado]);
         });
 
         Notificacao::enviar(
@@ -98,12 +100,12 @@ class DoacaoService
         abort_if($doacao->doador_id !== $doadorUser->doadorId(), 403);
 
         $agendamento = $doacao->agendamento;
-        abort_if(! $agendamento || $agendamento->status !== 'alteracao_sugerida', 422);
+        abort_if(! $agendamento || $agendamento->status !== AgendamentoStatus::AlteracaoSugerida, 422);
 
         $agendamento->update([
             'data_hora' => $agendamento->data_hora_sugerida,
             'data_hora_sugerida' => null,
-            'status' => 'confirmado',
+            'status' => AgendamentoStatus::Confirmado,
         ]);
 
         Notificacao::enviar(
@@ -118,11 +120,11 @@ class DoacaoService
         abort_if($doacao->doador_id !== $doadorUser->doadorId(), 403);
 
         $agendamento = $doacao->agendamento;
-        abort_if(! $agendamento || $agendamento->status !== 'alteracao_sugerida', 422);
+        abort_if(! $agendamento || $agendamento->status !== AgendamentoStatus::AlteracaoSugerida, 422);
 
         $agendamento->update([
             'data_hora_sugerida' => null,
-            'status' => 'confirmado',
+            'status' => AgendamentoStatus::Confirmado,
         ]);
 
         Notificacao::enviar(
@@ -135,10 +137,10 @@ class DoacaoService
     public function confirm(Doacao $doacao, User $instituicaoUser): void
     {
         abort_if($doacao->instituicao_id !== $instituicaoUser->instituicaoId(), 403);
-        abort_if($doacao->status !== 'pendente', 422);
+        abort_if($doacao->status !== DoacaoStatus::Pendente, 422);
 
         DB::transaction(function () use ($doacao) {
-            $doacao->update(['status' => 'confirmada']);
+            $doacao->update(['status' => DoacaoStatus::Confirmada]);
 
             foreach ($doacao->itens()->whereNotNull('necessidade_id')->with('necessidade')->get() as $item) {
                 $item->necessidade->increment('quantidade_atual', $item->quantidade);
@@ -155,9 +157,9 @@ class DoacaoService
     public function reject(Doacao $doacao, User $instituicaoUser): void
     {
         abort_if($doacao->instituicao_id !== $instituicaoUser->instituicaoId(), 403);
-        abort_if($doacao->status !== 'pendente', 422);
+        abort_if($doacao->status !== DoacaoStatus::Pendente, 422);
 
-        $doacao->update(['status' => 'recusada']);
+        $doacao->update(['status' => DoacaoStatus::Recusada]);
 
         Notificacao::enviar(
             $doacao->doador_id,
@@ -169,9 +171,9 @@ class DoacaoService
     public function deliver(Doacao $doacao, User $instituicaoUser): void
     {
         abort_if($doacao->instituicao_id !== $instituicaoUser->instituicaoId(), 403);
-        abort_if($doacao->status !== 'confirmada', 422);
+        abort_if($doacao->status !== DoacaoStatus::Confirmada, 422);
 
-        $doacao->update(['status' => 'entregue', 'data_entrega' => now()]);
+        $doacao->update(['status' => DoacaoStatus::Entregue, 'data_entrega' => now()]);
 
         Notificacao::enviar(
             $doacao->doador_id,
@@ -183,13 +185,13 @@ class DoacaoService
     public function notDelivered(Doacao $doacao, User $instituicaoUser): void
     {
         abort_if($doacao->instituicao_id !== $instituicaoUser->instituicaoId(), 403);
-        abort_if($doacao->status !== 'confirmada', 422);
+        abort_if($doacao->status !== DoacaoStatus::Confirmada, 422);
 
         DB::transaction(function () use ($doacao) {
             foreach ($doacao->itens()->whereNotNull('necessidade_id')->with('necessidade')->get() as $item) {
                 $item->necessidade->decrement('quantidade_atual', $item->quantidade);
             }
-            $doacao->update(['status' => 'nao_entregue']);
+            $doacao->update(['status' => DoacaoStatus::NaoEntregue]);
         });
 
         Notificacao::enviar(

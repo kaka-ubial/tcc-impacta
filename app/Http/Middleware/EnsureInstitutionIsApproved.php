@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\InstituicaoStatus;
+use App\Enums\UserType;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -11,7 +13,7 @@ class EnsureInstitutionIsApproved
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
-        if (! $user || $user->tipo_usuario !== 'instituicao') {
+        if (! $user || $user->tipo_usuario !== UserType::Instituicao) {
             return $next($request);
         }
 
@@ -23,10 +25,10 @@ class EnsureInstitutionIsApproved
         $status = $user->instituicao?->status;
 
         if ($request->is('api/*')) {
-            if ($status !== 'approved') {
+            if ($status !== InstituicaoStatus::Approved) {
                 abort(403, match ($status) {
-                    'pending' => 'Sua instituição ainda está aguardando aprovação.',
-                    'rejected' => 'Sua instituição teve o cadastro rejeitado.',
+                    InstituicaoStatus::Pending => 'Sua instituição ainda está aguardando aprovação.',
+                    InstituicaoStatus::Rejected => 'Sua instituição teve o cadastro rejeitado.',
                     default => 'Sua instituição ainda não foi validada.',
                 });
             }
@@ -39,12 +41,12 @@ class EnsureInstitutionIsApproved
         }
 
         switch ($status) {
-            case 'pending':
+            case InstituicaoStatus::Pending:
                 if (! $request->routeIs('waiting-validation')) {
                     return redirect()->route('waiting-validation');
                 }
                 break;
-            case 'rejected':
+            case InstituicaoStatus::Rejected:
                 if (! $request->routeIs('rejected')) {
                     return redirect()->route('rejected');
                 }

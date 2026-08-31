@@ -29,6 +29,8 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
+          extensions: apcu
+          ini-values: apc.enable_cli=1
           tools: composer:v2
           coverage: xdebug
 
@@ -57,4 +59,4 @@ jobs:
         run: ./vendor/bin/pest
         env:
           DB_CONNECTION: sqlite
-          DB_DATABASE: ":memory:"
+          DB_DATABASE: ':memory:'

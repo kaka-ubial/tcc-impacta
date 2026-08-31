@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\InstituicaoStatus;
 use App\Models\Instituicao;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -22,7 +23,7 @@ class InstituicaoFactory extends Factory
                 ' - CEP ' . fake('pt_BR')->postcode(),
             'latitude' => fake()->latitude(-25.5, -25.3),
             'longitude' => fake()->longitude(-49.4, -49.2),
-            'status' => 'approved',
+            'status' => InstituicaoStatus::Approved,
         ];
     }
 }

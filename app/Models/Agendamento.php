@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\AgendamentoStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -24,6 +25,7 @@ class Agendamento extends Model
         return [
             'data_hora'          => 'datetime',
             'data_hora_sugerida' => 'datetime',
+            'status'             => AgendamentoStatus::class,
         ];
     }
 
