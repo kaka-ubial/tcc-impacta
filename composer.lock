@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c858846cff4a11779b0cd9b0d0220390",
+    "content-hash": "0ff78d93778d0a28bd35c1f2894a9cee",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -6387,6 +6387,61 @@
                 "source": "https://github.com/tijsverkoyen/CssToInlineStyles/tree/v2.4.0"
             },
             "time": "2025-12-02T11:56:42+00:00"
+        },
+        {
+            "name": "tomas-kulhanek/monolog-loki",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tomas-kulhanek/monolog-loki.git",
+                "reference": "2e4c1ac5be727cd5ab8e1b6cb7e19170e004b4c2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tomas-kulhanek/monolog-loki/zipball/2e4c1ac5be727cd5ab8e1b6cb7e19170e004b4c2",
+                "reference": "2e4c1ac5be727cd5ab8e1b6cb7e19170e004b4c2",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "monolog/monolog": "^3",
+                "php": ">=8.2"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^2.1",
+                "phpstan/phpstan-strict-rules": "^2.0",
+                "phpunit/phpunit": "^11.5",
+                "rector/rector": "^2.1",
+                "shipmonk/phpstan-rules": "^4.1",
+                "slevomat/coding-standard": "^8.19",
+                "squizlabs/php_codesniffer": "^3.13"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "TomasKulhanek\\Monolog\\Loki\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Loki handler for Monolog",
+            "homepage": "https://github.com/tomas-kulhanek/monolog-loki",
+            "keywords": [
+                "handler",
+                "log",
+                "logger",
+                "logging",
+                "loki",
+                "monolog",
+                "php"
+            ],
+            "support": {
+                "issues": "https://github.com/tomas-kulhanek/monolog-loki/issues",
+                "source": "https://github.com/tomas-kulhanek/monolog-loki/tree/v1.0.0"
+            },
+            "time": "2025-07-17T12:35:52+00:00"
         },
         {
             "name": "vlucas/phpdotenv",

@@ -4,8 +4,8 @@
 # a mesma imagem sobe em dev, test e prod, so trocando a tag.
 FROM php:8.4-cli
 
-RUN apt-get update && apt-get install -y libpq-dev libzip-dev unzip \
-    && docker-php-ext-install pdo_pgsql zip \
+RUN apt-get update && apt-get install -y libpq-dev libzip-dev libcurl4-openssl-dev unzip \
+    && docker-php-ext-install pdo_pgsql zip curl \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN pecl install apcu \

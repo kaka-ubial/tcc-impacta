@@ -16,11 +16,25 @@ madrugada não gera aviso e nem aparece no gráfico depois.
 virtualização na BIOS. Sem ela não há Docker Desktop nem WSL2, e portanto não há
 como subir a stack em container nem manter um agente sempre ligado.
 
-**Consequência prática:** o número de disponibilidade apurado é um limite superior
-otimista — mede apenas as horas em que houve observador.
+**Mitigação parcial:** o workflow `.github/workflows/metrics-scrape.yml` sobe um
+Prometheus descartável a cada 10 minutos (`schedule` do GitHub Actions), raspa os
+três ambientes e envia por `remote_write` pro Grafana Cloud, depois derruba tudo.
+Cobre o alerta de indisponibilidade e o painel de aplicação mesmo com o PC
+desligado, mas com resolução de ~10 minutos, não os 30 segundos do Prometheus
+local — um pico curto de erro pode passar despercebido entre duas execuções.
+Duas pegadinhas conhecidas: o GitHub desativa workflows agendados sozinho após 60
+dias sem nenhum commit no repositório, e o `docker run` puxa a imagem
+`prom/prometheus` do Docker Hub anônimo, sujeito ao rate limit (100 pulls/6h por
+IP) compartilhado com outros runners do GitHub — falhas esporádicas por isso são
+esperadas, não bug.
 
-**Como seria removida:** Grafana Cloud recebendo os dados por `remote_write`, ou um
-verificador externo sempre ligado para o alerta de indisponibilidade.
+**Consequência prática:** o número de disponibilidade apurado é um limite superior
+otimista — mede apenas as horas em que houve observador, e mesmo com o cron, picos
+menores que ~10 minutos podem não aparecer.
+
+**Como seria removida por completo:** um agente (Prometheus ou Grafana Alloy)
+rodando de verdade 24/7 em algo tipo Oracle Cloud Always Free Tier — exige criar
+conta com cartão de crédito para verificação, por isso foi adiado.
 
 ---
 
