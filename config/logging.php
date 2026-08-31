@@ -114,7 +114,7 @@ return [
             'driver' => 'monolog',
             'handler' => LokiHandler::class,
             'handler_with' => [
-                'url' => env('LOKI_URL'),
+                'endpoint' => env('LOKI_URL'),
                 'username' => env('LOKI_USERNAME'),
                 'password' => env('LOKI_PASSWORD'),
                 'labels' => ['app' => 'impacta', 'env' => env('APP_ENV')],
