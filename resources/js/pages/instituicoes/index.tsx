@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { ChevronLeft, ChevronRight, MapPin, Package, Search, Sparkles, Tag, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Filter, MapPin, MapPinned, Navigation, Package, Search, Sparkles, Tag, X } from 'lucide-react';
 import { useCallback, useRef, useState } from 'react';
 
 import { CausaBadge } from '@/components/causa-badge';
@@ -11,19 +11,41 @@ import {
     PaginationItem,
     PaginationLink,
 } from '@/components/ui/pagination';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { VerificadaBadge } from '@/components/verificada-badge';
 import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
-import type { BreadcrumbItem, Causa, InstituicaoListItem, Recomendacao, SimplePaginated } from '@/types';
 import { index as instituicoesIndex, show as instituicoesShow } from '@/routes/instituicoes';
+import { edit as editProfile } from '@/routes/profile';
+import type { BreadcrumbItem, Causa, CategoriaItem, InstituicaoListItem, Recomendacao, SimplePaginated } from '@/types';
+
+// Valor sentinela do Select para "sem filtro" — Radix Select não aceita value="".
+const SEM_FILTRO = 'all';
+
+type Filters = {
+    search: string;
+    causa: number | null;
+    categoria: number | null;
+    raio: number | null;
+};
 
 type Props = {
     instituicoes: SimplePaginated<InstituicaoListItem>;
     causas: Causa[];
-    filters: { search: string; causa: number | null };
+    categorias: CategoriaItem[];
+    hasLocation: boolean;
+    filters: Filters;
     recomendacoes: Recomendacao[];
 };
+
+// Opções de raio do filtro de proximidade (RF4), em km.
+const RAIO_OPTIONS = [5, 10, 25, 50, 100] as const;
+
+function formatDistancia(km: number): string {
+    return km < 1 ? 'menos de 1 km' : `${km} km`;
+}
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Instituições', href: instituicoesIndex() },
@@ -91,9 +113,7 @@ function RecommendationCard({ rec }: { rec: Recomendacao }) {
                     </span>
                 )}
                 {rec.distancia_km !== null && (
-                    <span>
-                        {rec.distancia_km < 1 ? 'menos de 1 km' : `${rec.distancia_km} km`}
-                    </span>
+                    <span>{formatDistancia(rec.distancia_km)}</span>
                 )}
             </div>
         </Link>
@@ -137,11 +157,15 @@ function EmptyState({ hasSearch, onClear }: { hasSearch: boolean; onClear: () =>
     );
 }
 
-export default function InstituicoesIndex({ instituicoes, causas, filters, recomendacoes }: Props) {
+export default function InstituicoesIndex({ instituicoes, causas, categorias, hasLocation, filters, recomendacoes }: Props) {
     const [search, setSearch] = useState(filters.search);
     const [searching, setSearching] = useState(false);
     const [recsOpen, setRecsOpen] = useState(true);
     const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+    // Só liga o skeleton se a navegação realmente demorar — em requests
+    // rápidas (localhost, cache) trocar a grade inteira por skeleton e
+    // voltar em poucos ms lê como um "flicker" na tela.
+    const searchingTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
     // Sincroniza o input quando o filtro muda via navegacao (padrao "adjust
     // state during render" — evita setState dentro de useEffect)
@@ -153,10 +177,12 @@ export default function InstituicoesIndex({ instituicoes, causas, filters, recom
         setSearching(false);
     }
 
-    const navigate = useCallback((params: { search?: string; causa?: number | null }) => {
+    const navigate = useCallback((params: { search?: string; causa?: number | null; categoria?: number | null; raio?: number | null }) => {
         const merged = {
             search: params.search ?? filters.search,
             causa: params.causa !== undefined ? params.causa : filters.causa,
+            categoria: params.categoria !== undefined ? params.categoria : filters.categoria,
+            raio: params.raio !== undefined ? params.raio : filters.raio,
         };
 
         const query: Record<string, string> = {};
@@ -169,6 +195,17 @@ query.search = merged.search;
 query.causa = String(merged.causa);
 }
 
+        if (merged.categoria) {
+query.categoria = String(merged.categoria);
+}
+
+        if (merged.raio) {
+query.raio = String(merged.raio);
+}
+
+        clearTimeout(searchingTimer.current);
+        searchingTimer.current = setTimeout(() => setSearching(true), 200);
+
         router.get(
             instituicoesIndex(),
             query,
@@ -177,23 +214,49 @@ query.causa = String(merged.causa);
                 preserveScroll: true,
                 replace: true,
                 only: ['instituicoes', 'filters'],
-                onSuccess: () => setSearching(false),
-                onError: () => setSearching(false),
+                onSuccess: () => {
+                    clearTimeout(searchingTimer.current);
+                    setSearching(false);
+                },
+                onError: () => {
+                    clearTimeout(searchingTimer.current);
+                    setSearching(false);
+                },
             },
         );
-    }, [filters.search, filters.causa]);
+    }, [filters.search, filters.causa, filters.categoria, filters.raio]);
 
     const handleSearch = useCallback((value: string) => {
         setSearch(value);
-        setSearching(true);
         clearTimeout(timer.current);
         timer.current = setTimeout(() => navigate({ search: value }), 300);
     }, [navigate]);
 
     const handleCausa = useCallback((id: number | null) => {
-        setSearching(true);
         navigate({ causa: id });
     }, [navigate]);
+
+    const handleCategoria = useCallback((id: number | null) => {
+        navigate({ categoria: id });
+    }, [navigate]);
+
+    const handleRaio = useCallback((km: number | null) => {
+        navigate({ raio: km });
+    }, [navigate]);
+
+    const clearItemFilters = useCallback(() => {
+        navigate({ categoria: null, raio: null });
+    }, [navigate]);
+
+    const clearAll = useCallback(() => {
+        setSearch('');
+        navigate({ search: '', causa: null, categoria: null, raio: null });
+    }, [navigate]);
+
+    const hasActiveFilters =
+        filters.search !== '' || filters.causa !== null || filters.categoria !== null || filters.raio !== null;
+
+    const itemFilterCount = (filters.categoria !== null ? 1 : 0) + (filters.raio !== null ? 1 : 0);
 
     const hasPagination =
         instituicoes.prev_page_url !== null || instituicoes.next_page_url !== null;
@@ -214,24 +277,112 @@ query.causa = String(merged.causa);
                             Encontre instituições verificadas e veja suas necessidades ativas.
                         </p>
 
-                        {/* Search */}
-                        <div className="relative mt-5 max-w-sm">
-                            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-                            <Input
-                                placeholder="Buscar por nome, cidade, causa..."
-                                className="pl-9"
-                                value={search}
-                                onChange={(e) => handleSearch(e.target.value)}
-                            />
-                            {search && (
-                                <button
-                                    className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                                    onClick={() => handleSearch('')}
-                                    aria-label="Limpar busca"
-                                >
-                                    <X className="size-3.5" />
-                                </button>
-                            )}
+                        {/* Search + filtro de item/proximidade */}
+                        <div className="mt-5 flex max-w-lg items-center gap-2">
+                            <div className="relative flex-1">
+                                <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                                <Input
+                                    placeholder="Buscar por nome, cidade, causa..."
+                                    className="pl-9"
+                                    value={search}
+                                    onChange={(e) => handleSearch(e.target.value)}
+                                />
+                                {search && (
+                                    <button
+                                        className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                        onClick={() => handleSearch('')}
+                                        aria-label="Limpar busca"
+                                    >
+                                        <X className="size-3.5" />
+                                    </button>
+                                )}
+                            </div>
+
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button variant="outline" size="icon" className="relative shrink-0" aria-label="Filtros">
+                                        <Filter className="size-4" />
+                                        {itemFilterCount > 0 && (
+                                            <span className="absolute -top-1.5 -right-1.5 flex size-4 items-center justify-center rounded-full bg-brand text-[10px] font-medium text-primary-foreground">
+                                                {itemFilterCount}
+                                            </span>
+                                        )}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent align="end" className="w-72">
+                                    <div className="flex flex-col gap-4">
+                                        <div>
+                                            <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                                                <Package className="size-3.5" />
+                                                Precisa de
+                                            </p>
+                                            <Select
+                                                value={filters.categoria !== null ? String(filters.categoria) : SEM_FILTRO}
+                                                onValueChange={(value) => handleCategoria(value === SEM_FILTRO ? null : Number(value))}
+                                            >
+                                                <SelectTrigger className="w-full">
+                                                    <SelectValue placeholder="Qualquer item" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value={SEM_FILTRO}>Qualquer item</SelectItem>
+                                                    {categorias.map((categoria) => (
+                                                        <SelectItem key={categoria.id} value={String(categoria.id)}>
+                                                            {categoria.nome}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+
+                                        <div>
+                                            <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                                                <Navigation className="size-3.5" />
+                                                Proximidade
+                                            </p>
+                                            {hasLocation ? (
+                                                <Select
+                                                    value={filters.raio !== null ? String(filters.raio) : SEM_FILTRO}
+                                                    onValueChange={(value) => handleRaio(value === SEM_FILTRO ? null : Number(value))}
+                                                >
+                                                    <SelectTrigger className="w-full">
+                                                        <SelectValue placeholder="Qualquer distância" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value={SEM_FILTRO}>Qualquer distância</SelectItem>
+                                                        {RAIO_OPTIONS.map((km) => (
+                                                            <SelectItem key={km} value={String(km)}>
+                                                                até {km} km
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            ) : (
+                                                <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
+                                                    <MapPinned className="mt-0.5 size-3.5 shrink-0" />
+                                                    <span>
+                                                        <Link href={editProfile()} className="font-medium text-brand hover:underline">
+                                                            Cadastre seu endereço
+                                                        </Link>{' '}
+                                                        para buscar perto de você.
+                                                    </span>
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        {itemFilterCount > 0 && (
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="self-start text-muted-foreground"
+                                                onClick={clearItemFilters}
+                                            >
+                                                <X className="size-3.5" />
+                                                Limpar filtros
+                                            </Button>
+                                        )}
+                                    </div>
+                                </PopoverContent>
+                            </Popover>
                         </div>
                     </div>
                 </div>
@@ -273,7 +424,7 @@ query.causa = String(merged.causa);
                     )}
 
                     {/* ── Recommendations ─────────────────────── */}
-                    {!filters.search && !filters.causa && (
+                    {!hasActiveFilters && (
                         recomendacoes.length > 0 ? (
                             <div className="mb-8">
                                 <button
@@ -325,10 +476,8 @@ query.causa = String(merged.causa);
                         </div>
                     ) : instituicoes.data.length === 0 ? (
                         <EmptyState
-                            hasSearch={!!search || filters.causa !== null}
-                            onClear={() => {
- handleSearch(''); handleCausa(null); 
-}}
+                            hasSearch={hasActiveFilters}
+                            onClear={clearAll}
                         />
                     ) : (
                         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -355,6 +504,13 @@ query.causa = String(merged.causa);
                                                     <span className="line-clamp-1">
                                                         {inst.endereco_completo}
                                                     </span>
+                                                </div>
+                                            )}
+
+                                            {inst.distancia_km != null && (
+                                                <div className="flex items-center gap-1.5 text-xs font-medium text-brand">
+                                                    <Navigation className="size-3 shrink-0" />
+                                                    {formatDistancia(inst.distancia_km)}
                                                 </div>
                                             )}
 

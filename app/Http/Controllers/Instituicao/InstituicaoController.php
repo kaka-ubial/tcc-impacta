@@ -8,6 +8,7 @@ use App\Http\Resources\InstituicaoShowResource;
 use App\Models\CategoriaItem;
 use App\Models\Causa;
 use App\Models\Instituicao;
+use App\Services\InstituicaoQueryService;
 use App\Services\RecommendationService;
 use App\Services\TransferenciaService;
 use Illuminate\Http\Request;
@@ -16,40 +17,37 @@ use Inertia\Response;
 
 class InstituicaoController extends Controller
 {
-    public function index(Request $request, RecommendationService $recommendations): Response
-    {
+    public function index(
+        Request $request,
+        InstituicaoQueryService $query,
+        RecommendationService $recommendations
+    ): Response {
         $search = $request->string('search')->trim()->value();
         $causaId = $request->integer('causa') ?: null;
+        $categoriaId = $request->integer('categoria') ?: null;
+        $raioKm = $request->integer('raio') ?: null;
 
-        $instituicoes = Instituicao::with('causas')
-            ->withCount(['necessidades as necessidades_ativas_count' => function ($query) {
-                $query->whereColumn('quantidade_atual', '<', 'quantidade_objetivo');
-            }])
-            ->visible()
-            ->when(auth()->user()->tipo_usuario === 'instituicao', fn ($q) => $q
-                ->where('usuario_id', '!=', auth()->user()->instituicaoId()))
-            ->when($search, fn ($q) => $q->where(function ($q) use ($search) {
-                $term = '%'.$search.'%';
-                $q->where('nome_fantasia', 'ilike', $term)
-                    ->orWhere('endereco_completo', 'ilike', $term)
-                    ->orWhereHas('causas', fn ($q) => $q->where('nome', 'ilike', $term));
-            }))
-            ->when($causaId, fn ($q) => $q->whereHas('causas', fn ($q) => $q->where('causas.id', $causaId)))
-            ->orderBy('nome_fantasia')
-            ->simplePaginate(12)
+        $filters = [
+            'search' => $search,
+            'causa' => $causaId,
+            'categoria' => $categoriaId,
+            'raio' => $raioKm,
+        ];
+
+        $instituicoes = $query->search($request->user(), $filters)
             ->through(fn ($inst) => (new InstituicaoListResource($inst))->resolve($request));
 
-        $isFiltering = $search !== '' || $causaId !== null;
+        $doador = $request->user()->tipo_usuario === 'doador' ? $request->user()->doador : null;
+        $isFiltering = $search !== '' || $causaId !== null || $categoriaId !== null || $raioKm !== null;
 
         return Inertia::render('instituicoes/index', [
             'instituicoes' => $instituicoes,
             'causas' => Causa::orderBy('nome')->get(['id', 'nome', 'icone']),
-            'filters' => [
-                'search' => $search,
-                'causa' => $causaId,
-            ],
-            'recomendacoes' => (! $isFiltering && auth()->user()->tipo_usuario === 'doador')
-                ? $recommendations->forDonor(auth()->user())
+            'categorias' => CategoriaItem::orderBy('nome')->get(['id', 'nome']),
+            'hasLocation' => $doador !== null && $doador->latitude !== null && $doador->longitude !== null,
+            'filters' => $filters,
+            'recomendacoes' => (! $isFiltering && $request->user()->tipo_usuario === 'doador')
+                ? $recommendations->forDonor($request->user())
                 : [],
         ]);
     }
