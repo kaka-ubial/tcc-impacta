@@ -20,21 +20,21 @@ class RecommendationService
         $hasLocation = $doador->latitude !== null && $doador->longitude !== null;
         $hasCauses = count($donorCauseIds) > 0;
 
+        // Distância calculada no banco (RF4 — earthdistance no pgsql,
+        // haversine em SQL no fallback) em vez de um haversine em PHP
+        // carregado em memória — ver App\Models\Instituicao::scopeSelectDistance().
         $institutions = Instituicao::with('causas')
             ->where('status', InstituicaoStatus::Approved)
+            ->when(
+                $hasLocation,
+                fn ($q) => $q->selectDistance($doador->latitude, $doador->longitude)
+            )
             ->get();
 
         return $institutions
-            ->map(function (Instituicao $inst) use ($donorCauseIds, $doador, $hasLocation, $hasCauses) {
-                $distanceKm = null;
-                if ($hasLocation && $inst->latitude !== null && $inst->longitude !== null) {
-                    $distanceKm = $this->haversine(
-                        $doador->latitude,
-                        $doador->longitude,
-                        $inst->latitude,
-                        $inst->longitude
-                    );
-                }
+            ->map(function (Instituicao $inst) use ($donorCauseIds, $hasCauses) {
+
+                $distanceKm = $inst->distancia_km;
 
                 if (! $hasCauses) {
                     $score = $distanceKm !== null
@@ -88,16 +88,5 @@ class RecommendationService
                 'distancia_km' => $item['distancia_km'] !== null ? round($item['distancia_km'], 1) : null,
             ])
             ->values();
-    }
-
-    private function haversine(float $lat1, float $lng1, float $lat2, float $lng2): float
-    {
-        $earthRadius = 6371;
-        $dLat = deg2rad($lat2 - $lat1);
-        $dLng = deg2rad($lng2 - $lng1);
-        $a = sin($dLat / 2) ** 2
-            + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLng / 2) ** 2;
-
-        return $earthRadius * 2 * atan2(sqrt($a), sqrt(1 - $a));
     }
 }

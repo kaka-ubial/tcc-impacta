@@ -50,6 +50,7 @@ export type InstituicaoListItem = {
     verificada: boolean;
     causas: Causa[];
     necessidades_ativas_count: number;
+    distancia_km?: number | null;
 };
 
 export type Recomendacao = {
