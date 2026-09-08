@@ -5,7 +5,8 @@ namespace App\Services;
 use App\Enums\UserType;
 use App\Models\User;
 
-class UserRedirectService {
+class UserRedirectService
+{
     public function getRedirectRoute(User $user): string
     {
         if ($user->tipo_usuario === UserType::Instituicao) {
@@ -16,10 +17,10 @@ class UserRedirectService {
             }
 
             return match (true) {
-                $instituicao->isPending()  => route('waiting-validation'),
+                $instituicao->isPending() => route('waiting-validation'),
                 $instituicao->isRejected() => route('rejected'),
                 $instituicao->isApproved() => route('instituicao.painel'),
-                default                    => route('waiting-validation'),
+                default => route('waiting-validation'),
             };
         }
 

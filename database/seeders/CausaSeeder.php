@@ -14,12 +14,12 @@ class CausaSeeder extends Seeder
     public function run(): void
     {
         $causas = [
-                ['nome' => 'Proteção Animal', 'icone' => 'paw'],
-                ['nome' => 'Educação', 'icone' => 'graduation-cap'],
-                ['nome' => 'Meio Ambiente', 'icone' => 'leaf'],
-                ['nome' => 'Saúde', 'icone' => 'heartbeat'],
-                ['nome' => 'Combate à Fome', 'icone' => 'utensils'],
-            ];
+            ['nome' => 'Proteção Animal', 'icone' => 'paw'],
+            ['nome' => 'Educação', 'icone' => 'graduation-cap'],
+            ['nome' => 'Meio Ambiente', 'icone' => 'leaf'],
+            ['nome' => 'Saúde', 'icone' => 'heartbeat'],
+            ['nome' => 'Combate à Fome', 'icone' => 'utensils'],
+        ];
 
         foreach ($causas as $causa) {
             Causa::firstOrCreate(['nome' => $causa['nome']], $causa);

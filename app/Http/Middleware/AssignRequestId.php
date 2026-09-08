@@ -11,7 +11,6 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Da um identificador unico a cada requisicao e o propaga para todos os logs
  * gerados durante ela.
- *
  */
 class AssignRequestId
 {

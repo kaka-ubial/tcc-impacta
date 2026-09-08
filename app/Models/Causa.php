@@ -10,6 +10,8 @@ class Causa extends Model
     use HasFactory;
 
     protected $table = 'causas';
+
     protected $primaryKey = 'id';
+
     protected $fillable = ['nome', 'icone'];
 }

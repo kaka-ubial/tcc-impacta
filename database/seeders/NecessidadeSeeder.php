@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\Instituicao;
 use App\Models\CategoriaItem;
+use App\Models\Instituicao;
 use App\Models\Necessidade;
+use Illuminate\Database\Seeder;
 
 class NecessidadeSeeder extends Seeder
 {
@@ -16,6 +16,7 @@ class NecessidadeSeeder extends Seeder
 
         if (empty($instituicoes) || empty($categorias)) {
             $this->command->warn('Sem instituições aprovadas ou categorias. Rode InstituicaoSeeder e CategoriaItemSeeder primeiro.');
+
             return;
         }
 
@@ -78,7 +79,9 @@ class NecessidadeSeeder extends Seeder
 
         foreach ($necessidades as $nec) {
             $catId = $categorias[$nec['categoria']] ?? null;
-            if (!$catId) continue;
+            if (! $catId) {
+                continue;
+            }
 
             $instId = $instituicoes[array_rand($instituicoes)];
 

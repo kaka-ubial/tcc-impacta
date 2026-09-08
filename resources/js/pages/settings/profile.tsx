@@ -1,6 +1,7 @@
 import { Transition } from '@headlessui/react';
 import { Form, Head, Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import DeleteUser from '@/components/delete-user';
 import { DoadorFotoUploader } from '@/components/doador-foto-uploader';
 import EnderecoCepFields from '@/components/endereco-cep-fields';
@@ -23,11 +24,10 @@ import {
     parseEnderecoCompleto,
 } from '@/lib/validators';
 import type { EnderecoFields } from '@/lib/validators';
-import type { BreadcrumbItem } from '@/types';
-import type { Causa } from '@/types/auth';
-import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import { edit } from '@/routes/profile';
 import { send } from '@/routes/verification';
+import type { BreadcrumbItem } from '@/types';
+import type { Causa } from '@/types/auth';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

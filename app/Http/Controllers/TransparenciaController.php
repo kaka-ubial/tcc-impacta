@@ -17,8 +17,8 @@ class TransparenciaController extends Controller
     {
         $filtros = $request->validate([
             'instituicao' => ['nullable', 'integer', 'exists:instituicao,usuario_id'],
-            'de'          => ['nullable', 'date'],
-            'ate'         => ['nullable', 'date', 'after_or_equal:de'],
+            'de' => ['nullable', 'date'],
+            'ate' => ['nullable', 'date', 'after_or_equal:de'],
         ]);
 
         $doacoes = Doacao::query()
@@ -37,26 +37,26 @@ class TransparenciaController extends Controller
             ->paginate(self::POR_PAGINA)
             ->withQueryString()
             ->through(fn (Doacao $doacao) => [
-                'id'           => $doacao->id,
+                'id' => $doacao->id,
                 'data_entrega' => $doacao->data_entrega?->toDateString(),
-                'instituicao'  => $doacao->instituicao?->nome_fantasia,
-                'doador'       => $doacao->doador?->exibir_em_transparencia
+                'instituicao' => $doacao->instituicao?->nome_fantasia,
+                'doador' => $doacao->doador?->exibir_em_transparencia
                     ? $doacao->doador->nome_completo
                     : null,
-                'itens'        => $doacao->itens->map(fn ($item) => [
-                    'categoria'   => $item->categoria?->nome,
-                    'descricao'   => $item->descricao,
-                    'quantidade'  => $item->quantidade,
+                'itens' => $doacao->itens->map(fn ($item) => [
+                    'categoria' => $item->categoria?->nome,
+                    'descricao' => $item->descricao,
+                    'quantidade' => $item->quantidade,
                 ])->values(),
             ]);
 
         return Inertia::render('transparencia', [
-            'doacoes'      => $doacoes,
-            'filtros'      => $filtros,
+            'doacoes' => $doacoes,
+            'filtros' => $filtros,
             'instituicoes' => Instituicao::where('status', InstituicaoStatus::Approved)
                 ->orderBy('nome_fantasia')
                 ->get(['usuario_id', 'nome_fantasia']),
-            'total'        => Doacao::publicas()->count(),
+            'total' => Doacao::publicas()->count(),
         ]);
     }
 }

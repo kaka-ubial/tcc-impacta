@@ -2,6 +2,7 @@ import { Transition } from '@headlessui/react';
 import { Form, Head } from '@inertiajs/react';
 import { ShieldCheck } from 'lucide-react';
 import { useRef, useState } from 'react';
+import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
@@ -13,10 +14,9 @@ import { useTwoFactorAuth } from '@/hooks/use-two-factor-auth';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { validatePassword } from '@/lib/validators';
-import type { BreadcrumbItem } from '@/types';
-import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
 import { edit } from '@/routes/security';
 import { disable, enable } from '@/routes/two-factor';
+import type { BreadcrumbItem } from '@/types';
 
 type Props = {
     canManageTwoFactor?: boolean;
@@ -110,9 +110,7 @@ export default function Security({
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="password">
-                                        Nova senha
-                                    </Label>
+                                    <Label htmlFor="password">Nova senha</Label>
 
                                     <PasswordInput
                                         id="password"
@@ -122,13 +120,24 @@ export default function Security({
                                         autoComplete="new-password"
                                         placeholder="Nova senha"
                                         onBlur={(e) => {
-                                            const err = e.target.value ? validatePassword(e.target.value) : '';
+                                            const err = e.target.value
+                                                ? validatePassword(
+                                                      e.target.value,
+                                                  )
+                                                : '';
                                             setPasswordClientError(err || '');
                                         }}
-                                        onChange={() => setPasswordClientError('')}
+                                        onChange={() =>
+                                            setPasswordClientError('')
+                                        }
                                     />
 
-                                    <InputError message={passwordClientError || errors.password} />
+                                    <InputError
+                                        message={
+                                            passwordClientError ||
+                                            errors.password
+                                        }
+                                    />
                                 </div>
 
                                 <div className="grid gap-2">
@@ -184,8 +193,11 @@ export default function Security({
                         {twoFactorEnabled ? (
                             <div className="flex flex-col items-start justify-start space-y-4">
                                 <p className="text-sm text-muted-foreground">
-                                    Ao ativar a autenticação em dois fatores, será solicitado um código de segurança durante o login.
-                                    Esse código pode ser obtido em um aplicativo compatível com TOTP no seu celular.
+                                    Ao ativar a autenticação em dois fatores,
+                                    será solicitado um código de segurança
+                                    durante o login. Esse código pode ser obtido
+                                    em um aplicativo compatível com TOTP no seu
+                                    celular.
                                 </p>
 
                                 <div className="relative inline">
@@ -211,8 +223,11 @@ export default function Security({
                         ) : (
                             <div className="flex flex-col items-start justify-start space-y-4">
                                 <p className="text-sm text-muted-foreground">
-                                    Ao ativar a autenticação em dois fatores, será solicitado um código de segurança durante o login.
-                                    Esse código pode ser obtido em um aplicativo compatível com TOTP no seu celular.
+                                    Ao ativar a autenticação em dois fatores,
+                                    será solicitado um código de segurança
+                                    durante o login. Esse código pode ser obtido
+                                    em um aplicativo compatível com TOTP no seu
+                                    celular.
                                 </p>
 
                                 <div>

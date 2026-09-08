@@ -6,10 +6,10 @@ use App\Models\User;
 function makeDoadorFor(User $user): Doador
 {
     return Doador::create([
-        'usuario_id'            => $user->id,
-        'nome_completo'         => 'Doador Original',
-        'cpf'                   => '529.982.247-25',
-        'telefone'              => '(11) 91234-5678',
+        'usuario_id' => $user->id,
+        'nome_completo' => 'Doador Original',
+        'cpf' => '529.982.247-25',
+        'telefone' => '(11) 91234-5678',
         'pontuacao_gamificacao' => 0,
     ]);
 }
@@ -31,11 +31,11 @@ test('profile information can be updated', function () {
     $response = $this
         ->actingAs($user)
         ->patch(route('profile.update'), [
-            'tipo_usuario'  => 'doador',
-            'email'         => 'test@example.com',
+            'tipo_usuario' => 'doador',
+            'email' => 'test@example.com',
             'nome_completo' => 'Test User',
-            'cpf'           => '529.982.247-25',
-            'telefone'      => '(11) 91234-5678',
+            'cpf' => '529.982.247-25',
+            'telefone' => '(11) 91234-5678',
         ]);
 
     $response
@@ -56,11 +56,11 @@ test('email verification status is unchanged when the email address is unchanged
     $response = $this
         ->actingAs($user)
         ->patch(route('profile.update'), [
-            'tipo_usuario'  => 'doador',
-            'email'         => $user->email,
+            'tipo_usuario' => 'doador',
+            'email' => $user->email,
             'nome_completo' => 'Test User',
-            'cpf'           => '529.982.247-25',
-            'telefone'      => '(11) 91234-5678',
+            'cpf' => '529.982.247-25',
+            'telefone' => '(11) 91234-5678',
         ]);
 
     $response

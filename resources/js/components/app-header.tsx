@@ -27,8 +27,8 @@ import { UserMenuContent } from '@/components/user-menu-content';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
-import type { BreadcrumbItem, NavItem } from '@/types';
 import { index as instituicoesIndex } from '@/routes/instituicoes';
+import type { BreadcrumbItem, NavItem } from '@/types';
 
 type Props = {
     breadcrumbs?: BreadcrumbItem[];
@@ -50,8 +50,7 @@ const instituicaoNavItems: NavItem[] = [
     },
 ];
 
-const activeItemStyles =
-    'text-foreground dark:bg-muted dark:text-foreground';
+const activeItemStyles = 'text-foreground dark:bg-muted dark:text-foreground';
 
 export function AppHeader({ breadcrumbs = [] }: Props) {
     const page = usePage();
@@ -60,8 +59,10 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
     const { isCurrentUrl, whenCurrentUrl } = useCurrentUrl();
 
     const tipo: string = auth.user.tipo_usuario;
-    const mainNavItems = tipo === 'instituicao' ? instituicaoNavItems : doadorNavItems;
-    const homeHref = tipo === 'instituicao' ? '/instituicao/painel' : instituicoesIndex();
+    const mainNavItems =
+        tipo === 'instituicao' ? instituicaoNavItems : doadorNavItems;
+    const homeHref =
+        tipo === 'instituicao' ? '/instituicao/painel' : instituicoesIndex();
 
     return (
         <>

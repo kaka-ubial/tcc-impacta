@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
             User::factory(10)
                 ->create([
                     'tipo_usuario' => 'instituicao',
-                    'status'       => 'ativo',
+                    'status' => 'ativo',
                 ])
                 ->each(function ($user) {
                     $user->instituicao()->create(

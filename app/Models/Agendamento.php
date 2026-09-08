@@ -23,9 +23,9 @@ class Agendamento extends Model
     protected function casts(): array
     {
         return [
-            'data_hora'          => 'datetime',
+            'data_hora' => 'datetime',
             'data_hora_sugerida' => 'datetime',
-            'status'             => AgendamentoStatus::class,
+            'status' => AgendamentoStatus::class,
         ];
     }
 

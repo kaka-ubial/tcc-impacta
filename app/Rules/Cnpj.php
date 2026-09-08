@@ -19,18 +19,20 @@ class Cnpj implements ValidationRule
 
         if (strlen($cnpj) !== 14) {
             $fail('CNPJ inválido');
+
             return;
         }
 
         if (preg_match('/(\d)\1{13}/', $cnpj)) {
             $fail('CNPJ inválido');
+
             return;
         }
 
         $tamanho = [12, 13];
         $multiplicadores = [
-            [5,4,3,2,9,8,7,6,5,4,3,2],
-            [6,5,4,3,2,9,8,7,6,5,4,3,2]
+            [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2],
+            [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2],
         ];
 
         for ($i = 0; $i < 2; $i++) {
@@ -43,8 +45,9 @@ class Cnpj implements ValidationRule
             $resto = $soma % 11;
             $digito = $resto < 2 ? 0 : 11 - $resto;
 
-            if ((int)$cnpj[$tamanho[$i]] !== $digito) {
+            if ((int) $cnpj[$tamanho[$i]] !== $digito) {
                 $fail('CNPJ inválido');
+
                 return;
             }
         }

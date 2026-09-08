@@ -17,18 +17,19 @@ class Instituicao extends Model
     use HasFactory;
 
     protected $table = 'instituicao';
+
     protected $primaryKey = 'usuario_id';
+
     public $incrementing = false;
 
     protected function casts(): array
     {
         return [
             'status' => InstituicaoStatus::class,
-            'latitude'           => 'float',
-            'longitude'          => 'float',
+            'latitude' => 'float',
+            'longitude' => 'float',
         ];
     }
-
 
     public function usuario(): BelongsTo
     {
@@ -60,7 +61,6 @@ class Instituicao extends Model
         $query->whereIn('status', [InstituicaoStatus::Pending, InstituicaoStatus::Approved]);
     }
 
-
     public function causas(): BelongsToMany
     {
         return $this->belongsToMany(Causa::class, 'usuario_causa', 'user_id', 'causa_id', 'usuario_id');
@@ -75,5 +75,4 @@ class Instituicao extends Model
     {
         return $this->hasMany(HorarioDisponivel::class, 'instituicao_id', 'usuario_id');
     }
-
 }

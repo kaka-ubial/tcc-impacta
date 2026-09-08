@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\Instituicao;
 use App\Models\HorarioDisponivel;
+use App\Models\Instituicao;
+use Illuminate\Database\Seeder;
 
 class HorarioDisponivelSeeder extends Seeder
 {
@@ -14,6 +14,7 @@ class HorarioDisponivelSeeder extends Seeder
 
         if (empty($instituicoes)) {
             $this->command->warn('Sem instituições aprovadas. Rode InstituicaoSeeder primeiro.');
+
             return;
         }
 

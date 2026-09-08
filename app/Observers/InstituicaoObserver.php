@@ -14,7 +14,7 @@ class InstituicaoObserver
 
     public function updating(Instituicao $instituicao): void
     {
-        if ($instituicao->isRejected() && !$instituicao->isDirty('status')) {
+        if ($instituicao->isRejected() && ! $instituicao->isDirty('status')) {
             $instituicao->status = InstituicaoStatus::Pending;
         }
     }

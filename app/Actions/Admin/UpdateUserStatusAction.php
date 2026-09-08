@@ -6,7 +6,6 @@ use App\Enums\UserStatus;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
-
 class UpdateUserStatusAction
 {
     public function execute(User $user, UserStatus $status, ?string $motivo): void

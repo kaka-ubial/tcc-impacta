@@ -32,8 +32,8 @@ class Notificacao extends Model
     {
         static::create([
             'usuario_id' => $usuarioId,
-            'titulo'     => $titulo,
-            'mensagem'   => $mensagem,
+            'titulo' => $titulo,
+            'mensagem' => $mensagem,
         ]);
     }
 }

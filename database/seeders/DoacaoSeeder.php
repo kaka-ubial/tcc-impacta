@@ -22,11 +22,11 @@ class DoacaoSeeder extends Seeder
      * são as únicas que aparecem no portal de transparência.
      */
     private const DISTRIBUICAO = [
-        'entregue'     => 34,
-        'confirmada'   => 8,
-        'pendente'     => 8,
-        'cancelado'    => 4,
-        'recusada'     => 3,
+        'entregue' => 34,
+        'confirmada' => 8,
+        'pendente' => 8,
+        'cancelado' => 4,
+        'recusada' => 3,
         'nao_entregue' => 3,
     ];
 
@@ -69,10 +69,10 @@ class DoacaoSeeder extends Seeder
             $entregueEm = $status === 'entregue' ? $criadaEm->copy()->addDays(3 + $i % 9) : null;
 
             $doacao = Doacao::create([
-                'doador_id'      => $doador->usuario_id,
+                'doador_id' => $doador->usuario_id,
                 'instituicao_id' => $instituicao->usuario_id,
-                'status'         => $status,
-                'data_entrega'   => $entregueEm,
+                'status' => $status,
+                'data_entrega' => $entregueEm,
             ]);
 
             $doacao->forceFill([
@@ -83,19 +83,19 @@ class DoacaoSeeder extends Seeder
             $this->criarItens($doacao, $categorias, $instituicao, $i);
 
             Agendamento::create([
-                'doacao_id'           => $doacao->id,
-                'data_hora'           => ($entregueEm ?? $criadaEm->copy()->addDays(4))->copy()->setTime(14, 0),
-                'tipo'                => $i % 3 === 0 ? 'coleta' : 'entrega',
+                'doacao_id' => $doacao->id,
+                'data_hora' => ($entregueEm ?? $criadaEm->copy()->addDays(4))->copy()->setTime(14, 0),
+                'tipo' => $i % 3 === 0 ? 'coleta' : 'entrega',
                 'endereco_referencia' => $i % 3 === 0 ? $doador->endereco_completo : null,
-                'status'              => in_array($status, ['entregue', 'confirmada'], true) ? 'confirmado' : 'pendente',
+                'status' => in_array($status, ['entregue', 'confirmada'], true) ? 'confirmado' : 'pendente',
             ]);
 
             if ($status === 'entregue' && $i % 2 === 0) {
                 Avaliacao::create([
                     'usuario_id' => $instituicao->usuario_id,
-                    'doacao_id'  => $doacao->id,
-                    'nota'       => 3 + $i % 3,
-                    'descricao'  => 'Doação recebida em ótimo estado. Obrigado pela contribuição!',
+                    'doacao_id' => $doacao->id,
+                    'nota' => 3 + $i % 3,
+                    'descricao' => 'Doação recebida em ótimo estado. Obrigado pela contribuição!',
                 ]);
             }
 
@@ -117,11 +117,11 @@ class DoacaoSeeder extends Seeder
                 ->first();
 
             ItemDoacao::create([
-                'doacao_id'     => $doacao->id,
+                'doacao_id' => $doacao->id,
                 'necessidade_id' => $necessidade?->id,
-                'categoria_id'  => $categoria->id,
-                'descricao'     => self::DESCRICOES[($i + $j) % count(self::DESCRICOES)],
-                'quantidade'    => 1 + ($i + $j) % 12,
+                'categoria_id' => $categoria->id,
+                'descricao' => self::DESCRICOES[($i + $j) % count(self::DESCRICOES)],
+                'quantidade' => 1 + ($i + $j) % 12,
             ]);
         }
     }
@@ -129,11 +129,11 @@ class DoacaoSeeder extends Seeder
     private function notificar(Doacao $doacao, Doador $doador, Instituicao $instituicao, string $status): void
     {
         $mensagens = [
-            'entregue'     => ['Doação concluída', $instituicao->nome_fantasia.' marcou a sua doação como entregue.'],
-            'confirmada'   => ['Doação confirmada', $instituicao->nome_fantasia.' confirmou o recebimento agendado.'],
-            'pendente'     => ['Doação registrada', 'Sua doação foi enviada para '.$instituicao->nome_fantasia.'.'],
-            'cancelado'    => ['Doação cancelada', 'A doação para '.$instituicao->nome_fantasia.' foi cancelada.'],
-            'recusada'     => ['Doação recusada', $instituicao->nome_fantasia.' não pôde aceitar esta doação.'],
+            'entregue' => ['Doação concluída', $instituicao->nome_fantasia.' marcou a sua doação como entregue.'],
+            'confirmada' => ['Doação confirmada', $instituicao->nome_fantasia.' confirmou o recebimento agendado.'],
+            'pendente' => ['Doação registrada', 'Sua doação foi enviada para '.$instituicao->nome_fantasia.'.'],
+            'cancelado' => ['Doação cancelada', 'A doação para '.$instituicao->nome_fantasia.' foi cancelada.'],
+            'recusada' => ['Doação recusada', $instituicao->nome_fantasia.' não pôde aceitar esta doação.'],
             'nao_entregue' => ['Doação não entregue', $instituicao->nome_fantasia.' registrou que a doação não chegou.'],
         ];
 
@@ -141,9 +141,9 @@ class DoacaoSeeder extends Seeder
 
         Notificacao::create([
             'usuario_id' => $doador->usuario_id,
-            'titulo'     => $titulo,
-            'mensagem'   => $mensagem,
-            'lida'       => $doacao->id % 3 === 0,
+            'titulo' => $titulo,
+            'mensagem' => $mensagem,
+            'lida' => $doacao->id % 3 === 0,
         ]);
     }
 }

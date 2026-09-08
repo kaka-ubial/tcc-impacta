@@ -26,7 +26,11 @@ export default function AppearanceToggleTab({
                 onValueChange={(v) => v && updateAppearance(v as Appearance)}
             >
                 {tabs.map(({ value, icon: Icon, label }) => (
-                    <ToggleGroupItem key={value} value={value} className="gap-1.5 px-3.5">
+                    <ToggleGroupItem
+                        key={value}
+                        value={value}
+                        className="gap-1.5 px-3.5"
+                    >
                         <Icon className="h-4 w-4" />
                         <span className="text-sm">{label}</span>
                     </ToggleGroupItem>

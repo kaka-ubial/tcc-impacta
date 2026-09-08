@@ -10,6 +10,7 @@ use Illuminate\Support\Collection;
 class RecommendationService
 {
     private const LIMIT = 6;
+
     private const MAX_DISTANCE_KM = 50;
 
     public function forDonor(User $user): Collection
@@ -35,7 +36,7 @@ class RecommendationService
                     );
                 }
 
-                if (!$hasCauses) {
+                if (! $hasCauses) {
                     $score = $distanceKm !== null
                         ? max(0, self::MAX_DISTANCE_KM - $distanceKm) / self::MAX_DISTANCE_KM * 100
                         : 0;
@@ -63,8 +64,13 @@ class RecommendationService
                 ];
             })
             ->filter(function ($item) use ($hasLocation, $hasCauses) {
-                if ($hasCauses && $item['causa_overlap'] > 0) return true;
-                if (!$hasLocation) return true;
+                if ($hasCauses && $item['causa_overlap'] > 0) {
+                    return true;
+                }
+                if (! $hasLocation) {
+                    return true;
+                }
+
                 return $item['distancia_km'] !== null && $item['distancia_km'] <= self::MAX_DISTANCE_KM;
             })
             ->sortByDesc('score')
