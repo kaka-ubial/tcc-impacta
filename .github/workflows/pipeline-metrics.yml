@@ -1,0 +1,59 @@
+name: Metricas de pipeline
+
+on:
+  workflow_run:
+    workflows: ['CI/CD', 'tests', 'linter']
+    types: [completed]
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  coletar:
+    name: Coletar e publicar
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Gerar arquivo de metricas
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p metricas
+          python3 observability/pipeline/coleta-github-actions.py metricas/github_actions.prom
+          cat metricas/github_actions.prom
+
+      - name: Servir o arquivo por HTTP
+        run: |
+          nohup python3 -m http.server 9109 --directory metricas > /dev/null 2>&1 &
+          for i in $(seq 1 10); do
+            curl -sf http://localhost:9109/github_actions.prom > /dev/null && exit 0
+            sleep 1
+          done
+          echo "::error::servidor HTTP local nao respondeu"
+          exit 1
+
+      - name: Escrever token do Grafana Cloud
+        working-directory: observability/prometheus
+        run: printf '%s' "${{ secrets.GRAFANA_CLOUD_REMOTE_WRITE_TOKEN }}" > grafana-cloud-token.txt
+
+      - name: Subir Prometheus efemero
+        working-directory: observability/prometheus
+        run: |
+          docker run -d --name prom-pipeline --network host \
+            -v "$PWD:/etc/prometheus:ro" \
+            -v "/tmp/prom-pipeline-data:/prometheus" \
+            prom/prometheus:latest \
+            --config.file=/etc/prometheus/prometheus.pipeline.yml \
+            --storage.tsdb.path=/prometheus
+
+      - name: Aguardar scrape e flush do remote_write
+        run: sleep 30
+
+      - name: Logs do Prometheus (diagnostico)
+        if: always()
+        run: docker logs prom-pipeline
+
+      - name: Derrubar Prometheus
+        if: always()
+        run: docker rm -f prom-pipeline
