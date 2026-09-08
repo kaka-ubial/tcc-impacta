@@ -17,10 +17,10 @@ class NotificacaoController extends Controller
             ->limit(100)
             ->get()
             ->map(fn (Notificacao $n) => [
-                'id'        => $n->id,
-                'titulo'    => $n->titulo,
-                'mensagem'  => $n->mensagem,
-                'lida'      => $n->lida,
+                'id' => $n->id,
+                'titulo' => $n->titulo,
+                'mensagem' => $n->mensagem,
+                'lida' => $n->lida,
                 'criado_em' => $n->created_at->toIso8601String(),
             ]);
 

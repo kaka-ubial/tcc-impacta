@@ -18,7 +18,12 @@ type Props = {
     tem_horarios: boolean;
 };
 
-export default function Index({ categorias, necessidades, necessidades_count, tem_horarios }: Props) {
+export default function Index({
+    categorias,
+    necessidades,
+    necessidades_count,
+    tem_horarios,
+}: Props) {
     const [open, setOpen] = useState(false);
     const [editing, setEditing] = useState<any | null>(null);
 
@@ -27,13 +32,12 @@ export default function Index({ categorias, necessidades, necessidades_count, te
             <Head title="Minhas Necessidades" />
 
             <div className="flex flex-col gap-6 p-6">
-
                 <div className="flex items-center justify-between">
                     <div className="flex flex-col">
                         <h1 className="text-2xl font-semibold">
                             Minhas Necessidades
                         </h1>
-                        <span className="text-muted-foreground text-sm">
+                        <span className="text-sm text-muted-foreground">
                             {necessidades_count} cadastradas
                         </span>
                     </div>
@@ -50,9 +54,12 @@ export default function Index({ categorias, necessidades, necessidades_count, te
                 </div>
 
                 {!tem_horarios && (
-                    <div className="border-pending/30 bg-pending/10 rounded-lg border px-4 py-3 text-sm">
+                    <div className="rounded-lg border border-pending/30 bg-pending/10 px-4 py-3 text-sm">
                         Cadastre ao menos um{' '}
-                        <Link href="/instituicao/horarios" className="font-medium underline">
+                        <Link
+                            href="/instituicao/horarios"
+                            className="font-medium underline"
+                        >
                             horário disponível
                         </Link>{' '}
                         antes de criar necessidades.
@@ -67,7 +74,7 @@ export default function Index({ categorias, necessidades, necessidades_count, te
                 />
 
                 {necessidades.length === 0 ? (
-                    <div className="text-muted-foreground border border-dashed rounded-xl py-16 text-center">
+                    <div className="rounded-xl border border-dashed py-16 text-center text-muted-foreground">
                         Nenhuma necessidade cadastrada ainda.
                     </div>
                 ) : (

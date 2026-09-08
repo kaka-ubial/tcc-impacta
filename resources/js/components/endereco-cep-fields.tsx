@@ -2,19 +2,14 @@ import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import {
-    maskCep,
-    fetchCep
-    
-} from '@/lib/validators';
-import type {EnderecoFields} from '@/lib/validators';
+import { maskCep, fetchCep } from '@/lib/validators';
+import type { EnderecoFields } from '@/lib/validators';
 
 type Props = {
     value: EnderecoFields;
     onChange: (fields: EnderecoFields) => void;
     errors?: Partial<Record<keyof EnderecoFields | 'cep', string>>;
 };
-
 
 export default function EnderecoCepFields({ value, onChange, errors }: Props) {
     const [loading, setLoading] = useState(false);
@@ -29,8 +24,8 @@ export default function EnderecoCepFields({ value, onChange, errors }: Props) {
 
         if (digits.length !== 8) {
             if (digits.length > 0) {
-setCepError('CEP deve ter 8 dígitos');
-}
+                setCepError('CEP deve ter 8 dígitos');
+            }
 
             return;
         }
@@ -106,7 +101,9 @@ setCepError('CEP deve ter 8 dígitos');
                     )}
                 </div>
                 {(cepError || errors?.cep) && (
-                    <span className="text-destructive text-xs">{cepError || errors?.cep}</span>
+                    <span className="text-xs text-destructive">
+                        {cepError || errors?.cep}
+                    </span>
                 )}
             </div>
 
@@ -120,7 +117,9 @@ setCepError('CEP deve ter 8 dígitos');
                     readOnly={!!value.logradouro && loading}
                 />
                 {errors?.logradouro && (
-                    <span className="text-destructive text-xs">{errors.logradouro}</span>
+                    <span className="text-xs text-destructive">
+                        {errors.logradouro}
+                    </span>
                 )}
             </div>
 
@@ -134,7 +133,9 @@ setCepError('CEP deve ter 8 dígitos');
                         placeholder="123"
                     />
                     {errors?.numero && (
-                        <span className="text-destructive text-xs">{errors.numero}</span>
+                        <span className="text-xs text-destructive">
+                            {errors.numero}
+                        </span>
                     )}
                 </div>
                 <div className="flex flex-col gap-1">
@@ -158,7 +159,9 @@ setCepError('CEP deve ter 8 dígitos');
                     readOnly={!!value.bairro && loading}
                 />
                 {errors?.bairro && (
-                    <span className="text-destructive text-xs">{errors.bairro}</span>
+                    <span className="text-xs text-destructive">
+                        {errors.bairro}
+                    </span>
                 )}
             </div>
 
@@ -173,7 +176,9 @@ setCepError('CEP deve ter 8 dígitos');
                         readOnly={!!value.cidade && loading}
                     />
                     {errors?.cidade && (
-                        <span className="text-destructive text-xs">{errors.cidade}</span>
+                        <span className="text-xs text-destructive">
+                            {errors.cidade}
+                        </span>
                     )}
                 </div>
                 <div className="flex flex-col gap-1">
@@ -181,13 +186,20 @@ setCepError('CEP deve ter 8 dígitos');
                     <Input
                         id="uf"
                         value={value.uf}
-                        onChange={(e) => update('uf', e.target.value.toUpperCase().slice(0, 2))}
+                        onChange={(e) =>
+                            update(
+                                'uf',
+                                e.target.value.toUpperCase().slice(0, 2),
+                            )
+                        }
                         placeholder="UF"
                         maxLength={2}
                         readOnly={!!value.uf && loading}
                     />
                     {errors?.uf && (
-                        <span className="text-destructive text-xs">{errors.uf}</span>
+                        <span className="text-xs text-destructive">
+                            {errors.uf}
+                        </span>
                     )}
                 </div>
             </div>

@@ -2,10 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Necessidade;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use App\Models\Necessidade; 
 
 class CheckNecessidadeOwnership
 {
@@ -21,7 +21,7 @@ class CheckNecessidadeOwnership
         if ($necessidade->instituicao_id !== $request->user()->instituicaoId()) {
             abort(403);
         }
-        
+
         $request->attributes->set('necessidade', $necessidade);
 
         return $next($request);

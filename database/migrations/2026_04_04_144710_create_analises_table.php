@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('analises', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('instituicao_id')->references('usuario_id') ->on('instituicao')->onDelete('cascade');            
-            $table->foreignId('admin_id')->references('id') ->on('usuarios')->onDelete('cascade');            
+            $table->foreignId('instituicao_id')->references('usuario_id')->on('instituicao')->onDelete('cascade');
+            $table->foreignId('admin_id')->references('id')->on('usuarios')->onDelete('cascade');
             $table->enum('status', ['approved', 'pending', 'rejected']);
             $table->text('observacoes')->nullable();
             $table->timestamps();

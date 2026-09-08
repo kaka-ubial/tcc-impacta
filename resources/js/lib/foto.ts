@@ -3,7 +3,11 @@ export function fotoUrl(path: string | null | undefined): string | undefined {
         return undefined;
     }
 
-    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('/')) {
+    if (
+        path.startsWith('http://') ||
+        path.startsWith('https://') ||
+        path.startsWith('/')
+    ) {
         return path;
     }
 

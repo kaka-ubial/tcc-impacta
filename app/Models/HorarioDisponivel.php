@@ -23,7 +23,7 @@ class HorarioDisponivel extends Model
     {
         return [
             'dia_semana' => 'integer',
-            'ativo'      => 'boolean',
+            'ativo' => 'boolean',
         ];
     }
 

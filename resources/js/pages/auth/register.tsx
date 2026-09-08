@@ -1,7 +1,7 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { Building2, Check, Heart, LocateFixed, UserRound } from 'lucide-react';
-import {  useEffect, useRef, useState } from 'react';
-import type {FormEvent} from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { FormEvent } from 'react';
 
 import EnderecoCepFields from '@/components/endereco-cep-fields';
 import InputError from '@/components/input-error';
@@ -13,11 +13,14 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
 import {
-    maskCpf, maskCnpj, maskPhone,
-    runValidation, rules,
-    buildEnderecoCompleto 
+    maskCpf,
+    maskCnpj,
+    maskPhone,
+    runValidation,
+    rules,
+    buildEnderecoCompleto,
 } from '@/lib/validators';
-import type {EnderecoFields} from '@/lib/validators';
+import type { EnderecoFields } from '@/lib/validators';
 import { home, login } from '@/routes';
 import { store } from '@/routes/register';
 
@@ -64,8 +67,8 @@ function BrandPanel() {
 
     useEffect(() => {
         if (paused) {
-return;
-}
+            return;
+        }
 
         const timer = setInterval(() => {
             setCurrent((c) => (c + 1) % brandSlides.length);
@@ -92,14 +95,16 @@ return;
                     <div
                         key={i}
                         className={cn(
-                            'absolute inset-0 flex flex-col justify-center px-10 xl:px-14 transition-opacity duration-700 ease-out',
-                            i === current ? 'opacity-100' : 'opacity-0 pointer-events-none',
+                            'absolute inset-0 flex flex-col justify-center px-10 transition-opacity duration-700 ease-out xl:px-14',
+                            i === current
+                                ? 'opacity-100'
+                                : 'pointer-events-none opacity-0',
                         )}
                     >
-                        <p className="text-[0.625rem] font-semibold uppercase tracking-[0.16em] text-primary-foreground/50">
+                        <p className="text-[0.625rem] font-semibold tracking-[0.16em] text-primary-foreground/50 uppercase">
                             {slide.eyebrow}
                         </p>
-                        <h2 className="font-display mt-3 text-3xl font-bold leading-tight text-primary-foreground xl:text-4xl">
+                        <h2 className="mt-3 font-display text-3xl leading-tight font-bold text-primary-foreground xl:text-4xl">
                             {slide.heading}
                         </h2>
                         {'body' in slide && (
@@ -110,7 +115,10 @@ return;
                         {'bullets' in slide && (
                             <ul className="mt-5 flex flex-col gap-3">
                                 {slide.bullets.map((b, j) => (
-                                    <li key={j} className="flex items-start gap-3 text-sm text-primary-foreground/80">
+                                    <li
+                                        key={j}
+                                        className="flex items-start gap-3 text-sm text-primary-foreground/80"
+                                    >
                                         <span className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full bg-white/20">
                                             <span className="size-1.5 rounded-full bg-white" />
                                         </span>
@@ -132,7 +140,9 @@ return;
                         aria-label={`Slide ${i + 1}`}
                         className={cn(
                             'h-1.5 rounded-full transition-all duration-300 ease-out',
-                            i === current ? 'w-6 bg-white' : 'w-1.5 bg-white/30 hover:bg-white/50',
+                            i === current
+                                ? 'w-6 bg-white'
+                                : 'w-1.5 bg-white/30 hover:bg-white/50',
                         )}
                     />
                 ))}
@@ -149,7 +159,7 @@ function StepIndicator({ step }: { step: Step }) {
     return (
         <div className="relative mb-8 flex items-start justify-between">
             {/* Track */}
-            <div className="absolute top-4 left-4 right-4 h-px bg-border" />
+            <div className="absolute top-4 right-4 left-4 h-px bg-border" />
             {/* Progress fill */}
             <div
                 className="absolute top-4 left-4 h-px bg-brand transition-all duration-500 ease-out"
@@ -161,21 +171,31 @@ function StepIndicator({ step }: { step: Step }) {
                 const active = step === n;
 
                 return (
-                    <div key={n} className="relative z-10 flex flex-col items-center gap-1.5">
+                    <div
+                        key={n}
+                        className="relative z-10 flex flex-col items-center gap-1.5"
+                    >
                         <div
                             className={cn(
                                 'flex size-8 items-center justify-center rounded-full border-2 bg-warm-neutral text-xs font-bold transition-all duration-300',
-                                done && 'border-brand bg-brand text-primary-foreground',
+                                done &&
+                                    'border-brand bg-brand text-primary-foreground',
                                 active && 'border-brand text-brand',
-                                !active && !done && 'border-border text-muted-foreground/30',
+                                !active &&
+                                    !done &&
+                                    'border-border text-muted-foreground/30',
                             )}
                         >
                             {done ? <Check className="size-3.5" /> : n}
                         </div>
                         <span
                             className={cn(
-                                'text-center text-[0.5625rem] font-semibold uppercase tracking-[0.08em] transition-colors duration-200',
-                                active ? 'text-brand' : done ? 'text-muted-foreground' : 'text-muted-foreground/30',
+                                'text-center text-[0.5625rem] font-semibold tracking-[0.08em] uppercase transition-colors duration-200',
+                                active
+                                    ? 'text-brand'
+                                    : done
+                                      ? 'text-muted-foreground'
+                                      : 'text-muted-foreground/30',
                             )}
                         >
                             {label}
@@ -192,32 +212,43 @@ function StepIndicator({ step }: { step: Step }) {
 export default function Register({ causas }: { causas: any[] }) {
     const [step, setStep] = useState<Step>(1);
     const [tipo, setTipo] = useState<TipoUsuario>(null);
-    const [clientErrors, setClientErrors] = useState<Record<string, string>>({});
+    const [clientErrors, setClientErrors] = useState<Record<string, string>>(
+        {},
+    );
     const [endereco, setEndereco] = useState<EnderecoFields>({
-        cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', uf: '',
+        cep: '',
+        logradouro: '',
+        numero: '',
+        complemento: '',
+        bairro: '',
+        cidade: '',
+        uf: '',
     });
 
-    const [geoStatus, setGeoStatus] = useState<'idle' | 'loading' | 'granted' | 'denied'>('idle');
+    const [geoStatus, setGeoStatus] = useState<
+        'idle' | 'loading' | 'granted' | 'denied'
+    >('idle');
     const geoAttempted = useRef(false);
 
-    const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
-        email: '',
-        password: '',
-        password_confirmation: '',
-        tipo_usuario: '' as 'doador' | 'instituicao' | '',
-        nome_completo: '',
-        cpf: '',
-        telefone: '',
-        nome_fantasia: '',
-        razao_social: '',
-        cnpj: '',
-        telefone_inst: '',
-        endereco_completo: '',
-        geocoding_query: '',
-        latitude: null as number | null,
-        longitude: null as number | null,
-        causas_apoiadas: [] as number[],
-    });
+    const { data, setData, post, processing, errors, reset, clearErrors } =
+        useForm({
+            email: '',
+            password: '',
+            password_confirmation: '',
+            tipo_usuario: '' as 'doador' | 'instituicao' | '',
+            nome_completo: '',
+            cpf: '',
+            telefone: '',
+            nome_fantasia: '',
+            razao_social: '',
+            cnpj: '',
+            telefone_inst: '',
+            endereco_completo: '',
+            geocoding_query: '',
+            latitude: null as number | null,
+            longitude: null as number | null,
+            causas_apoiadas: [] as number[],
+        });
 
     function handleTipo(t: 'doador' | 'instituicao') {
         setTipo(t);
@@ -228,16 +259,26 @@ export default function Register({ causas }: { causas: any[] }) {
         const current = data.causas_apoiadas;
         setData(
             'causas_apoiadas',
-            current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
+            current.includes(id)
+                ? current.filter((item) => item !== id)
+                : [...current, id],
         );
     }
 
     function handleStepOne() {
         const errs = runValidation(
-            { password: data.password, password_confirmation: data.password_confirmation },
+            {
+                password: data.password,
+                password_confirmation: data.password_confirmation,
+            },
             {
                 password: [rules.password()],
-                password_confirmation: [() => data.password !== data.password_confirmation ? 'As senhas não coincidem' : null],
+                password_confirmation: [
+                    () =>
+                        data.password !== data.password_confirmation
+                            ? 'As senhas não coincidem'
+                            : null,
+                ],
             },
         );
 
@@ -257,7 +298,13 @@ export default function Register({ causas }: { causas: any[] }) {
 
     function handleEnderecoChange(fields: EnderecoFields) {
         setEndereco(fields);
-        const geocodingQuery = [fields.logradouro, fields.numero, fields.cidade, fields.uf, 'Brasil']
+        const geocodingQuery = [
+            fields.logradouro,
+            fields.numero,
+            fields.cidade,
+            fields.uf,
+            'Brasil',
+        ]
             .filter(Boolean)
             .join(', ');
         setData((prev) => ({
@@ -271,14 +318,18 @@ export default function Register({ causas }: { causas: any[] }) {
 
     function handleGeolocate() {
         if (!navigator.geolocation || geoAttempted.current) {
-return;
-}
+            return;
+        }
 
         geoAttempted.current = true;
         setGeoStatus('loading');
         navigator.geolocation.getCurrentPosition(
             (pos) => {
-                setData((prev) => ({ ...prev, latitude: pos.coords.latitude, longitude: pos.coords.longitude }));
+                setData((prev) => ({
+                    ...prev,
+                    latitude: pos.coords.latitude,
+                    longitude: pos.coords.longitude,
+                }));
                 setGeoStatus('granted');
             },
             () => setGeoStatus('denied'),
@@ -307,8 +358,12 @@ return;
     };
 
     function validateStep3(): boolean {
-        const fieldRules = tipo === 'doador' ? step3Rules.doador : step3Rules.instituicao;
-        const fieldData = { ...data, ...endereco } as unknown as Record<string, string>;
+        const fieldRules =
+            tipo === 'doador' ? step3Rules.doador : step3Rules.instituicao;
+        const fieldData = { ...data, ...endereco } as unknown as Record<
+            string,
+            string
+        >;
         const errs = runValidation(fieldData, fieldRules);
         setClientErrors(errs);
 
@@ -317,8 +372,8 @@ return;
 
     function nextStep() {
         if (step === 3 && !validateStep3()) {
-return;
-}
+            return;
+        }
 
         setStep((s) => (s < 4 ? ((s + 1) as Step) : s));
     }
@@ -341,7 +396,6 @@ return;
 
             {/* ── Left — Form column ──────────────────────── */}
             <div className="flex flex-col bg-warm-neutral lg:overflow-y-auto">
-
                 {/* Logo bar */}
                 <header className="flex h-14 shrink-0 items-center px-6 lg:px-10">
                     <Link
@@ -356,9 +410,8 @@ return;
                 </header>
 
                 {/* Form area */}
-                <div className="flex flex-col px-6 pb-12 pt-6 lg:px-10 lg:pt-8">
+                <div className="flex flex-col px-6 pt-6 pb-12 lg:px-10 lg:pt-8">
                     <div className="mx-auto w-full max-w-md">
-
                         {/* Heading */}
                         <div className="mb-8">
                             <h1 className="font-display text-2xl font-bold text-foreground md:text-3xl">
@@ -374,12 +427,14 @@ return;
 
                         {/* Form content */}
                         <form onSubmit={submit} className="flex flex-col gap-5">
-
                             {/* ── Step 1 — Credenciais ── */}
                             {step === 1 && (
                                 <div className="flex flex-col gap-5">
                                     <div className="flex flex-col gap-1.5">
-                                        <Label htmlFor="email" className="text-sm font-medium">
+                                        <Label
+                                            htmlFor="email"
+                                            className="text-sm font-medium"
+                                        >
                                             E-mail
                                         </Label>
                                         <Input
@@ -389,7 +444,9 @@ return;
                                             autoFocus
                                             autoComplete="email"
                                             value={data.email}
-                                            onChange={(e) => setData('email', e.target.value)}
+                                            onChange={(e) =>
+                                                setData('email', e.target.value)
+                                            }
                                             placeholder="seu@email.com"
                                             className="h-11"
                                         />
@@ -397,7 +454,10 @@ return;
                                     </div>
 
                                     <div className="flex flex-col gap-1.5">
-                                        <Label htmlFor="password" className="text-sm font-medium">
+                                        <Label
+                                            htmlFor="password"
+                                            className="text-sm font-medium"
+                                        >
                                             Senha
                                         </Label>
                                         <PasswordInput
@@ -405,14 +465,27 @@ return;
                                             required
                                             autoComplete="new-password"
                                             value={data.password}
-                                            onChange={(e) => setData('password', e.target.value)}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'password',
+                                                    e.target.value,
+                                                )
+                                            }
                                             placeholder="Crie uma senha"
                                         />
-                                        <InputError message={clientErrors.password || errors.password} />
+                                        <InputError
+                                            message={
+                                                clientErrors.password ||
+                                                errors.password
+                                            }
+                                        />
                                     </div>
 
                                     <div className="flex flex-col gap-1.5">
-                                        <Label htmlFor="password_confirmation" className="text-sm font-medium">
+                                        <Label
+                                            htmlFor="password_confirmation"
+                                            className="text-sm font-medium"
+                                        >
                                             Confirmar senha
                                         </Label>
                                         <PasswordInput
@@ -420,17 +493,32 @@ return;
                                             required
                                             autoComplete="new-password"
                                             value={data.password_confirmation}
-                                            onChange={(e) => setData('password_confirmation', e.target.value)}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'password_confirmation',
+                                                    e.target.value,
+                                                )
+                                            }
                                             placeholder="Repita a senha"
                                         />
-                                        <InputError message={clientErrors.password_confirmation || errors.password_confirmation} />
+                                        <InputError
+                                            message={
+                                                clientErrors.password_confirmation ||
+                                                errors.password_confirmation
+                                            }
+                                        />
                                     </div>
 
                                     <Button
                                         type="button"
                                         className="mt-1 h-11 w-full font-semibold"
                                         onClick={handleStepOne}
-                                        disabled={processing || !data.email || !data.password || !data.password_confirmation}
+                                        disabled={
+                                            processing ||
+                                            !data.email ||
+                                            !data.password ||
+                                            !data.password_confirmation
+                                        }
                                     >
                                         {processing && <Spinner />}
                                         Continuar
@@ -459,46 +547,56 @@ return;
                                                     desc: 'Cadastre sua instituição e receba doações da comunidade.',
                                                 },
                                             ] as const
-                                        ).map(({ value, id, Icon, title, desc }) => (
-                                            <label
-                                                key={value}
-                                                htmlFor={id}
-                                                className={cn(
-                                                    'flex cursor-pointer flex-col gap-4 rounded-2xl border-2 p-5 transition-all duration-150',
-                                                    tipo === value
-                                                        ? 'border-brand bg-brand/[0.06]'
-                                                        : 'border-border bg-card hover:border-brand/40',
-                                                )}
-                                            >
-                                                <input
-                                                    type="radio"
-                                                    id={id}
-                                                    name="tipo_usuario"
-                                                    value={value}
-                                                    className="sr-only"
-                                                    onChange={() => handleTipo(value)}
-                                                    checked={tipo === value}
-                                                />
-                                                <div
+                                        ).map(
+                                            ({
+                                                value,
+                                                id,
+                                                Icon,
+                                                title,
+                                                desc,
+                                            }) => (
+                                                <label
+                                                    key={value}
+                                                    htmlFor={id}
                                                     className={cn(
-                                                        'flex size-12 items-center justify-center rounded-xl transition-colors duration-150',
+                                                        'flex cursor-pointer flex-col gap-4 rounded-2xl border-2 p-5 transition-all duration-150',
                                                         tipo === value
-                                                            ? 'bg-brand/15 text-brand'
-                                                            : 'bg-muted text-muted-foreground',
+                                                            ? 'border-brand bg-brand/[0.06]'
+                                                            : 'border-border bg-card hover:border-brand/40',
                                                     )}
                                                 >
-                                                    <Icon className="size-6" />
-                                                </div>
-                                                <div>
-                                                    <p className="text-sm font-semibold text-foreground">
-                                                        {title}
-                                                    </p>
-                                                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                                                        {desc}
-                                                    </p>
-                                                </div>
-                                            </label>
-                                        ))}
+                                                    <input
+                                                        type="radio"
+                                                        id={id}
+                                                        name="tipo_usuario"
+                                                        value={value}
+                                                        className="sr-only"
+                                                        onChange={() =>
+                                                            handleTipo(value)
+                                                        }
+                                                        checked={tipo === value}
+                                                    />
+                                                    <div
+                                                        className={cn(
+                                                            'flex size-12 items-center justify-center rounded-xl transition-colors duration-150',
+                                                            tipo === value
+                                                                ? 'bg-brand/15 text-brand'
+                                                                : 'bg-muted text-muted-foreground',
+                                                        )}
+                                                    >
+                                                        <Icon className="size-6" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-semibold text-foreground">
+                                                            {title}
+                                                        </p>
+                                                        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                                                            {desc}
+                                                        </p>
+                                                    </div>
+                                                </label>
+                                            ),
+                                        )}
                                     </div>
                                     <InputError message={errors.tipo_usuario} />
                                     <div className="flex gap-3">
@@ -526,7 +624,10 @@ return;
                             {step === 3 && tipo === 'doador' && (
                                 <div className="flex flex-col gap-5">
                                     <div className="flex flex-col gap-1.5">
-                                        <Label htmlFor="nome_completo" className="text-sm font-medium">
+                                        <Label
+                                            htmlFor="nome_completo"
+                                            className="text-sm font-medium"
+                                        >
                                             Nome completo
                                         </Label>
                                         <Input
@@ -535,52 +636,91 @@ return;
                                             autoFocus
                                             autoComplete="name"
                                             value={data.nome_completo}
-                                            onChange={(e) => setData('nome_completo', e.target.value)}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'nome_completo',
+                                                    e.target.value,
+                                                )
+                                            }
                                             placeholder="Seu nome completo"
                                             className="h-11"
                                         />
-                                        <InputError message={clientErrors.nome_completo || errors.nome_completo} />
+                                        <InputError
+                                            message={
+                                                clientErrors.nome_completo ||
+                                                errors.nome_completo
+                                            }
+                                        />
                                     </div>
 
                                     <div className="flex flex-col gap-1.5">
-                                        <Label htmlFor="cpf" className="text-sm font-medium">
+                                        <Label
+                                            htmlFor="cpf"
+                                            className="text-sm font-medium"
+                                        >
                                             CPF
                                         </Label>
                                         <Input
                                             id="cpf"
                                             type="text"
                                             value={data.cpf}
-                                            onChange={(e) => setData('cpf', maskCpf(e.target.value))}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'cpf',
+                                                    maskCpf(e.target.value),
+                                                )
+                                            }
                                             placeholder="000.000.000-00"
                                             maxLength={14}
                                             className="h-11"
                                         />
-                                        <InputError message={clientErrors.cpf || errors.cpf} />
+                                        <InputError
+                                            message={
+                                                clientErrors.cpf || errors.cpf
+                                            }
+                                        />
                                     </div>
 
                                     <div className="flex flex-col gap-1.5">
-                                        <Label htmlFor="telefone" className="text-sm font-medium">
+                                        <Label
+                                            htmlFor="telefone"
+                                            className="text-sm font-medium"
+                                        >
                                             Telefone
                                         </Label>
                                         <Input
                                             id="telefone"
                                             type="tel"
                                             value={data.telefone}
-                                            onChange={(e) => setData('telefone', maskPhone(e.target.value))}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'telefone',
+                                                    maskPhone(e.target.value),
+                                                )
+                                            }
                                             placeholder="(00) 00000-0000"
                                             maxLength={15}
                                             className="h-11"
                                         />
-                                        <InputError message={clientErrors.telefone || errors.telefone} />
+                                        <InputError
+                                            message={
+                                                clientErrors.telefone ||
+                                                errors.telefone
+                                            }
+                                        />
                                     </div>
 
                                     <div className="flex flex-col gap-3 rounded-xl border border-border bg-muted/30 p-4">
                                         <div>
                                             <p className="text-sm font-medium text-foreground">
-                                                Endereço <span className="text-xs font-normal text-muted-foreground">(opcional)</span>
+                                                Endereço{' '}
+                                                <span className="text-xs font-normal text-muted-foreground">
+                                                    (opcional)
+                                                </span>
                                             </p>
                                             <p className="mt-0.5 text-xs text-muted-foreground">
-                                                Usado para sugerir instituições próximas a você.
+                                                Usado para sugerir instituições
+                                                próximas a você.
                                             </p>
                                         </div>
 
@@ -589,7 +729,8 @@ return;
                                             onChange={handleEnderecoChange}
                                             errors={{
                                                 cep: clientErrors.cep,
-                                                logradouro: clientErrors.logradouro,
+                                                logradouro:
+                                                    clientErrors.logradouro,
                                                 numero: clientErrors.numero,
                                                 bairro: clientErrors.bairro,
                                                 cidade: clientErrors.cidade,
@@ -599,7 +740,10 @@ return;
                                         <button
                                             type="button"
                                             onClick={handleGeolocate}
-                                            disabled={geoStatus === 'loading' || geoStatus === 'granted'}
+                                            disabled={
+                                                geoStatus === 'loading' ||
+                                                geoStatus === 'granted'
+                                            }
                                             className={cn(
                                                 'flex items-center gap-2 self-start rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors',
                                                 geoStatus === 'granted'
@@ -610,10 +754,14 @@ return;
                                             )}
                                         >
                                             <LocateFixed className="size-3.5 shrink-0" />
-                                            {geoStatus === 'loading' && 'Obtendo localização...'}
-                                            {geoStatus === 'granted' && 'Localização obtida'}
-                                            {geoStatus === 'denied' && 'Permissão negada'}
-                                            {geoStatus === 'idle' && 'Usar minha localização atual'}
+                                            {geoStatus === 'loading' &&
+                                                'Obtendo localização...'}
+                                            {geoStatus === 'granted' &&
+                                                'Localização obtida'}
+                                            {geoStatus === 'denied' &&
+                                                'Permissão negada'}
+                                            {geoStatus === 'idle' &&
+                                                'Usar minha localização atual'}
                                         </button>
                                     </div>
 
@@ -630,7 +778,11 @@ return;
                                             type="button"
                                             className="h-11 flex-1 font-semibold"
                                             onClick={nextStep}
-                                            disabled={!data.nome_completo || !data.cpf || !data.telefone}
+                                            disabled={
+                                                !data.nome_completo ||
+                                                !data.cpf ||
+                                                !data.telefone
+                                            }
                                         >
                                             Próximo
                                         </Button>
@@ -642,7 +794,10 @@ return;
                             {step === 3 && tipo === 'instituicao' && (
                                 <div className="flex flex-col gap-5">
                                     <div className="flex flex-col gap-1.5">
-                                        <Label htmlFor="nome_fantasia" className="text-sm font-medium">
+                                        <Label
+                                            htmlFor="nome_fantasia"
+                                            className="text-sm font-medium"
+                                        >
                                             Nome fantasia
                                         </Label>
                                         <Input
@@ -650,58 +805,106 @@ return;
                                             type="text"
                                             autoFocus
                                             value={data.nome_fantasia}
-                                            onChange={(e) => setData('nome_fantasia', e.target.value)}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'nome_fantasia',
+                                                    e.target.value,
+                                                )
+                                            }
                                             placeholder="Nome da instituição"
                                             className="h-11"
                                         />
-                                        <InputError message={clientErrors.nome_fantasia || errors.nome_fantasia} />
+                                        <InputError
+                                            message={
+                                                clientErrors.nome_fantasia ||
+                                                errors.nome_fantasia
+                                            }
+                                        />
                                     </div>
 
                                     <div className="flex flex-col gap-1.5">
-                                        <Label htmlFor="razao_social" className="text-sm font-medium">
+                                        <Label
+                                            htmlFor="razao_social"
+                                            className="text-sm font-medium"
+                                        >
                                             Razão social
                                         </Label>
                                         <Input
                                             id="razao_social"
                                             type="text"
                                             value={data.razao_social}
-                                            onChange={(e) => setData('razao_social', e.target.value)}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'razao_social',
+                                                    e.target.value,
+                                                )
+                                            }
                                             placeholder="Razão social"
                                             className="h-11"
                                         />
-                                        <InputError message={clientErrors.razao_social || errors.razao_social} />
+                                        <InputError
+                                            message={
+                                                clientErrors.razao_social ||
+                                                errors.razao_social
+                                            }
+                                        />
                                     </div>
 
                                     <div className="flex flex-col gap-1.5">
-                                        <Label htmlFor="cnpj" className="text-sm font-medium">
+                                        <Label
+                                            htmlFor="cnpj"
+                                            className="text-sm font-medium"
+                                        >
                                             CNPJ
                                         </Label>
                                         <Input
                                             id="cnpj"
                                             type="text"
                                             value={data.cnpj}
-                                            onChange={(e) => setData('cnpj', maskCnpj(e.target.value))}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'cnpj',
+                                                    maskCnpj(e.target.value),
+                                                )
+                                            }
                                             placeholder="00.000.000/0000-00"
                                             maxLength={18}
                                             className="h-11"
                                         />
-                                        <InputError message={clientErrors.cnpj || errors.cnpj} />
+                                        <InputError
+                                            message={
+                                                clientErrors.cnpj || errors.cnpj
+                                            }
+                                        />
                                     </div>
 
                                     <div className="flex flex-col gap-1.5">
-                                        <Label htmlFor="telefone_inst" className="text-sm font-medium">
+                                        <Label
+                                            htmlFor="telefone_inst"
+                                            className="text-sm font-medium"
+                                        >
                                             Telefone
                                         </Label>
                                         <Input
                                             id="telefone_inst"
                                             type="tel"
                                             value={data.telefone_inst}
-                                            onChange={(e) => setData('telefone_inst', maskPhone(e.target.value))}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'telefone_inst',
+                                                    maskPhone(e.target.value),
+                                                )
+                                            }
                                             placeholder="(00) 00000-0000"
                                             maxLength={15}
                                             className="h-11"
                                         />
-                                        <InputError message={clientErrors.telefone_inst || errors.telefone} />
+                                        <InputError
+                                            message={
+                                                clientErrors.telefone_inst ||
+                                                errors.telefone
+                                            }
+                                        />
                                     </div>
 
                                     <EnderecoCepFields
@@ -715,7 +918,9 @@ return;
                                             cidade: clientErrors.cidade,
                                         }}
                                     />
-                                    <InputError message={errors.endereco_completo} />
+                                    <InputError
+                                        message={errors.endereco_completo}
+                                    />
 
                                     <div className="flex gap-3">
                                         <Button
@@ -730,7 +935,15 @@ return;
                                             type="button"
                                             className="h-11 flex-1 font-semibold"
                                             onClick={nextStep}
-                                            disabled={!data.nome_fantasia || !data.razao_social || !data.cnpj || !data.telefone_inst || !endereco.cep || !endereco.logradouro || !endereco.numero}
+                                            disabled={
+                                                !data.nome_fantasia ||
+                                                !data.razao_social ||
+                                                !data.cnpj ||
+                                                !data.telefone_inst ||
+                                                !endereco.cep ||
+                                                !endereco.logradouro ||
+                                                !endereco.numero
+                                            }
                                         >
                                             Próximo
                                         </Button>
@@ -742,18 +955,29 @@ return;
                             {step === 4 && (
                                 <div className="flex flex-col gap-5">
                                     <p className="text-sm text-muted-foreground">
-                                        Selecione as causas que você deseja apoiar.
+                                        Selecione as causas que você deseja
+                                        apoiar.
                                     </p>
                                     <div className="max-h-60 overflow-y-auto rounded-xl border border-border p-3">
                                         <div className="grid grid-cols-2 gap-2">
                                             {causas?.map((causa) => {
-                                                const isSelected = data.causas_apoiadas.includes(causa.id);
+                                                const isSelected =
+                                                    data.causas_apoiadas.includes(
+                                                        causa.id,
+                                                    );
 
                                                 return (
                                                     <button
-                                                        key={causa.id ?? `causa-${causa.nome}`}
+                                                        key={
+                                                            causa.id ??
+                                                            `causa-${causa.nome}`
+                                                        }
                                                         type="button"
-                                                        onClick={() => toggleCausa(causa.id)}
+                                                        onClick={() =>
+                                                            toggleCausa(
+                                                                causa.id,
+                                                            )
+                                                        }
                                                         className={cn(
                                                             'flex items-center gap-2 rounded-lg border px-3 py-2.5 text-left text-xs font-medium transition-all duration-150',
                                                             isSelected
@@ -787,10 +1011,16 @@ return;
                                         <Button
                                             type="submit"
                                             className="h-11 flex-1 font-semibold"
-                                            disabled={processing || data.causas_apoiadas.length === 0}
+                                            disabled={
+                                                processing ||
+                                                data.causas_apoiadas.length ===
+                                                    0
+                                            }
                                         >
                                             {processing && <Spinner />}
-                                            {processing ? 'Criando...' : 'Finalizar cadastro'}
+                                            {processing
+                                                ? 'Criando...'
+                                                : 'Finalizar cadastro'}
                                         </Button>
                                     </div>
                                 </div>
@@ -800,9 +1030,7 @@ return;
                         {/* Login link */}
                         <p className="mt-6 text-center text-sm text-muted-foreground">
                             Já tem uma conta?{' '}
-                            <TextLink href={login.url()}>
-                                Entrar
-                            </TextLink>
+                            <TextLink href={login.url()}>Entrar</TextLink>
                         </p>
                     </div>
                 </div>

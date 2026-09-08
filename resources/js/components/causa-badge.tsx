@@ -16,21 +16,21 @@ import { Badge } from '@/components/ui/badge';
 import type { Causa } from '@/types';
 
 const iconMap: Record<string, LucideIcon> = {
-    'paw':            PawPrint,
+    paw: PawPrint,
     'graduation-cap': GraduationCap,
-    'leaf':           Leaf,
-    'heartbeat':      HeartPulse,
-    'utensils':       Utensils,
-    'hand-heart':     HandHeart,
-    'users':          Users,
-    'home':           Home,
-    'shield':         Shield,
+    leaf: Leaf,
+    heartbeat: HeartPulse,
+    utensils: Utensils,
+    'hand-heart': HandHeart,
+    users: Users,
+    home: Home,
+    shield: Shield,
 };
 
 function CausaIcon({ nome }: { nome: string | null }) {
     if (!nome) {
-return <Tag className="size-3" />;
-}
+        return <Tag className="size-3" />;
+    }
 
     const Icon = iconMap[nome] ?? Tag;
 

@@ -1,6 +1,10 @@
 import { BadgeCheck } from 'lucide-react';
 
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 type Props = {
     verificada: boolean;
@@ -9,8 +13,8 @@ type Props = {
 
 export function VerificadaBadge({ verificada, variant = 'icon' }: Props) {
     if (!verificada) {
-return null;
-}
+        return null;
+    }
 
     if (variant === 'full') {
         return (
@@ -24,7 +28,10 @@ return null;
     return (
         <Tooltip>
             <TooltipTrigger asChild>
-                <BadgeCheck className="size-4 shrink-0 text-success" aria-label="Instituição Verificada" />
+                <BadgeCheck
+                    className="size-4 shrink-0 text-success"
+                    aria-label="Instituição Verificada"
+                />
             </TooltipTrigger>
             <TooltipContent side="top">
                 <p>Instituição Verificada</p>

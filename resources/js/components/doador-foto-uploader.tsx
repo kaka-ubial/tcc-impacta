@@ -103,7 +103,7 @@ export function DoadorFotoUploader({ nome, fotoAtual }: Props) {
                     </AvatarFallback>
                 </Avatar>
                 {processing && (
-                    <div className="bg-background/70 absolute inset-0 flex items-center justify-center rounded-full">
+                    <div className="absolute inset-0 flex items-center justify-center rounded-full bg-background/70">
                         <Loader2 className="size-6 animate-spin" />
                     </div>
                 )}
@@ -130,7 +130,7 @@ export function DoadorFotoUploader({ nome, fotoAtual }: Props) {
                             size="sm"
                             onClick={remover}
                             disabled={processing}
-                            className="text-destructive hover:text-destructive gap-1.5"
+                            className="gap-1.5 text-destructive hover:text-destructive"
                         >
                             <Trash2 className="size-3.5" />
                             Remover
@@ -138,7 +138,7 @@ export function DoadorFotoUploader({ nome, fotoAtual }: Props) {
                     )}
                 </div>
 
-                <p className="text-muted-foreground text-xs">
+                <p className="text-xs text-muted-foreground">
                     JPG, PNG ou WEBP · até 2 MB.
                 </p>
 

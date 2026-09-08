@@ -1,35 +1,38 @@
 <?php
 
-use App\Http\Controllers\RedirectController;
-use App\Http\Middleware\EnsureInstitutionIsApproved;
-use App\Http\Controllers\Instituicao\PainelController;
-use Illuminate\Support\Facades\Route;
-use Laravel\Fortify\Features;
 use App\Actions\Auth\ValidateRegisterStepOne;
-use Inertia\Inertia;
 use App\Http\Controllers\Admin\InstitutionCheckController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Doador\DoacaoController;
 use App\Http\Controllers\Doador\PerfilController as DoadorPerfilController;
+use App\Http\Controllers\Instituicao\AgendaController;
+use App\Http\Controllers\Instituicao\AvaliacaoController;
 use App\Http\Controllers\Instituicao\DoacaoController as InstituicaoDoacaoController;
 use App\Http\Controllers\Instituicao\DoadorController as InstituicaoDoadorController;
 use App\Http\Controllers\Instituicao\HorarioController;
-use App\Http\Controllers\Instituicao\AgendaController;
 use App\Http\Controllers\Instituicao\InstituicaoController;
-use App\Http\Controllers\Instituicao\AvaliacaoController;
+use App\Http\Controllers\Instituicao\PainelController;
 use App\Http\Controllers\Instituicao\TransferenciaController;
 use App\Http\Controllers\NecessidadeController;
 use App\Http\Controllers\NotificacaoController;
+use App\Http\Controllers\RedirectController;
 use App\Http\Controllers\TransparenciaController;
 use App\Http\Middleware\CheckNecessidadeOwnership;
+use App\Http\Middleware\EnsureInstitutionIsApproved;
+use App\Models\Doacao;
+use App\Models\Doador;
+use App\Models\Instituicao;
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
+use Laravel\Fortify\Features;
 
 Route::get('/', function () {
     return Inertia::render('welcome', [
         'canRegister' => Features::enabled(Features::registration()),
         'stats' => [
-            'doadoras'     => \App\Models\Doador::count(),
-            'instituicoes' => \App\Models\Instituicao::where('status', 'approved')->count(),
-            'doacoes'      => \App\Models\Doacao::count(),
+            'doadoras' => Doador::count(),
+            'instituicoes' => Instituicao::where('status', 'approved')->count(),
+            'doacoes' => Doacao::count(),
         ],
     ]);
 })->name('home');
@@ -124,13 +127,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->analises()
             ->latest()
             ->first();
+
         return auth()->user()->instituicao?->isRejected()
             ? Inertia::render('auth/rejected', ['motivo' => $analise?->observacoes])
             : redirect()->route('instituicao.painel');
     })->name('rejected');
 
 });
-
-
 
 require __DIR__.'/settings.php';

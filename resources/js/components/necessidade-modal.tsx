@@ -1,9 +1,20 @@
 import { useForm } from '@inertiajs/react';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 
 type Categoria = {
@@ -27,17 +38,23 @@ type FormData = {
     prioridade: 'baixa' | 'media' | 'alta';
 };
 
-export function NecessidadeCreateModal({ categorias, open, setOpen, initialData }: {
+export function NecessidadeCreateModal({
+    categorias,
+    open,
+    setOpen,
+    initialData,
+}: {
     categorias: Categoria[];
     open: boolean;
     setOpen: (v: boolean) => void;
     initialData?: any;
-}) {    
+}) {
     const isEdit = !!initialData?.id;
 
-    const { data, setData, post, processing, put, reset, errors } = useForm<FormData>({
-        ...getInitialFormData(initialData)
-    });
+    const { data, setData, post, processing, put, reset, errors } =
+        useForm<FormData>({
+            ...getInitialFormData(initialData),
+        });
 
     useEffect(() => {
         if (open) {
@@ -53,7 +70,7 @@ export function NecessidadeCreateModal({ categorias, open, setOpen, initialData 
                 onSuccess: () => {
                     setOpen(false);
                     reset();
-                }
+                },
             });
         } else {
             post('/instituicao/necessidades', {
@@ -67,21 +84,23 @@ export function NecessidadeCreateModal({ categorias, open, setOpen, initialData 
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle>
                         {isEdit ? 'Editar necessidade' : 'Criar necessidade'}
-                    </DialogTitle>                
+                    </DialogTitle>
                 </DialogHeader>
 
                 <form onSubmit={submit} className="flex flex-col gap-4">
-
                     <div className="flex flex-col gap-1">
                         <label className="text-sm">Categoria</label>
 
                         <Select
-                            value={data.categoria_id ? String(data.categoria_id) : ''}
+                            value={
+                                data.categoria_id
+                                    ? String(data.categoria_id)
+                                    : ''
+                            }
                             onValueChange={(value) =>
                                 setData('categoria_id', Number(value))
                             }
@@ -100,7 +119,7 @@ export function NecessidadeCreateModal({ categorias, open, setOpen, initialData 
                         </Select>
 
                         {errors.categoria_id && (
-                            <span className="text-destructive text-xs">
+                            <span className="text-xs text-destructive">
                                 {errors.categoria_id}
                             </span>
                         )}
@@ -119,15 +138,17 @@ export function NecessidadeCreateModal({ categorias, open, setOpen, initialData 
                         />
 
                         {errors.descricao && (
-                            <span className="text-destructive text-xs">
+                            <span className="text-xs text-destructive">
                                 {errors.descricao}
                             </span>
                         )}
-                        {!errors.descricao && data.descricao.length > 0 && data.descricao.length < 5 && (
-                            <span className="text-destructive text-xs">
-                                Descrição deve ter pelo menos 5 caracteres
-                            </span>
-                        )}
+                        {!errors.descricao &&
+                            data.descricao.length > 0 &&
+                            data.descricao.length < 5 && (
+                                <span className="text-xs text-destructive">
+                                    Descrição deve ter pelo menos 5 caracteres
+                                </span>
+                            )}
                     </div>
 
                     <div className="flex flex-col gap-1">
@@ -140,14 +161,16 @@ export function NecessidadeCreateModal({ categorias, open, setOpen, initialData 
                             onChange={(e) =>
                                 setData(
                                     'quantidade_objetivo',
-                                    e.target.value ? Number(e.target.value) : null
+                                    e.target.value
+                                        ? Number(e.target.value)
+                                        : null,
                                 )
                             }
                             placeholder="Ex: 100"
                         />
 
                         {errors.quantidade_objetivo && (
-                            <span className="text-destructive text-xs">
+                            <span className="text-xs text-destructive">
                                 {errors.quantidade_objetivo}
                             </span>
                         )}
@@ -159,7 +182,10 @@ export function NecessidadeCreateModal({ categorias, open, setOpen, initialData 
                         <Select
                             value={data.prioridade}
                             onValueChange={(value) =>
-                                setData('prioridade', value as FormData['prioridade'])
+                                setData(
+                                    'prioridade',
+                                    value as FormData['prioridade'],
+                                )
                             }
                         >
                             <SelectTrigger>
@@ -185,7 +211,12 @@ export function NecessidadeCreateModal({ categorias, open, setOpen, initialData 
 
                         <Button
                             type="submit"
-                            disabled={processing || !data.categoria_id || !data.quantidade_objetivo || data.descricao.length < 5}
+                            disabled={
+                                processing ||
+                                !data.categoria_id ||
+                                !data.quantidade_objetivo ||
+                                data.descricao.length < 5
+                            }
                         >
                             {isEdit ? 'Editar' : 'Criar'}
                         </Button>
