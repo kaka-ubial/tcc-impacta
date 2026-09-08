@@ -1,13 +1,12 @@
 <?php
 
 use App\Logging\AddRequestContext;
+use App\Logging\LokiChannel;
 use Monolog\Formatter\JsonFormatter;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
-use Monolog\Level;
 use Monolog\Processor\PsrLogMessageProcessor;
-use TomasKulhanek\Monolog\Loki\LokiHandler;
 
 return [
 
@@ -111,16 +110,13 @@ return [
         ],
 
         'loki' => [
-            'driver' => 'monolog',
-            'handler' => LokiHandler::class,
-            'handler_with' => [
-                'endpoint' => env('LOKI_URL'),
-                'username' => env('LOKI_USERNAME'),
-                'password' => env('LOKI_PASSWORD'),
-                'labels' => ['app' => 'impacta', 'env' => env('APP_ENV')],
-                'level' => Level::Debug,
-            ],
-            'processors' => [PsrLogMessageProcessor::class],
+            'driver' => 'custom',
+            'via' => LokiChannel::class,
+            'level' => env('LOG_LEVEL', 'debug'),
+            'url' => env('LOKI_URL'),
+            'username' => env('LOKI_USERNAME'),
+            'password' => env('LOKI_PASSWORD'),
+            'labels' => ['app' => 'impacta', 'env' => env('APP_ENV', 'desconhecido')],
             'tap' => [AddRequestContext::class],
         ],
 
