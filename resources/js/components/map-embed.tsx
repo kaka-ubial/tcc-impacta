@@ -6,7 +6,8 @@ import { useEffect, useRef } from 'react';
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
     iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+    iconRetinaUrl:
+        'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
     shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
@@ -22,8 +23,8 @@ export default function MapEmbed({ lat, lng, label }: Props) {
 
     useEffect(() => {
         if (!containerRef.current || mapRef.current) {
-return;
-}
+            return;
+        }
 
         const map = L.map(containerRef.current, {
             center: [lat, lng],
@@ -33,12 +34,15 @@ return;
         });
 
         // CartoDB Voyager — design moderno e colorido, gratuito sem API key
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-            attribution:
-                '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-            subdomains: 'abcd',
-            maxZoom: 20,
-        }).addTo(map);
+        L.tileLayer(
+            'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+            {
+                attribution:
+                    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 20,
+            },
+        ).addTo(map);
 
         L.marker([lat, lng])
             .addTo(map)

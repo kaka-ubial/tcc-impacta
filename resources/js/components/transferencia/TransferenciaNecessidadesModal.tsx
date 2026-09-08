@@ -4,23 +4,46 @@ import { useState } from 'react';
 import EnderecoCepFields from '@/components/endereco-cep-fields';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { buildEnderecoCompleto  } from '@/lib/validators';
-import type {EnderecoFields} from '@/lib/validators';
-import type { HorarioDisponivel, NecessidadeAtiva } from '@/types';
+import { buildEnderecoCompleto } from '@/lib/validators';
+import type { EnderecoFields } from '@/lib/validators';
 import { store as transferenciaStore } from '@/routes/instituicao/transferencias';
+import type { HorarioDisponivel, NecessidadeAtiva } from '@/types';
 
-const DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+const DIAS = [
+    'Domingo',
+    'Segunda',
+    'Terça',
+    'Quarta',
+    'Quinta',
+    'Sexta',
+    'Sábado',
+];
 
 function fmt(hora: string) {
     return hora.slice(0, 5);
 }
 
-function buildUpcomingDates(horarios: HorarioDisponivel[], tipo: 'coleta' | 'entrega', weeks = 2) {
+function buildUpcomingDates(
+    horarios: HorarioDisponivel[],
+    tipo: 'coleta' | 'entrega',
+    weeks = 2,
+) {
     const filtered = horarios.filter((h) => h.tipo === tipo);
     const now = new Date();
     const results: { label: string; value: string; horarioId: number }[] = [];
@@ -58,9 +81,9 @@ type Props = {
 };
 
 const prioridadeConfig = {
-    alta:  { variant: 'destructive' as const, label: 'Alta' },
-    media: { variant: 'default'     as const, label: 'Média' },
-    baixa: { variant: 'secondary'   as const, label: 'Baixa' },
+    alta: { variant: 'destructive' as const, label: 'Alta' },
+    media: { variant: 'default' as const, label: 'Média' },
+    baixa: { variant: 'secondary' as const, label: 'Baixa' },
 };
 
 const STEPS = ['Necessidades', 'Agendamento', 'Confirmação'] as const;
@@ -76,17 +99,25 @@ export function TransferenciaNecessidadesModal({
 }: Props) {
     const [step, setStep] = useState(0);
     const [selected, setSelected] = useState<Record<number, number>>(() =>
-        initialNecessidadeId !== undefined ? { [initialNecessidadeId]: 1 } : {}
+        initialNecessidadeId !== undefined ? { [initialNecessidadeId]: 1 } : {},
     );
     const [tipo, setTipo] = useState<'coleta' | 'entrega'>('entrega');
     const [dataHora, setDataHora] = useState('');
     const [enderecoReferencia, setEnderecoReferencia] = useState('');
     const [enderecoColeta, setEnderecoColeta] = useState<EnderecoFields>({
-        cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', uf: '',
+        cep: '',
+        logradouro: '',
+        numero: '',
+        complemento: '',
+        bairro: '',
+        cidade: '',
+        uf: '',
     });
     const [processing, setProcessing] = useState(false);
 
-    const abertas = necessidades.filter((n) => n.quantidade_atual < n.quantidade_objetivo);
+    const abertas = necessidades.filter(
+        (n) => n.quantidade_atual < n.quantidade_objetivo,
+    );
     const selectedIds = Object.keys(selected).map(Number);
 
     const upcomingDates = buildUpcomingDates(horariosDisponiveis, tipo);
@@ -125,18 +156,32 @@ export function TransferenciaNecessidadesModal({
         setTipo('entrega');
         setDataHora('');
         setEnderecoReferencia('');
-        setEnderecoColeta({ cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', uf: '' });
+        setEnderecoColeta({
+            cep: '',
+            logradouro: '',
+            numero: '',
+            complemento: '',
+            bairro: '',
+            cidade: '',
+            uf: '',
+        });
         onClose();
     }
 
     function canAdvanceStep2() {
         if (!dataHora) {
-return false;
-}
+            return false;
+        }
 
-        if (tipo === 'coleta' && (!enderecoColeta.cep || enderecoColeta.cep.replace(/\D/g, '').length !== 8 || !enderecoColeta.logradouro || !enderecoColeta.numero)) {
-return false;
-}
+        if (
+            tipo === 'coleta' &&
+            (!enderecoColeta.cep ||
+                enderecoColeta.cep.replace(/\D/g, '').length !== 8 ||
+                !enderecoColeta.logradouro ||
+                !enderecoColeta.numero)
+        ) {
+            return false;
+        }
 
         return true;
     }
@@ -146,7 +191,12 @@ return false;
         const itens = selectedIds.map((id) => {
             const n = necessidades.find((x) => x.id === id)!;
 
-            return { necessidade_id: n.id, categoria_id: n.categoria.id, quantidade: selected[id], descricao: null };
+            return {
+                necessidade_id: n.id,
+                categoria_id: n.categoria.id,
+                quantidade: selected[id],
+                descricao: null,
+            };
         });
         router.post(
             transferenciaStore().url,
@@ -156,15 +206,19 @@ return false;
                 agendamento: {
                     tipo,
                     data_hora: dataHora.replace('T', ' ') + ':00',
-                    horario_disponivel_id: upcomingDates.find((d) => d.value === dataHora)?.horarioId ?? null,
-                    endereco_referencia: tipo === 'coleta' ? enderecoReferencia : null,
+                    horario_disponivel_id:
+                        upcomingDates.find((d) => d.value === dataHora)
+                            ?.horarioId ?? null,
+                    endereco_referencia:
+                        tipo === 'coleta' ? enderecoReferencia : null,
                 },
             },
             {
                 onSuccess: () => {
- setProcessing(false); handleClose(); 
-},
-                onError:   () => setProcessing(false),
+                    setProcessing(false);
+                    handleClose();
+                },
+                onError: () => setProcessing(false),
             },
         );
     }
@@ -179,14 +233,30 @@ return false;
                 <div className="flex items-center gap-2 text-sm">
                     {STEPS.map((s, i) => (
                         <div key={s} className="flex items-center gap-2">
-                            <span className={[
-                                'flex size-6 items-center justify-center rounded-full text-xs font-medium',
-                                i === step ? 'bg-primary text-primary-foreground'
-                                    : i < step ? 'bg-primary/30 text-primary'
-                                    : 'bg-muted text-muted-foreground',
-                            ].join(' ')}>{i + 1}</span>
-                            <span className={i === step ? 'font-medium' : 'text-muted-foreground'}>{s}</span>
-                            {i < STEPS.length - 1 && <span className="text-muted-foreground">›</span>}
+                            <span
+                                className={[
+                                    'flex size-6 items-center justify-center rounded-full text-xs font-medium',
+                                    i === step
+                                        ? 'bg-primary text-primary-foreground'
+                                        : i < step
+                                          ? 'bg-primary/30 text-primary'
+                                          : 'bg-muted text-muted-foreground',
+                                ].join(' ')}
+                            >
+                                {i + 1}
+                            </span>
+                            <span
+                                className={
+                                    i === step
+                                        ? 'font-medium'
+                                        : 'text-muted-foreground'
+                                }
+                            >
+                                {s}
+                            </span>
+                            {i < STEPS.length - 1 && (
+                                <span className="text-muted-foreground">›</span>
+                            )}
                         </div>
                     ))}
                 </div>
@@ -196,60 +266,118 @@ return false;
                 {/* ── step 1: necessidades ─────────────────────────────── */}
                 {step === 0 && (
                     <div className="flex flex-col gap-4">
-                        <Label>Selecione as necessidades que deseja atender</Label>
+                        <Label>
+                            Selecione as necessidades que deseja atender
+                        </Label>
                         {abertas.length === 0 ? (
-                            <p className="text-muted-foreground text-sm">Todas as necessidades já foram atendidas.</p>
+                            <p className="text-sm text-muted-foreground">
+                                Todas as necessidades já foram atendidas.
+                            </p>
                         ) : (
                             <div className="flex max-h-80 flex-col gap-2 overflow-y-auto pr-1">
                                 {abertas.map((n) => {
-                                    const remaining = n.quantidade_objetivo - n.quantidade_atual;
-                                    const disponivel = estoque[n.categoria.id] ?? 0;
+                                    const remaining =
+                                        n.quantidade_objetivo -
+                                        n.quantidade_atual;
+                                    const disponivel =
+                                        estoque[n.categoria.id] ?? 0;
                                     const max = Math.min(remaining, disponivel);
-                                    const pct = Math.round((n.quantidade_atual / n.quantidade_objetivo) * 100);
-                                    const isSelected = selected[n.id] !== undefined;
+                                    const pct = Math.round(
+                                        (n.quantidade_atual /
+                                            n.quantidade_objetivo) *
+                                            100,
+                                    );
+                                    const isSelected =
+                                        selected[n.id] !== undefined;
                                     const cfg = prioridadeConfig[n.prioridade];
 
                                     return (
                                         <button
                                             key={n.id}
                                             type="button"
-                                            onClick={() => disponivel > 0 && toggle(n)}
-                                            disabled={disponivel === 0 && !isSelected}
+                                            onClick={() =>
+                                                disponivel > 0 && toggle(n)
+                                            }
+                                            disabled={
+                                                disponivel === 0 && !isSelected
+                                            }
                                             className={[
                                                 'flex flex-col gap-2 rounded-lg border p-3 text-left transition-colors',
-                                                disponivel === 0 && !isSelected ? 'opacity-50 cursor-not-allowed' :
-                                                isSelected ? 'border-primary bg-primary/5' : 'hover:border-muted-foreground/40',
+                                                disponivel === 0 && !isSelected
+                                                    ? 'cursor-not-allowed opacity-50'
+                                                    : isSelected
+                                                      ? 'border-primary bg-primary/5'
+                                                      : 'hover:border-muted-foreground/40',
                                             ].join(' ')}
                                         >
                                             <div className="flex items-start justify-between gap-2">
                                                 <div className="flex flex-col gap-0.5">
-                                                    <span className="text-sm font-medium">{n.categoria.nome}</span>
-                                                    {n.descricao && <span className="text-muted-foreground text-xs">{n.descricao}</span>}
+                                                    <span className="text-sm font-medium">
+                                                        {n.categoria.nome}
+                                                    </span>
+                                                    {n.descricao && (
+                                                        <span className="text-xs text-muted-foreground">
+                                                            {n.descricao}
+                                                        </span>
+                                                    )}
                                                 </div>
-                                                <Badge variant={cfg.variant} className="shrink-0 text-xs">{cfg.label}</Badge>
+                                                <Badge
+                                                    variant={cfg.variant}
+                                                    className="shrink-0 text-xs"
+                                                >
+                                                    {cfg.label}
+                                                </Badge>
                                             </div>
                                             <div className="flex flex-col gap-1">
-                                                <div className="text-muted-foreground flex justify-between text-xs">
+                                                <div className="flex justify-between text-xs text-muted-foreground">
                                                     <span>{pct}% atendido</span>
-                                                    <span>{n.quantidade_atual}/{n.quantidade_objetivo} · faltam {remaining}</span>
+                                                    <span>
+                                                        {n.quantidade_atual}/
+                                                        {n.quantidade_objetivo}{' '}
+                                                        · faltam {remaining}
+                                                    </span>
                                                 </div>
-                                                <div className="bg-secondary h-1.5 w-full overflow-hidden rounded-full">
-                                                    <div className="bg-primary h-full rounded-full transition-all" style={{ width: `${pct}%` }} />
+                                                <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
+                                                    <div
+                                                        className="h-full rounded-full bg-primary transition-all"
+                                                        style={{
+                                                            width: `${pct}%`,
+                                                        }}
+                                                    />
                                                 </div>
                                             </div>
-                                            {disponivel === 0 && !isSelected && (
-                                                <span className="text-destructive text-xs">Sem estoque disponível</span>
-                                            )}
+                                            {disponivel === 0 &&
+                                                !isSelected && (
+                                                    <span className="text-xs text-destructive">
+                                                        Sem estoque disponível
+                                                    </span>
+                                                )}
                                             {isSelected && (
-                                                <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                                                    <Label className="text-xs">Quantidade</Label>
+                                                <div
+                                                    className="flex items-center gap-2"
+                                                    onClick={(e) =>
+                                                        e.stopPropagation()
+                                                    }
+                                                >
+                                                    <Label className="text-xs">
+                                                        Quantidade
+                                                    </Label>
                                                     <Input
-                                                        type="number" min={1} max={max}
+                                                        type="number"
+                                                        min={1}
+                                                        max={max}
                                                         value={selected[n.id]}
-                                                        onChange={(e) => setQty(n.id, e.target.value)}
+                                                        onChange={(e) =>
+                                                            setQty(
+                                                                n.id,
+                                                                e.target.value,
+                                                            )
+                                                        }
                                                         className="h-7 w-20 text-sm"
                                                     />
-                                                    <span className="text-muted-foreground text-xs">de {max} disponíveis</span>
+                                                    <span className="text-xs text-muted-foreground">
+                                                        de {max} disponíveis
+                                                    </span>
                                                 </div>
                                             )}
                                         </button>
@@ -258,7 +386,12 @@ return false;
                             </div>
                         )}
                         <div className="flex justify-end">
-                            <Button onClick={() => setStep(1)} disabled={selectedIds.length === 0}>Próximo</Button>
+                            <Button
+                                onClick={() => setStep(1)}
+                                disabled={selectedIds.length === 0}
+                            >
+                                Próximo
+                            </Button>
                         </div>
                     </div>
                 )}
@@ -268,34 +401,49 @@ return false;
                     <div className="flex flex-col gap-4">
                         <div className="flex flex-col gap-1">
                             <Label>Tipo de entrega</Label>
-                            <Select value={tipo} onValueChange={(v) => {
- setTipo(v as 'coleta' | 'entrega'); setDataHora(''); 
-}}>
+                            <Select
+                                value={tipo}
+                                onValueChange={(v) => {
+                                    setTipo(v as 'coleta' | 'entrega');
+                                    setDataHora('');
+                                }}
+                            >
                                 <SelectTrigger>
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="entrega">Entrega — eu levo até a instituição</SelectItem>
-                                    <SelectItem value="coleta">Coleta — a instituição busca em mim</SelectItem>
+                                    <SelectItem value="entrega">
+                                        Entrega — eu levo até a instituição
+                                    </SelectItem>
+                                    <SelectItem value="coleta">
+                                        Coleta — a instituição busca em mim
+                                    </SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
 
                         {!hasHorarios ? (
-                            <p className="text-muted-foreground text-sm">
-                                Esta instituição não possui horários disponíveis para {tipo === 'coleta' ? 'coleta' : 'entrega'}.
+                            <p className="text-sm text-muted-foreground">
+                                Esta instituição não possui horários disponíveis
+                                para {tipo === 'coleta' ? 'coleta' : 'entrega'}.
                             </p>
                         ) : (
                             <>
                                 <div className="flex flex-col gap-1">
                                     <Label>Data e horário disponível</Label>
-                                    <Select value={dataHora} onValueChange={setDataHora}>
+                                    <Select
+                                        value={dataHora}
+                                        onValueChange={setDataHora}
+                                    >
                                         <SelectTrigger>
                                             <SelectValue placeholder="Selecione uma data" />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {upcomingDates.map((d) => (
-                                                <SelectItem key={d.value} value={d.value}>
+                                                <SelectItem
+                                                    key={d.value}
+                                                    value={d.value}
+                                                >
                                                     {d.label}
                                                 </SelectItem>
                                             ))}
@@ -308,7 +456,9 @@ return false;
                                         <Label>Endereço para coleta</Label>
                                         <EnderecoCepFields
                                             value={enderecoColeta}
-                                            onChange={handleEnderecoColetaChange}
+                                            onChange={
+                                                handleEnderecoColetaChange
+                                            }
                                         />
                                     </div>
                                 )}
@@ -316,8 +466,18 @@ return false;
                         )}
 
                         <div className="flex justify-between">
-                            <Button variant="outline" onClick={() => setStep(0)}>Voltar</Button>
-                            <Button onClick={() => setStep(2)} disabled={!canAdvanceStep2()}>Próximo</Button>
+                            <Button
+                                variant="outline"
+                                onClick={() => setStep(0)}
+                            >
+                                Voltar
+                            </Button>
+                            <Button
+                                onClick={() => setStep(2)}
+                                disabled={!canAdvanceStep2()}
+                            >
+                                Próximo
+                            </Button>
                         </div>
                     </div>
                 )}
@@ -326,47 +486,78 @@ return false;
                 {step === 2 && (
                     <div className="flex flex-col gap-4">
                         <div className="flex flex-col gap-2 rounded-lg border p-4 text-sm">
-                            <p className="font-medium">Resumo da transferência</p>
+                            <p className="font-medium">
+                                Resumo da transferência
+                            </p>
                             <Separator />
                             <div className="flex items-center gap-2">
-                                <span className="text-muted-foreground w-24 shrink-0">Tipo:</span>
+                                <span className="w-24 shrink-0 text-muted-foreground">
+                                    Tipo:
+                                </span>
                                 <Badge variant="outline">
-                                    {tipo === 'entrega' ? 'Entrega (eu levo)' : 'Coleta (buscam)'}
+                                    {tipo === 'entrega'
+                                        ? 'Entrega (eu levo)'
+                                        : 'Coleta (buscam)'}
                                 </Badge>
                             </div>
                             <div className="flex flex-col gap-1">
-                                <span className="text-muted-foreground">Itens:</span>
+                                <span className="text-muted-foreground">
+                                    Itens:
+                                </span>
                                 <ul className="list-inside list-disc space-y-0.5 pl-1">
                                     {selectedIds.map((id) => {
-                                        const n = necessidades.find((x) => x.id === id)!;
+                                        const n = necessidades.find(
+                                            (x) => x.id === id,
+                                        )!;
 
                                         return (
                                             <li key={id}>
-                                                {selected[id]}× {n.categoria.nome}
-                                                {n.descricao && <span className="text-muted-foreground"> ({n.descricao})</span>}
+                                                {selected[id]}×{' '}
+                                                {n.categoria.nome}
+                                                {n.descricao && (
+                                                    <span className="text-muted-foreground">
+                                                        {' '}
+                                                        ({n.descricao})
+                                                    </span>
+                                                )}
                                             </li>
                                         );
                                     })}
                                 </ul>
                             </div>
                             <div className="flex items-center gap-2">
-                                <span className="text-muted-foreground w-24 shrink-0">Data/hora:</span>
+                                <span className="w-24 shrink-0 text-muted-foreground">
+                                    Data/hora:
+                                </span>
                                 <span>{dataHora.replace('T', ' ')}</span>
                             </div>
                             {tipo === 'coleta' && enderecoReferencia && (
                                 <div className="flex items-center gap-2">
-                                    <span className="text-muted-foreground w-24 shrink-0">Endereço:</span>
+                                    <span className="w-24 shrink-0 text-muted-foreground">
+                                        Endereço:
+                                    </span>
                                     <span>{enderecoReferencia}</span>
                                 </div>
                             )}
                         </div>
-                        <p className="text-muted-foreground text-xs">
-                            A instituição destino poderá confirmar, recusar ou sugerir uma nova data.
+                        <p className="text-xs text-muted-foreground">
+                            A instituição destino poderá confirmar, recusar ou
+                            sugerir uma nova data.
                         </p>
                         <div className="flex justify-between">
-                            <Button variant="outline" onClick={() => setStep(1)}>Voltar</Button>
-                            <Button onClick={handleSubmit} disabled={processing}>
-                                {processing ? 'Enviando…' : 'Enviar transferência'}
+                            <Button
+                                variant="outline"
+                                onClick={() => setStep(1)}
+                            >
+                                Voltar
+                            </Button>
+                            <Button
+                                onClick={handleSubmit}
+                                disabled={processing}
+                            >
+                                {processing
+                                    ? 'Enviando…'
+                                    : 'Enviar transferência'}
                             </Button>
                         </div>
                     </div>

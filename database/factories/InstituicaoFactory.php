@@ -15,12 +15,12 @@ class InstituicaoFactory extends Factory
     {
         return [
             'nome_fantasia' => fake('pt_BR')->company(),
-            'razao_social' => fake('pt_BR')->company() . ' LTDA',
+            'razao_social' => fake('pt_BR')->company().' LTDA',
             'cnpj' => fake('pt_BR')->cnpj(),
             'telefone' => fake('pt_BR')->cellphoneNumber(),
-            'endereco_completo' => fake('pt_BR')->streetAddress() . ' - ' .
-                fake('pt_BR')->city() . '/' . fake('pt_BR')->stateAbbr() .
-                ' - CEP ' . fake('pt_BR')->postcode(),
+            'endereco_completo' => fake('pt_BR')->streetAddress().' - '.
+                fake('pt_BR')->city().'/'.fake('pt_BR')->stateAbbr().
+                ' - CEP '.fake('pt_BR')->postcode(),
             'latitude' => fake()->latitude(-25.5, -25.3),
             'longitude' => fake()->longitude(-49.4, -49.2),
             'status' => InstituicaoStatus::Approved,

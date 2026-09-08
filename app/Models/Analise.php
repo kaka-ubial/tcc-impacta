@@ -6,8 +6,6 @@ use App\Enums\AnaliseStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Models\Instituicao;
-use App\Models\User;
 
 class Analise extends Model
 {
@@ -19,7 +17,7 @@ class Analise extends Model
         'instituicao_id',
         'admin_id',
         'status',
-        'observacoes'
+        'observacoes',
     ];
 
     protected function casts(): array
@@ -34,7 +32,7 @@ class Analise extends Model
         return $this->belongsTo(Instituicao::class, 'usuario_id');
     }
 
-    public function admin():BelongsTo
+    public function admin(): BelongsTo
     {
         return $this->belongsTo(User::class, 'usuario_id');
     }

@@ -59,12 +59,16 @@ export default function ResetPassword({ token, email }: Props) {
                                 autoFocus
                                 placeholder="Nova senha"
                                 onBlur={(e) => {
-                                    const err = e.target.value ? validatePassword(e.target.value) : '';
+                                    const err = e.target.value
+                                        ? validatePassword(e.target.value)
+                                        : '';
                                     setPasswordClientError(err || '');
                                 }}
                                 onChange={() => setPasswordClientError('')}
                             />
-                            <InputError message={passwordClientError || errors.password} />
+                            <InputError
+                                message={passwordClientError || errors.password}
+                            />
                         </div>
 
                         <div className="grid gap-2">

@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\CategoriaItem;
+use Illuminate\Database\Seeder;
 
 class CategoriaItemSeeder extends Seeder
 {
@@ -30,7 +29,7 @@ class CategoriaItemSeeder extends Seeder
             'Ferramentas',
             'Equipamentos eletrônicos',
             'Outros',
-            ];
+        ];
 
         foreach ($categorias as $nome) {
             CategoriaItem::firstOrCreate([

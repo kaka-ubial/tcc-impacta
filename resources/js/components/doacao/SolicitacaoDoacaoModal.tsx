@@ -5,24 +5,46 @@ import { useState } from 'react';
 import EnderecoCepFields from '@/components/endereco-cep-fields';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { buildEnderecoCompleto  } from '@/lib/validators';
-import type {EnderecoFields} from '@/lib/validators';
-import type { CategoriaItem, HorarioDisponivel } from '@/types';
+import { buildEnderecoCompleto } from '@/lib/validators';
+import type { EnderecoFields } from '@/lib/validators';
 import { store as doacoesStore } from '@/routes/doacoes';
+import type { CategoriaItem, HorarioDisponivel } from '@/types';
 
-const DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+const DIAS = [
+    'Domingo',
+    'Segunda',
+    'Terça',
+    'Quarta',
+    'Quinta',
+    'Sexta',
+    'Sábado',
+];
 
 function fmt(hora: string) {
     return hora.slice(0, 5); // "HH:MM"
 }
 
-
-function buildUpcomingDates(horarios: HorarioDisponivel[], tipo: 'coleta' | 'entrega', weeks = 2) {
+function buildUpcomingDates(
+    horarios: HorarioDisponivel[],
+    tipo: 'coleta' | 'entrega',
+    weeks = 2,
+) {
     const filtered = horarios.filter((h) => h.tipo === tipo);
     const now = new Date();
     const results: { label: string; value: string; horarioId: number }[] = [];
@@ -49,7 +71,6 @@ function buildUpcomingDates(horarios: HorarioDisponivel[], tipo: 'coleta' | 'ent
     return results.sort((a, b) => a.value.localeCompare(b.value));
 }
 
-
 type Item = {
     categoria_id: string;
     quantidade: string;
@@ -66,15 +87,28 @@ type Props = {
 
 const STEPS = ['Itens', 'Agendamento', 'Confirmação'] as const;
 
-
-export function SolicitacaoDoacaoModal({ open, onClose, instituicaoId, categorias, horariosDisponiveis }: Props) {
+export function SolicitacaoDoacaoModal({
+    open,
+    onClose,
+    instituicaoId,
+    categorias,
+    horariosDisponiveis,
+}: Props) {
     const [step, setStep] = useState(0);
-    const [itens, setItens] = useState<Item[]>([{ categoria_id: '', quantidade: '1', descricao: '' }]);
+    const [itens, setItens] = useState<Item[]>([
+        { categoria_id: '', quantidade: '1', descricao: '' },
+    ]);
     const [tipo, setTipo] = useState<'coleta' | 'entrega'>('entrega');
     const [dataHora, setDataHora] = useState('');
     const [enderecoReferencia, setEnderecoReferencia] = useState('');
     const [enderecoColeta, setEnderecoColeta] = useState<EnderecoFields>({
-        cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', uf: '',
+        cep: '',
+        logradouro: '',
+        numero: '',
+        complemento: '',
+        bairro: '',
+        cidade: '',
+        uf: '',
     });
 
     const [processing, setProcessing] = useState(false);
@@ -84,7 +118,10 @@ export function SolicitacaoDoacaoModal({ open, onClose, instituicaoId, categoria
     const hasHorarios = upcomingDates.length > 0;
 
     function addItem() {
-        setItens((prev) => [...prev, { categoria_id: '', quantidade: '1', descricao: '' }]);
+        setItens((prev) => [
+            ...prev,
+            { categoria_id: '', quantidade: '1', descricao: '' },
+        ]);
     }
 
     function removeItem(i: number) {
@@ -92,7 +129,9 @@ export function SolicitacaoDoacaoModal({ open, onClose, instituicaoId, categoria
     }
 
     function updateItem(i: number, field: keyof Item, value: string) {
-        setItens((prev) => prev.map((it, idx) => (idx === i ? { ...it, [field]: value } : it)));
+        setItens((prev) =>
+            prev.map((it, idx) => (idx === i ? { ...it, [field]: value } : it)),
+        );
     }
 
     function handleEnderecoColetaChange(fields: EnderecoFields) {
@@ -106,22 +145,38 @@ export function SolicitacaoDoacaoModal({ open, onClose, instituicaoId, categoria
         setTipo('entrega');
         setDataHora('');
         setEnderecoReferencia('');
-        setEnderecoColeta({ cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', uf: '' });
+        setEnderecoColeta({
+            cep: '',
+            logradouro: '',
+            numero: '',
+            complemento: '',
+            bairro: '',
+            cidade: '',
+            uf: '',
+        });
         onClose();
     }
 
     function canAdvanceStep1() {
-        return itens.every((it) => it.categoria_id && Number(it.quantidade) >= 1);
+        return itens.every(
+            (it) => it.categoria_id && Number(it.quantidade) >= 1,
+        );
     }
 
     function canAdvanceStep2() {
         if (!dataHora) {
-return false;
-}
+            return false;
+        }
 
-        if (tipo === 'coleta' && (!enderecoColeta.cep || enderecoColeta.cep.replace(/\D/g, '').length !== 8 || !enderecoColeta.logradouro || !enderecoColeta.numero)) {
-return false;
-}
+        if (
+            tipo === 'coleta' &&
+            (!enderecoColeta.cep ||
+                enderecoColeta.cep.replace(/\D/g, '').length !== 8 ||
+                !enderecoColeta.logradouro ||
+                !enderecoColeta.numero)
+        ) {
+            return false;
+        }
 
         return true;
     }
@@ -140,14 +195,18 @@ return false;
                 agendamento: {
                     tipo,
                     data_hora: dataHora.replace('T', ' ') + ':00',
-                    horario_disponivel_id: upcomingDates.find((d) => d.value === dataHora)?.horarioId ?? null,
-                    endereco_referencia: tipo === 'coleta' ? enderecoReferencia : null,
+                    horario_disponivel_id:
+                        upcomingDates.find((d) => d.value === dataHora)
+                            ?.horarioId ?? null,
+                    endereco_referencia:
+                        tipo === 'coleta' ? enderecoReferencia : null,
                 },
             },
             {
                 onSuccess: () => {
- setProcessing(false); handleClose(); 
-},
+                    setProcessing(false);
+                    handleClose();
+                },
                 onError: () => setProcessing(false),
             },
         );
@@ -176,8 +235,18 @@ return false;
                             >
                                 {i + 1}
                             </span>
-                            <span className={i === step ? 'font-medium' : 'text-muted-foreground'}>{s}</span>
-                            {i < STEPS.length - 1 && <span className="text-muted-foreground">›</span>}
+                            <span
+                                className={
+                                    i === step
+                                        ? 'font-medium'
+                                        : 'text-muted-foreground'
+                                }
+                            >
+                                {s}
+                            </span>
+                            {i < STEPS.length - 1 && (
+                                <span className="text-muted-foreground">›</span>
+                            )}
                         </div>
                     ))}
                 </div>
@@ -189,13 +258,22 @@ return false;
                     <div className="flex flex-col gap-4">
                         <div className="flex flex-col gap-1">
                             <Label>Tipo de entrega</Label>
-                            <Select value={tipo} onValueChange={(v) => setTipo(v as 'coleta' | 'entrega')}>
+                            <Select
+                                value={tipo}
+                                onValueChange={(v) =>
+                                    setTipo(v as 'coleta' | 'entrega')
+                                }
+                            >
                                 <SelectTrigger>
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="entrega">Entrega — eu levo até a instituição</SelectItem>
-                                    <SelectItem value="coleta">Coleta — a instituição busca em mim</SelectItem>
+                                    <SelectItem value="entrega">
+                                        Entrega — eu levo até a instituição
+                                    </SelectItem>
+                                    <SelectItem value="coleta">
+                                        Coleta — a instituição busca em mim
+                                    </SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -205,28 +283,47 @@ return false;
                         <div className="flex flex-col gap-3">
                             <Label>Itens a doar</Label>
                             {itens.map((item, i) => (
-                                <div key={i} className="flex flex-col gap-2 rounded-lg border p-3">
+                                <div
+                                    key={i}
+                                    className="flex flex-col gap-2 rounded-lg border p-3"
+                                >
                                     <div className="flex items-center justify-between">
-                                        <span className="text-sm font-medium">Item {i + 1}</span>
+                                        <span className="text-sm font-medium">
+                                            Item {i + 1}
+                                        </span>
                                         {itens.length > 1 && (
-                                            <button onClick={() => removeItem(i)} className="text-muted-foreground hover:text-destructive">
+                                            <button
+                                                onClick={() => removeItem(i)}
+                                                className="text-muted-foreground hover:text-destructive"
+                                            >
                                                 <Trash2 className="size-4" />
                                             </button>
                                         )}
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                    <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
                                         <div className="flex flex-col gap-1">
-                                            <Label className="text-xs">Categoria</Label>
+                                            <Label className="text-xs">
+                                                Categoria
+                                            </Label>
                                             <Select
                                                 value={item.categoria_id}
-                                                onValueChange={(v) => updateItem(i, 'categoria_id', v)}
+                                                onValueChange={(v) =>
+                                                    updateItem(
+                                                        i,
+                                                        'categoria_id',
+                                                        v,
+                                                    )
+                                                }
                                             >
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="Selecione" />
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     {categorias.map((c) => (
-                                                        <SelectItem key={c.id} value={String(c.id)}>
+                                                        <SelectItem
+                                                            key={c.id}
+                                                            value={String(c.id)}
+                                                        >
                                                             {c.nome}
                                                         </SelectItem>
                                                     ))}
@@ -234,33 +331,57 @@ return false;
                                             </Select>
                                         </div>
                                         <div className="flex flex-col gap-1">
-                                            <Label className="text-xs">Quantidade</Label>
+                                            <Label className="text-xs">
+                                                Quantidade
+                                            </Label>
                                             <Input
                                                 type="number"
                                                 min={1}
                                                 value={item.quantidade}
-                                                onChange={(e) => updateItem(i, 'quantidade', e.target.value)}
+                                                onChange={(e) =>
+                                                    updateItem(
+                                                        i,
+                                                        'quantidade',
+                                                        e.target.value,
+                                                    )
+                                                }
                                             />
                                         </div>
                                     </div>
                                     <div className="flex flex-col gap-1">
-                                        <Label className="text-xs">Descrição (opcional)</Label>
+                                        <Label className="text-xs">
+                                            Descrição (opcional)
+                                        </Label>
                                         <Input
                                             placeholder="ex: roupas de inverno masculinas"
                                             value={item.descricao}
-                                            onChange={(e) => updateItem(i, 'descricao', e.target.value)}
+                                            onChange={(e) =>
+                                                updateItem(
+                                                    i,
+                                                    'descricao',
+                                                    e.target.value,
+                                                )
+                                            }
                                         />
                                     </div>
                                 </div>
                             ))}
-                            <Button variant="outline" size="sm" onClick={addItem} className="gap-1.5">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={addItem}
+                                className="gap-1.5"
+                            >
                                 <Plus className="size-3.5" />
                                 Adicionar item
                             </Button>
                         </div>
 
                         <div className="flex justify-end">
-                            <Button onClick={() => setStep(1)} disabled={!canAdvanceStep1()}>
+                            <Button
+                                onClick={() => setStep(1)}
+                                disabled={!canAdvanceStep1()}
+                            >
                                 Próximo
                             </Button>
                         </div>
@@ -271,20 +392,28 @@ return false;
                 {step === 1 && (
                     <div className="flex flex-col gap-4">
                         {!hasHorarios ? (
-                            <p className="text-muted-foreground text-sm">
-                                Esta instituição não possui horários disponíveis cadastrados para {tipo === 'coleta' ? 'coleta' : 'entrega'}.
+                            <p className="text-sm text-muted-foreground">
+                                Esta instituição não possui horários disponíveis
+                                cadastrados para{' '}
+                                {tipo === 'coleta' ? 'coleta' : 'entrega'}.
                             </p>
                         ) : (
                             <>
                                 <div className="flex flex-col gap-1">
                                     <Label>Data e horário disponível</Label>
-                                    <Select value={dataHora} onValueChange={setDataHora}>
+                                    <Select
+                                        value={dataHora}
+                                        onValueChange={setDataHora}
+                                    >
                                         <SelectTrigger>
                                             <SelectValue placeholder="Selecione uma data" />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {upcomingDates.map((d) => (
-                                                <SelectItem key={d.value} value={d.value}>
+                                                <SelectItem
+                                                    key={d.value}
+                                                    value={d.value}
+                                                >
                                                     {d.label}
                                                 </SelectItem>
                                             ))}
@@ -297,7 +426,9 @@ return false;
                                         <Label>Seu endereço para coleta</Label>
                                         <EnderecoCepFields
                                             value={enderecoColeta}
-                                            onChange={handleEnderecoColetaChange}
+                                            onChange={
+                                                handleEnderecoColetaChange
+                                            }
                                         />
                                     </div>
                                 )}
@@ -305,14 +436,22 @@ return false;
                         )}
 
                         {errors['agendamento.data_hora'] && (
-                            <p className="text-destructive text-xs">{errors['agendamento.data_hora']}</p>
+                            <p className="text-xs text-destructive">
+                                {errors['agendamento.data_hora']}
+                            </p>
                         )}
 
                         <div className="flex justify-between">
-                            <Button variant="outline" onClick={() => setStep(0)}>
+                            <Button
+                                variant="outline"
+                                onClick={() => setStep(0)}
+                            >
                                 Voltar
                             </Button>
-                            <Button onClick={() => setStep(2)} disabled={!canAdvanceStep2()}>
+                            <Button
+                                onClick={() => setStep(2)}
+                                disabled={!canAdvanceStep2()}
+                            >
                                 Próximo
                             </Button>
                         </div>
@@ -326,22 +465,36 @@ return false;
                             <p className="font-medium">Resumo da solicitação</p>
                             <Separator />
                             <div className="flex items-center gap-2">
-                                <span className="text-muted-foreground w-24 shrink-0">Tipo:</span>
+                                <span className="w-24 shrink-0 text-muted-foreground">
+                                    Tipo:
+                                </span>
                                 <Badge variant="outline">
-                                    {tipo === 'entrega' ? 'Entrega (eu levo)' : 'Coleta (buscam)'}
+                                    {tipo === 'entrega'
+                                        ? 'Entrega (eu levo)'
+                                        : 'Coleta (buscam)'}
                                 </Badge>
                             </div>
                             <div className="flex flex-col gap-1">
-                                <span className="text-muted-foreground">Itens:</span>
+                                <span className="text-muted-foreground">
+                                    Itens:
+                                </span>
                                 <ul className="list-inside list-disc space-y-0.5 pl-1">
                                     {itens.map((it, i) => {
-                                        const cat = categorias.find((c) => String(c.id) === it.categoria_id);
+                                        const cat = categorias.find(
+                                            (c) =>
+                                                String(c.id) ===
+                                                it.categoria_id,
+                                        );
 
                                         return (
                                             <li key={i}>
-                                                {it.quantidade}× {cat?.nome ?? '—'}
+                                                {it.quantidade}×{' '}
+                                                {cat?.nome ?? '—'}
                                                 {it.descricao && (
-                                                    <span className="text-muted-foreground"> ({it.descricao})</span>
+                                                    <span className="text-muted-foreground">
+                                                        {' '}
+                                                        ({it.descricao})
+                                                    </span>
                                                 )}
                                             </li>
                                         );
@@ -349,27 +502,40 @@ return false;
                                 </ul>
                             </div>
                             <div className="flex items-center gap-2">
-                                <span className="text-muted-foreground w-24 shrink-0">Data/hora:</span>
+                                <span className="w-24 shrink-0 text-muted-foreground">
+                                    Data/hora:
+                                </span>
                                 <span>{dataHora.replace('T', ' ')}</span>
                             </div>
                             {tipo === 'coleta' && enderecoReferencia && (
                                 <div className="flex items-center gap-2">
-                                    <span className="text-muted-foreground w-24 shrink-0">Endereço:</span>
+                                    <span className="w-24 shrink-0 text-muted-foreground">
+                                        Endereço:
+                                    </span>
                                     <span>{enderecoReferencia}</span>
                                 </div>
                             )}
                         </div>
 
-                        <p className="text-muted-foreground text-xs">
-                            Após o envio, a instituição irá avaliar e confirmar ou recusar a solicitação.
+                        <p className="text-xs text-muted-foreground">
+                            Após o envio, a instituição irá avaliar e confirmar
+                            ou recusar a solicitação.
                         </p>
 
                         <div className="flex justify-between">
-                            <Button variant="outline" onClick={() => setStep(1)}>
+                            <Button
+                                variant="outline"
+                                onClick={() => setStep(1)}
+                            >
                                 Voltar
                             </Button>
-                            <Button onClick={handleSubmit} disabled={processing}>
-                                {processing ? 'Enviando…' : 'Enviar solicitação'}
+                            <Button
+                                onClick={handleSubmit}
+                                disabled={processing}
+                            >
+                                {processing
+                                    ? 'Enviando…'
+                                    : 'Enviar solicitação'}
                             </Button>
                         </div>
                     </div>

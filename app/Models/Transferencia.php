@@ -25,9 +25,9 @@ class Transferencia extends Model
     protected function casts(): array
     {
         return [
-            'data_hora'          => 'datetime',
+            'data_hora' => 'datetime',
             'data_hora_sugerida' => 'datetime',
-            'status'             => TransferenciaStatus::class,
+            'status' => TransferenciaStatus::class,
         ];
     }
 

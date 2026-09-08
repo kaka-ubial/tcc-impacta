@@ -12,7 +12,13 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { sugerir as sugerirRoute } from '@/routes/instituicao/agenda';
 
 // ─── types ─────────────────────────────────────────────────────────────────
@@ -35,9 +41,21 @@ type Props = {
 
 // ─── helpers ───────────────────────────────────────────────────────────────
 
-const DIAS = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+const DIAS = [
+    'Domingo',
+    'Segunda-feira',
+    'Terça-feira',
+    'Quarta-feira',
+    'Quinta-feira',
+    'Sexta-feira',
+    'Sábado',
+];
 
-function buildUpcomingDates(horarios: Horario[], tipo: 'coleta' | 'entrega', weeks = 4) {
+function buildUpcomingDates(
+    horarios: Horario[],
+    tipo: 'coleta' | 'entrega',
+    weeks = 4,
+) {
     const agora = new Date();
     const opcoes: { label: string; value: string }[] = [];
 
@@ -46,7 +64,12 @@ function buildUpcomingDates(horarios: Horario[], tipo: 'coleta' | 'entrega', wee
             const d = new Date(agora);
             const diff = (h.dia_semana - d.getDay() + 7) % 7;
             d.setDate(d.getDate() + diff + w * 7);
-            d.setHours(Number(h.hora_inicio.slice(0, 2)), Number(h.hora_inicio.slice(3, 5)), 0, 0);
+            d.setHours(
+                Number(h.hora_inicio.slice(0, 2)),
+                Number(h.hora_inicio.slice(3, 5)),
+                0,
+                0,
+            );
 
             if (d > agora) {
                 const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}T${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
@@ -69,11 +92,22 @@ function formatDataHora(iso: string): string {
 
 // ─── component ─────────────────────────────────────────────────────────────
 
-export default function SugerirAlteracaoDialog({ agendamentoId, dataHoraAtual, tipo, horarios, trigger }: Props) {
+export default function SugerirAlteracaoDialog({
+    agendamentoId,
+    dataHoraAtual,
+    tipo,
+    horarios,
+    trigger,
+}: Props) {
     const [open, setOpen] = useState(false);
-    const { data, setData, post, processing, errors, reset } = useForm({ data_hora_sugerida: '' });
+    const { data, setData, post, processing, errors, reset } = useForm({
+        data_hora_sugerida: '',
+    });
 
-    const opcoes = useMemo(() => buildUpcomingDates(horarios, tipo), [horarios, tipo]);
+    const opcoes = useMemo(
+        () => buildUpcomingDates(horarios, tipo),
+        [horarios, tipo],
+    );
     const tipoLabel = tipo === 'coleta' ? 'coleta' : 'entrega';
 
     function submit(e: React.FormEvent) {
@@ -81,8 +115,9 @@ export default function SugerirAlteracaoDialog({ agendamentoId, dataHoraAtual, t
         post(sugerirRoute(agendamentoId).url, {
             preserveScroll: true,
             onSuccess: () => {
- setOpen(false); reset(); 
-},
+                setOpen(false);
+                reset();
+            },
         });
     }
 
@@ -99,34 +134,59 @@ export default function SugerirAlteracaoDialog({ agendamentoId, dataHoraAtual, t
             <DialogContent>
                 <DialogTitle>Sugerir nova data</DialogTitle>
                 <DialogDescription>
-                    Agendado para {formatDataHora(dataHoraAtual)}. Escolha um horário entre os que
-                    você cadastrou como disponíveis para {tipoLabel} — o doador precisa aceitar para valer.
+                    Agendado para {formatDataHora(dataHoraAtual)}. Escolha um
+                    horário entre os que você cadastrou como disponíveis para{' '}
+                    {tipoLabel} — o doador precisa aceitar para valer.
                 </DialogDescription>
                 {opcoes.length === 0 ? (
-                    <p className="text-muted-foreground text-sm pt-2">
+                    <p className="pt-2 text-sm text-muted-foreground">
                         Você ainda não tem horários de {tipoLabel} cadastrados.
                     </p>
                 ) : (
-                    <form onSubmit={submit} className="flex flex-col gap-4 pt-2">
+                    <form
+                        onSubmit={submit}
+                        className="flex flex-col gap-4 pt-2"
+                    >
                         <div className="flex flex-col gap-1">
                             <Label>Nova data e horário</Label>
-                            <Select value={data.data_hora_sugerida} onValueChange={(v) => setData('data_hora_sugerida', v)}>
-                                <SelectTrigger><SelectValue placeholder="Selecione um horário" /></SelectTrigger>
+                            <Select
+                                value={data.data_hora_sugerida}
+                                onValueChange={(v) =>
+                                    setData('data_hora_sugerida', v)
+                                }
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Selecione um horário" />
+                                </SelectTrigger>
                                 <SelectContent>
                                     {opcoes.map((o) => (
-                                        <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                                        <SelectItem
+                                            key={o.value}
+                                            value={o.value}
+                                        >
+                                            {o.label}
+                                        </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
                             {errors.data_hora_sugerida && (
-                                <p className="text-destructive text-xs">{errors.data_hora_sugerida}</p>
+                                <p className="text-xs text-destructive">
+                                    {errors.data_hora_sugerida}
+                                </p>
                             )}
                         </div>
                         <DialogFooter className="gap-2">
                             <DialogClose asChild>
-                                <Button type="button" variant="secondary">Cancelar</Button>
+                                <Button type="button" variant="secondary">
+                                    Cancelar
+                                </Button>
                             </DialogClose>
-                            <Button type="submit" disabled={processing || !data.data_hora_sugerida}>
+                            <Button
+                                type="submit"
+                                disabled={
+                                    processing || !data.data_hora_sugerida
+                                }
+                            >
                                 {processing ? 'Enviando...' : 'Enviar sugestão'}
                             </Button>
                         </DialogFooter>

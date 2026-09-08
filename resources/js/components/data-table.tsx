@@ -14,7 +14,12 @@ interface Props<T> {
     emptyMessage?: string;
 }
 
-export function DataTable<T>({ data, columns, loading = false, emptyMessage = 'Nenhum registro encontrado.' }: Props<T>) {
+export function DataTable<T>({
+    data,
+    columns,
+    loading = false,
+    emptyMessage = 'Nenhum registro encontrado.',
+}: Props<T>) {
     return (
         <div className="overflow-x-auto rounded-xl border bg-card shadow-sm">
             <table className="w-full min-w-[480px] text-sm">
@@ -23,7 +28,7 @@ export function DataTable<T>({ data, columns, loading = false, emptyMessage = 'N
                         {columns.map((col, i) => (
                             <th
                                 key={i}
-                                className="px-4 py-3 text-left text-muted-foreground font-medium"
+                                className="px-4 py-3 text-left font-medium text-muted-foreground"
                             >
                                 {col.label}
                             </th>
@@ -44,7 +49,10 @@ export function DataTable<T>({ data, columns, loading = false, emptyMessage = 'N
                         ))
                     ) : data.length === 0 ? (
                         <tr>
-                            <td colSpan={columns.length} className="px-4 py-16 text-center">
+                            <td
+                                colSpan={columns.length}
+                                className="px-4 py-16 text-center"
+                            >
                                 <div className="flex flex-col items-center gap-3 text-muted-foreground">
                                     <PackageOpen className="size-10 opacity-40" />
                                     <p className="text-sm">{emptyMessage}</p>
@@ -55,7 +63,7 @@ export function DataTable<T>({ data, columns, loading = false, emptyMessage = 'N
                         data.map((item, rowIndex) => (
                             <tr
                                 key={rowIndex}
-                                className="border-t hover:bg-muted/40 transition"
+                                className="border-t transition hover:bg-muted/40"
                             >
                                 {columns.map((col, colIndex) => (
                                     <td key={colIndex} className="px-4 py-3">

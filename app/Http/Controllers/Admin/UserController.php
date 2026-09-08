@@ -17,7 +17,6 @@ use Inertia\Inertia;
 
 class UserController extends Controller
 {
-
     public function index(Request $request)
     {
         $usuarios = User::with(['doador', 'instituicao'])

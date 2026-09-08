@@ -60,8 +60,9 @@ export default function TwoFactorRecoveryCodes({
                     Códigos de recuperação 2FA
                 </CardTitle>
                 <CardDescription>
-                    Os códigos de recuperação permitem que você recupere acesso caso perca
-                    seu dispositivo 2FA. Armazene-os em um gerenciador de senhas seguro.
+                    Os códigos de recuperação permitem que você recupere acesso
+                    caso perca seu dispositivo 2FA. Armazene-os em um
+                    gerenciador de senhas seguro.
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -76,7 +77,8 @@ export default function TwoFactorRecoveryCodes({
                             className="size-4"
                             aria-hidden="true"
                         />
-                        {codesAreVisible ? 'Ocultar' : 'Ver'} códigos de recuperação
+                        {codesAreVisible ? 'Ocultar' : 'Ver'} códigos de
+                        recuperação
                     </Button>
 
                     {canRegenerateCodes && (
@@ -145,10 +147,12 @@ export default function TwoFactorRecoveryCodes({
 
                                 <div className="text-xs text-muted-foreground select-none">
                                     <p id="regenerate-warning">
-                                        Cada código pode ser usado uma vez para acessar sua
-                                        conta e será removido após o uso. Se precisar de mais,
-                                        clique em{' '}
-                                        <span className="font-bold">Gerar novos códigos</span>{' '}
+                                        Cada código pode ser usado uma vez para
+                                        acessar sua conta e será removido após o
+                                        uso. Se precisar de mais, clique em{' '}
+                                        <span className="font-bold">
+                                            Gerar novos códigos
+                                        </span>{' '}
                                         acima.
                                     </p>
                                 </div>
