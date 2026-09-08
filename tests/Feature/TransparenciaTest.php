@@ -12,15 +12,15 @@ function criarDoador(bool $exibir = false, string $nome = 'Karen Ubial', string 
     $user = User::factory()->create(['tipo_usuario' => 'doador']);
 
     return Doador::create([
-        'usuario_id'              => $user->id,
-        'nome_completo'           => $nome,
-        'cpf'                     => $cpf,
-        'telefone'                => '(41) 91234-5678',
-        'endereco_completo'       => 'Rua Secreta, 123 - Curitiba/PR',
-        'pontuacao_gamificacao'   => 0,
+        'usuario_id' => $user->id,
+        'nome_completo' => $nome,
+        'cpf' => $cpf,
+        'telefone' => '(41) 91234-5678',
+        'endereco_completo' => 'Rua Secreta, 123 - Curitiba/PR',
+        'pontuacao_gamificacao' => 0,
         'exibir_em_transparencia' => $exibir,
-        'latitude'                => -25.4,
-        'longitude'               => -49.3,
+        'latitude' => -25.4,
+        'longitude' => -49.3,
     ]);
 }
 
@@ -29,28 +29,28 @@ function criarInstituicao(string $nome = 'Casa de Apoio'): Instituicao
     $user = User::factory()->create(['tipo_usuario' => 'instituicao']);
 
     return Instituicao::factory()->create([
-        'usuario_id'    => $user->id,
+        'usuario_id' => $user->id,
         'nome_fantasia' => $nome,
-        'status'        => 'approved',
+        'status' => 'approved',
     ]);
 }
 
 function criarDoacao(Doador $doador, Instituicao $instituicao, string $status = 'entregue', ?string $dataEntrega = '2026-08-01'): Doacao
 {
     $doacao = Doacao::create([
-        'doador_id'      => $doador->usuario_id,
+        'doador_id' => $doador->usuario_id,
         'instituicao_id' => $instituicao->usuario_id,
-        'status'         => $status,
-        'data_entrega'   => $status === 'entregue' ? $dataEntrega : null,
+        'status' => $status,
+        'data_entrega' => $status === 'entregue' ? $dataEntrega : null,
     ]);
 
     $categoria = CategoriaItem::firstOrCreate(['nome' => 'Alimentos']);
 
     ItemDoacao::create([
-        'doacao_id'    => $doacao->id,
+        'doacao_id' => $doacao->id,
         'categoria_id' => $categoria->id,
-        'descricao'    => 'Arroz e feijão',
-        'quantidade'   => 5,
+        'descricao' => 'Arroz e feijão',
+        'quantidade' => 5,
     ]);
 
     return $doacao;
@@ -139,9 +139,9 @@ test('marcar doação como entregue grava a data de entrega', function () {
     $instituicao = criarInstituicao();
 
     $doacao = Doacao::create([
-        'doador_id'      => $doador->usuario_id,
+        'doador_id' => $doador->usuario_id,
         'instituicao_id' => $instituicao->usuario_id,
-        'status'         => 'confirmada',
+        'status' => 'confirmada',
     ]);
 
     expect($doacao->data_entrega)->toBeNull();

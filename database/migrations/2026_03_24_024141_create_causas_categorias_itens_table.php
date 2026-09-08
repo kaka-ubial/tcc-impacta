@@ -18,7 +18,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-
         Schema::create('categorias_itens', function (Blueprint $table) {
             $table->id();
             $table->string('nome');

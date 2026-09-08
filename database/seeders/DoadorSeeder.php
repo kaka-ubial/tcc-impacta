@@ -39,9 +39,9 @@ class DoadorSeeder extends Seeder
             $user = User::firstOrCreate(
                 ['email' => $email],
                 [
-                    'password'     => Hash::make('senha_segura'),
+                    'password' => Hash::make('senha_segura'),
                     'tipo_usuario' => 'doador',
-                    'status'       => 'ativo',
+                    'status' => 'ativo',
                 ],
             );
 
@@ -52,14 +52,14 @@ class DoadorSeeder extends Seeder
             Doador::firstOrCreate(
                 ['usuario_id' => $user->id],
                 [
-                    'nome_completo'           => $nome,
-                    'cpf'                     => $cpf,
-                    'telefone'                => sprintf('(41) 9%04d-%04d', 1000 + $i * 37, 2000 + $i * 53),
-                    'endereco_completo'       => sprintf('Rua das Flores, %d - %s, Curitiba/PR', 100 + $i * 17, self::BAIRROS[$i % count(self::BAIRROS)]),
-                    'pontuacao_gamificacao'   => $i * 35,
+                    'nome_completo' => $nome,
+                    'cpf' => $cpf,
+                    'telefone' => sprintf('(41) 9%04d-%04d', 1000 + $i * 37, 2000 + $i * 53),
+                    'endereco_completo' => sprintf('Rua das Flores, %d - %s, Curitiba/PR', 100 + $i * 17, self::BAIRROS[$i % count(self::BAIRROS)]),
+                    'pontuacao_gamificacao' => $i * 35,
                     'exibir_em_transparencia' => $i % 5 < 2,
-                    'latitude'                => -25.42 - ($i % 10) * 0.006,
-                    'longitude'               => -49.27 - ($i % 10) * 0.005,
+                    'latitude' => -25.42 - ($i % 10) * 0.006,
+                    'longitude' => -49.27 - ($i % 10) * 0.005,
                 ],
             );
 

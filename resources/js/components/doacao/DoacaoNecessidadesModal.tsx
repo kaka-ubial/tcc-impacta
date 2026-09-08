@@ -4,15 +4,26 @@ import { useState } from 'react';
 import EnderecoCepFields from '@/components/endereco-cep-fields';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { buildEnderecoCompleto  } from '@/lib/validators';
-import type {EnderecoFields} from '@/lib/validators';
-import type { HorarioDisponivel, NecessidadeAtiva } from '@/types';
+import { buildEnderecoCompleto } from '@/lib/validators';
+import type { EnderecoFields } from '@/lib/validators';
 import { store as doacoesStore } from '@/routes/doacoes';
+import type { HorarioDisponivel, NecessidadeAtiva } from '@/types';
 
 type Props = {
     open: boolean;
@@ -23,14 +34,25 @@ type Props = {
     initialNecessidadeId?: number;
 };
 
-
-const DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+const DIAS = [
+    'Domingo',
+    'Segunda',
+    'Terça',
+    'Quarta',
+    'Quinta',
+    'Sexta',
+    'Sábado',
+];
 
 function fmt(hora: string) {
     return hora.slice(0, 5);
 }
 
-function buildUpcomingDates(horarios: HorarioDisponivel[], tipo: 'coleta' | 'entrega', weeks = 2) {
+function buildUpcomingDates(
+    horarios: HorarioDisponivel[],
+    tipo: 'coleta' | 'entrega',
+    weeks = 2,
+) {
     const filtered = horarios.filter((h) => h.tipo === tipo);
     const now = new Date();
     const results: { label: string; value: string; horarioId: number }[] = [];
@@ -57,15 +79,21 @@ function buildUpcomingDates(horarios: HorarioDisponivel[], tipo: 'coleta' | 'ent
 }
 
 const prioridadeConfig = {
-    alta:  { variant: 'destructive' as const, label: 'Alta' },
-    media: { variant: 'default'     as const, label: 'Média' },
-    baixa: { variant: 'secondary'   as const, label: 'Baixa' },
+    alta: { variant: 'destructive' as const, label: 'Alta' },
+    media: { variant: 'default' as const, label: 'Média' },
+    baixa: { variant: 'secondary' as const, label: 'Baixa' },
 };
 
 const STEPS = ['Necessidades', 'Agendamento', 'Confirmação'] as const;
 
-
-export function DoacaoNecessidadesModal({ open, onClose, instituicaoId, necessidades, horariosDisponiveis, initialNecessidadeId }: Props) {
+export function DoacaoNecessidadesModal({
+    open,
+    onClose,
+    instituicaoId,
+    necessidades,
+    horariosDisponiveis,
+    initialNecessidadeId,
+}: Props) {
     const [step, setStep] = useState(0);
     const [selected, setSelected] = useState<Record<number, number>>({});
 
@@ -85,11 +113,19 @@ export function DoacaoNecessidadesModal({ open, onClose, instituicaoId, necessid
     const [dataHora, setDataHora] = useState('');
     const [enderecoReferencia, setEnderecoReferencia] = useState('');
     const [enderecoColeta, setEnderecoColeta] = useState<EnderecoFields>({
-        cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', uf: '',
+        cep: '',
+        logradouro: '',
+        numero: '',
+        complemento: '',
+        bairro: '',
+        cidade: '',
+        uf: '',
     });
     const [processing, setProcessing] = useState(false);
 
-    const abertas = necessidades.filter((n) => n.quantidade_atual < n.quantidade_objetivo);
+    const abertas = necessidades.filter(
+        (n) => n.quantidade_atual < n.quantidade_objetivo,
+    );
     const upcomingDates = buildUpcomingDates(horariosDisponiveis, tipo);
 
     function toggle(n: NecessidadeAtiva) {
@@ -123,13 +159,26 @@ export function DoacaoNecessidadesModal({ open, onClose, instituicaoId, necessid
         setTipo('entrega');
         setDataHora('');
         setEnderecoReferencia('');
-        setEnderecoColeta({ cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', uf: '' });
+        setEnderecoColeta({
+            cep: '',
+            logradouro: '',
+            numero: '',
+            complemento: '',
+            bairro: '',
+            cidade: '',
+            uf: '',
+        });
         onClose();
     }
 
     const selectedIds = Object.keys(selected).map(Number);
     const canAdvanceStep1 = selectedIds.length > 0;
-    const canAdvanceStep2 = dataHora !== '' && (tipo !== 'coleta' || (enderecoColeta.cep.replace(/\D/g, '').length === 8 && !!enderecoColeta.logradouro && !!enderecoColeta.numero));
+    const canAdvanceStep2 =
+        dataHora !== '' &&
+        (tipo !== 'coleta' ||
+            (enderecoColeta.cep.replace(/\D/g, '').length === 8 &&
+                !!enderecoColeta.logradouro &&
+                !!enderecoColeta.numero));
 
     function handleSubmit() {
         setProcessing(true);
@@ -153,14 +202,18 @@ export function DoacaoNecessidadesModal({ open, onClose, instituicaoId, necessid
                 agendamento: {
                     tipo,
                     data_hora: dataHora.replace('T', ' ') + ':00',
-                    horario_disponivel_id: upcomingDates.find((d) => d.value === dataHora)?.horarioId ?? null,
-                    endereco_referencia: tipo === 'coleta' ? enderecoReferencia : null,
+                    horario_disponivel_id:
+                        upcomingDates.find((d) => d.value === dataHora)
+                            ?.horarioId ?? null,
+                    endereco_referencia:
+                        tipo === 'coleta' ? enderecoReferencia : null,
                 },
             },
             {
                 onSuccess: () => {
- setProcessing(false); handleClose(); 
-},
+                    setProcessing(false);
+                    handleClose();
+                },
                 onError: () => setProcessing(false),
             },
         );
@@ -177,16 +230,30 @@ export function DoacaoNecessidadesModal({ open, onClose, instituicaoId, necessid
                 <div className="flex items-center gap-2 text-sm">
                     {STEPS.map((s, i) => (
                         <div key={s} className="flex items-center gap-2">
-                            <span className={[
-                                'flex size-6 items-center justify-center rounded-full text-xs font-medium',
-                                i === step ? 'bg-primary text-primary-foreground'
-                                    : i < step ? 'bg-primary/30 text-primary'
-                                    : 'bg-muted text-muted-foreground',
-                            ].join(' ')}>
+                            <span
+                                className={[
+                                    'flex size-6 items-center justify-center rounded-full text-xs font-medium',
+                                    i === step
+                                        ? 'bg-primary text-primary-foreground'
+                                        : i < step
+                                          ? 'bg-primary/30 text-primary'
+                                          : 'bg-muted text-muted-foreground',
+                                ].join(' ')}
+                            >
                                 {i + 1}
                             </span>
-                            <span className={i === step ? 'font-medium' : 'text-muted-foreground'}>{s}</span>
-                            {i < STEPS.length - 1 && <span className="text-muted-foreground">›</span>}
+                            <span
+                                className={
+                                    i === step
+                                        ? 'font-medium'
+                                        : 'text-muted-foreground'
+                                }
+                            >
+                                {s}
+                            </span>
+                            {i < STEPS.length - 1 && (
+                                <span className="text-muted-foreground">›</span>
+                            )}
                         </div>
                     ))}
                 </div>
@@ -198,27 +265,49 @@ export function DoacaoNecessidadesModal({ open, onClose, instituicaoId, necessid
                     <div className="flex flex-col gap-4">
                         <div className="flex flex-col gap-1">
                             <Label>Tipo de entrega</Label>
-                            <Select value={tipo} onValueChange={(v) => setTipo(v as 'coleta' | 'entrega')}>
-                                <SelectTrigger><SelectValue /></SelectTrigger>
+                            <Select
+                                value={tipo}
+                                onValueChange={(v) =>
+                                    setTipo(v as 'coleta' | 'entrega')
+                                }
+                            >
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="entrega">Entrega — eu levo até a instituição</SelectItem>
-                                    <SelectItem value="coleta">Coleta — a instituição busca em mim</SelectItem>
+                                    <SelectItem value="entrega">
+                                        Entrega — eu levo até a instituição
+                                    </SelectItem>
+                                    <SelectItem value="coleta">
+                                        Coleta — a instituição busca em mim
+                                    </SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
 
                         <Separator />
 
-                        <Label>Selecione as necessidades que deseja atender</Label>
+                        <Label>
+                            Selecione as necessidades que deseja atender
+                        </Label>
 
                         {abertas.length === 0 ? (
-                            <p className="text-muted-foreground text-sm">Todas as necessidades já foram atendidas.</p>
+                            <p className="text-sm text-muted-foreground">
+                                Todas as necessidades já foram atendidas.
+                            </p>
                         ) : (
                             <div className="flex max-h-80 flex-col gap-2 overflow-y-auto pr-1">
                                 {abertas.map((n) => {
-                                    const remaining = n.quantidade_objetivo - n.quantidade_atual;
-                                    const pct = Math.round((n.quantidade_atual / n.quantidade_objetivo) * 100);
-                                    const isSelected = selected[n.id] !== undefined;
+                                    const remaining =
+                                        n.quantidade_objetivo -
+                                        n.quantidade_atual;
+                                    const pct = Math.round(
+                                        (n.quantidade_atual /
+                                            n.quantidade_objetivo) *
+                                            100,
+                                    );
+                                    const isSelected =
+                                        selected[n.id] !== undefined;
                                     const cfg = prioridadeConfig[n.prioridade];
 
                                     return (
@@ -235,26 +324,39 @@ export function DoacaoNecessidadesModal({ open, onClose, instituicaoId, necessid
                                         >
                                             <div className="flex items-start justify-between gap-2">
                                                 <div className="flex flex-col gap-0.5">
-                                                    <span className="text-sm font-medium">{n.categoria.nome}</span>
+                                                    <span className="text-sm font-medium">
+                                                        {n.categoria.nome}
+                                                    </span>
                                                     {n.descricao && (
-                                                        <span className="text-muted-foreground text-xs">{n.descricao}</span>
+                                                        <span className="text-xs text-muted-foreground">
+                                                            {n.descricao}
+                                                        </span>
                                                     )}
                                                 </div>
-                                                <Badge variant={cfg.variant} className="shrink-0 text-xs">
+                                                <Badge
+                                                    variant={cfg.variant}
+                                                    className="shrink-0 text-xs"
+                                                >
                                                     {cfg.label}
                                                 </Badge>
                                             </div>
 
                                             {/* progress */}
                                             <div className="flex flex-col gap-1">
-                                                <div className="text-muted-foreground flex justify-between text-xs">
+                                                <div className="flex justify-between text-xs text-muted-foreground">
                                                     <span>{pct}% atendido</span>
-                                                    <span>{n.quantidade_atual}/{n.quantidade_objetivo} · faltam {remaining}</span>
+                                                    <span>
+                                                        {n.quantidade_atual}/
+                                                        {n.quantidade_objetivo}{' '}
+                                                        · faltam {remaining}
+                                                    </span>
                                                 </div>
-                                                <div className="bg-secondary h-1.5 w-full overflow-hidden rounded-full">
+                                                <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
                                                     <div
-                                                        className="bg-primary h-full rounded-full transition-all"
-                                                        style={{ width: `${pct}%` }}
+                                                        className="h-full rounded-full bg-primary transition-all"
+                                                        style={{
+                                                            width: `${pct}%`,
+                                                        }}
                                                     />
                                                 </div>
                                             </div>
@@ -263,18 +365,30 @@ export function DoacaoNecessidadesModal({ open, onClose, instituicaoId, necessid
                                             {isSelected && (
                                                 <div
                                                     className="flex items-center gap-2"
-                                                    onClick={(e) => e.stopPropagation()}
+                                                    onClick={(e) =>
+                                                        e.stopPropagation()
+                                                    }
                                                 >
-                                                    <Label className="text-xs">Quantidade</Label>
+                                                    <Label className="text-xs">
+                                                        Quantidade
+                                                    </Label>
                                                     <Input
                                                         type="number"
                                                         min={1}
                                                         max={remaining}
                                                         value={selected[n.id]}
-                                                        onChange={(e) => setQty(n.id, e.target.value)}
+                                                        onChange={(e) =>
+                                                            setQty(
+                                                                n.id,
+                                                                e.target.value,
+                                                            )
+                                                        }
                                                         className="h-7 w-20 text-sm"
                                                     />
-                                                    <span className="text-muted-foreground text-xs">de {remaining} disponíveis</span>
+                                                    <span className="text-xs text-muted-foreground">
+                                                        de {remaining}{' '}
+                                                        disponíveis
+                                                    </span>
                                                 </div>
                                             )}
                                         </button>
@@ -284,7 +398,10 @@ export function DoacaoNecessidadesModal({ open, onClose, instituicaoId, necessid
                         )}
 
                         <div className="flex justify-end">
-                            <Button onClick={() => setStep(1)} disabled={!canAdvanceStep1}>
+                            <Button
+                                onClick={() => setStep(1)}
+                                disabled={!canAdvanceStep1}
+                            >
                                 Próximo
                             </Button>
                         </div>
@@ -295,18 +412,29 @@ export function DoacaoNecessidadesModal({ open, onClose, instituicaoId, necessid
                 {step === 1 && (
                     <div className="flex flex-col gap-4">
                         {upcomingDates.length === 0 ? (
-                            <p className="text-muted-foreground text-sm">
-                                Nenhum horário disponível para {tipo === 'coleta' ? 'coleta' : 'entrega'}.
+                            <p className="text-sm text-muted-foreground">
+                                Nenhum horário disponível para{' '}
+                                {tipo === 'coleta' ? 'coleta' : 'entrega'}.
                             </p>
                         ) : (
                             <>
                                 <div className="flex flex-col gap-1">
                                     <Label>Data e horário</Label>
-                                    <Select value={dataHora} onValueChange={setDataHora}>
-                                        <SelectTrigger><SelectValue placeholder="Selecione uma data" /></SelectTrigger>
+                                    <Select
+                                        value={dataHora}
+                                        onValueChange={setDataHora}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Selecione uma data" />
+                                        </SelectTrigger>
                                         <SelectContent>
                                             {upcomingDates.map((d) => (
-                                                <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
+                                                <SelectItem
+                                                    key={d.value}
+                                                    value={d.value}
+                                                >
+                                                    {d.label}
+                                                </SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
@@ -317,7 +445,9 @@ export function DoacaoNecessidadesModal({ open, onClose, instituicaoId, necessid
                                         <Label>Seu endereço para coleta</Label>
                                         <EnderecoCepFields
                                             value={enderecoColeta}
-                                            onChange={handleEnderecoColetaChange}
+                                            onChange={
+                                                handleEnderecoColetaChange
+                                            }
                                         />
                                     </div>
                                 )}
@@ -325,8 +455,18 @@ export function DoacaoNecessidadesModal({ open, onClose, instituicaoId, necessid
                         )}
 
                         <div className="flex justify-between">
-                            <Button variant="outline" onClick={() => setStep(0)}>Voltar</Button>
-                            <Button onClick={() => setStep(2)} disabled={!canAdvanceStep2}>Próximo</Button>
+                            <Button
+                                variant="outline"
+                                onClick={() => setStep(0)}
+                            >
+                                Voltar
+                            </Button>
+                            <Button
+                                onClick={() => setStep(2)}
+                                disabled={!canAdvanceStep2}
+                            >
+                                Próximo
+                            </Button>
                         </div>
                     </div>
                 )}
@@ -338,22 +478,34 @@ export function DoacaoNecessidadesModal({ open, onClose, instituicaoId, necessid
                             <p className="font-medium">Resumo</p>
                             <Separator />
                             <div className="flex items-center gap-2">
-                                <span className="text-muted-foreground w-24 shrink-0">Tipo:</span>
+                                <span className="w-24 shrink-0 text-muted-foreground">
+                                    Tipo:
+                                </span>
                                 <Badge variant="outline">
-                                    {tipo === 'entrega' ? 'Entrega (eu levo)' : 'Coleta (buscam)'}
+                                    {tipo === 'entrega'
+                                        ? 'Entrega (eu levo)'
+                                        : 'Coleta (buscam)'}
                                 </Badge>
                             </div>
                             <div className="flex flex-col gap-1">
-                                <span className="text-muted-foreground">Itens:</span>
+                                <span className="text-muted-foreground">
+                                    Itens:
+                                </span>
                                 <ul className="list-inside list-disc space-y-0.5 pl-1">
                                     {selectedIds.map((id) => {
-                                        const n = necessidades.find((x) => x.id === id)!;
+                                        const n = necessidades.find(
+                                            (x) => x.id === id,
+                                        )!;
 
                                         return (
                                             <li key={id}>
-                                                {selected[id]}× {n.categoria.nome}
+                                                {selected[id]}×{' '}
+                                                {n.categoria.nome}
                                                 {n.descricao && (
-                                                    <span className="text-muted-foreground"> ({n.descricao})</span>
+                                                    <span className="text-muted-foreground">
+                                                        {' '}
+                                                        ({n.descricao})
+                                                    </span>
                                                 )}
                                             </li>
                                         );
@@ -361,25 +513,40 @@ export function DoacaoNecessidadesModal({ open, onClose, instituicaoId, necessid
                                 </ul>
                             </div>
                             <div className="flex items-center gap-2">
-                                <span className="text-muted-foreground w-24 shrink-0">Data/hora:</span>
+                                <span className="w-24 shrink-0 text-muted-foreground">
+                                    Data/hora:
+                                </span>
                                 <span>{dataHora.replace('T', ' ')}</span>
                             </div>
                             {tipo === 'coleta' && enderecoReferencia && (
                                 <div className="flex items-center gap-2">
-                                    <span className="text-muted-foreground w-24 shrink-0">Endereço:</span>
+                                    <span className="w-24 shrink-0 text-muted-foreground">
+                                        Endereço:
+                                    </span>
                                     <span>{enderecoReferencia}</span>
                                 </div>
                             )}
                         </div>
 
-                        <p className="text-muted-foreground text-xs">
-                            O progresso das necessidades será atualizado quando a instituição confirmar a solicitação.
+                        <p className="text-xs text-muted-foreground">
+                            O progresso das necessidades será atualizado quando
+                            a instituição confirmar a solicitação.
                         </p>
 
                         <div className="flex justify-between">
-                            <Button variant="outline" onClick={() => setStep(1)}>Voltar</Button>
-                            <Button onClick={handleSubmit} disabled={processing}>
-                                {processing ? 'Enviando…' : 'Enviar solicitação'}
+                            <Button
+                                variant="outline"
+                                onClick={() => setStep(1)}
+                            >
+                                Voltar
+                            </Button>
+                            <Button
+                                onClick={handleSubmit}
+                                disabled={processing}
+                            >
+                                {processing
+                                    ? 'Enviando…'
+                                    : 'Enviar solicitação'}
                             </Button>
                         </div>
                     </div>

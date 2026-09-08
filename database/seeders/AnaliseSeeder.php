@@ -22,7 +22,7 @@ class AnaliseSeeder extends Seeder
         $observacoes = [
             'approved' => 'Documentação conferida e CNPJ ativo na Receita Federal.',
             'rejected' => 'CNPJ inativo e endereço não confere com o cadastro.',
-            'pending'  => null,
+            'pending' => null,
         ];
 
         Instituicao::orderBy('usuario_id')->get()->each(function (Instituicao $instituicao) use ($admin, $observacoes) {
@@ -32,10 +32,10 @@ class AnaliseSeeder extends Seeder
             Analise::firstOrCreate(
                 [
                     'instituicao_id' => $instituicao->usuario_id,
-                    'admin_id'       => $admin->id,
+                    'admin_id' => $admin->id,
                 ],
                 [
-                    'status'      => $instituicao->status->value,
+                    'status' => $instituicao->status->value,
                     'observacoes' => $observacoes[$instituicao->status->value] ?? null,
                 ],
             );

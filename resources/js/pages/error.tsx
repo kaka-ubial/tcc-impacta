@@ -6,7 +6,10 @@ interface Props {
     status: number;
 }
 
-const config: Record<number, { title: string; description: string; icon: React.ElementType }> = {
+const config: Record<
+    number,
+    { title: string; description: string; icon: React.ElementType }
+> = {
     403: {
         title: 'Acesso negado',
         description: 'Você não tem permissão para acessar esta página.',
@@ -14,7 +17,8 @@ const config: Record<number, { title: string; description: string; icon: React.E
     },
     404: {
         title: 'Página não encontrada',
-        description: 'A página que você está procurando não existe ou foi removida.',
+        description:
+            'A página que você está procurando não existe ou foi removida.',
         icon: SearchX,
     },
     500: {
@@ -24,18 +28,24 @@ const config: Record<number, { title: string; description: string; icon: React.E
     },
     503: {
         title: 'Serviço indisponível',
-        description: 'O serviço está temporariamente fora do ar. Voltamos em breve.',
+        description:
+            'O serviço está temporariamente fora do ar. Voltamos em breve.',
         icon: WifiOff,
     },
     419: {
         title: 'Sessão expirada',
-        description: 'Sua sessão expirou. Por favor, atualize a página e faça login novamente.',
+        description:
+            'Sua sessão expirou. Por favor, atualize a página e faça login novamente.',
         icon: Clock,
     },
 };
 
 export default function Error({ status }: Props) {
-    const { title, description, icon: Icon } = config[status] ?? {
+    const {
+        title,
+        description,
+        icon: Icon,
+    } = config[status] ?? {
         title: 'Erro inesperado',
         description: 'Ocorreu um erro inesperado. Tente novamente.',
         icon: ServerCrash,
@@ -49,7 +59,7 @@ export default function Error({ status }: Props) {
                 <div className="relative mb-8 flex justify-center">
                     <span
                         aria-hidden
-                        className="font-display pointer-events-none select-none text-[9rem] font-bold leading-none text-brand/[0.08]"
+                        className="pointer-events-none font-display text-[9rem] leading-none font-bold text-brand/[0.08] select-none"
                     >
                         {status}
                     </span>
@@ -73,7 +83,10 @@ export default function Error({ status }: Props) {
                     <Button asChild>
                         <Link href="/">Voltar ao início</Link>
                     </Button>
-                    <Button variant="ghost" onClick={() => window.history.back()}>
+                    <Button
+                        variant="ghost"
+                        onClick={() => window.history.back()}
+                    >
                         Página anterior
                     </Button>
                 </div>

@@ -46,15 +46,26 @@ export function InstitutionModal({ institution, isOpen, onClose }: Props) {
                 <DialogHeader>
                     <DialogTitle>Detalhes da Instituição</DialogTitle>
                     <DialogDescription>
-                        Revise as informações antes de aprovar ou reprovar o cadastro.
+                        Revise as informações antes de aprovar ou reprovar o
+                        cadastro.
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="space-y-3 text-sm">
-                    <p><strong>Razão Social:</strong> {institution.razao_social}</p>
-                    <p><strong>CNPJ:</strong> {institution.cnpj}</p>
-                    <p><strong>Endereço:</strong> {institution.endereco_completo}</p>
-                    <p><strong>Telefone:</strong> {institution.telefone}</p>
+                    <p>
+                        <strong>Razão Social:</strong>{' '}
+                        {institution.razao_social}
+                    </p>
+                    <p>
+                        <strong>CNPJ:</strong> {institution.cnpj}
+                    </p>
+                    <p>
+                        <strong>Endereço:</strong>{' '}
+                        {institution.endereco_completo}
+                    </p>
+                    <p>
+                        <strong>Telefone:</strong> {institution.telefone}
+                    </p>
                 </div>
 
                 <div className="space-y-2">
@@ -71,7 +82,11 @@ export function InstitutionModal({ institution, isOpen, onClose }: Props) {
                 </div>
 
                 <DialogFooter className="flex-col-reverse gap-2 sm:flex-row sm:justify-between">
-                    <Button variant="outline" onClick={closeModal} disabled={processing}>
+                    <Button
+                        variant="outline"
+                        onClick={closeModal}
+                        disabled={processing}
+                    >
                         Cancelar
                     </Button>
 

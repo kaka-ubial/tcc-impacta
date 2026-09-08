@@ -20,7 +20,11 @@ type Props = {
     canRegister: boolean;
 };
 
-export default function Login({ status, canResetPassword, canRegister }: Props) {
+export default function Login({
+    status,
+    canResetPassword,
+    canRegister,
+}: Props) {
     return (
         <div className="flex min-h-svh flex-col bg-warm-neutral">
             <Head title="Entrar" />
@@ -40,7 +44,6 @@ export default function Login({ status, canResetPassword, canRegister }: Props) 
 
             <div className="flex flex-1 items-center justify-center px-6 py-12">
                 <div className="w-full max-w-[420px]">
-
                     <div className="mb-8">
                         <h1 className="font-display text-2xl font-bold text-foreground md:text-3xl">
                             Entre na sua conta
@@ -64,9 +67,11 @@ export default function Login({ status, canResetPassword, canRegister }: Props) 
                         {({ processing, errors }) => (
                             <>
                                 <div className="flex flex-col gap-5">
-
                                     <div className="flex flex-col gap-1.5">
-                                        <Label htmlFor="email" className="text-sm font-medium">
+                                        <Label
+                                            htmlFor="email"
+                                            className="text-sm font-medium"
+                                        >
                                             E-mail
                                         </Label>
                                         <Input
@@ -85,7 +90,10 @@ export default function Login({ status, canResetPassword, canRegister }: Props) 
 
                                     <div className="flex flex-col gap-1.5">
                                         <div className="flex items-center justify-between">
-                                            <Label htmlFor="password" className="text-sm font-medium">
+                                            <Label
+                                                htmlFor="password"
+                                                className="text-sm font-medium"
+                                            >
                                                 Senha
                                             </Label>
                                             {canResetPassword && (
@@ -105,7 +113,7 @@ export default function Login({ status, canResetPassword, canRegister }: Props) 
                                             tabIndex={2}
                                             autoComplete="current-password"
                                             placeholder="Sua senha"
-                                            className='h-11'
+                                            className="h-11"
                                         />
                                         <InputError message={errors.password} />
                                     </div>

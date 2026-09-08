@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Settings;
 
+use App\Actions\UserTypes\UserTypeFactory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\ProfileDeleteRequest;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
-use App\Actions\UserTypes\UserTypeFactory;
 use App\Models\Causa;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
@@ -27,7 +27,7 @@ class ProfileController extends Controller
             'causas' => Causa::orderBy('nome')->get(['id', 'nome', 'icone']),
             'auth' => [
                 'user' => $request->user()->load(['doador', 'instituicao', 'causas']),
-            ]
+            ],
         ]);
     }
 

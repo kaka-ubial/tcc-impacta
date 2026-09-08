@@ -23,9 +23,9 @@ type Necessidade = {
 };
 
 const prioridadeConfig = {
-    alta:  { variant: 'destructive', label: 'Alta prioridade' },
-    media: { variant: 'default',     label: 'Média prioridade' },
-    baixa: { variant: 'secondary',   label: 'Baixa prioridade' },
+    alta: { variant: 'destructive', label: 'Alta prioridade' },
+    media: { variant: 'default', label: 'Média prioridade' },
+    baixa: { variant: 'secondary', label: 'Baixa prioridade' },
 };
 
 type Props = {
@@ -34,13 +34,21 @@ type Props = {
     onEdit?: () => void;
 };
 
-export function NecessidadeCard({ onEdit, necessidade, variant = 'doador' }: Props) {
+export function NecessidadeCard({
+    onEdit,
+    necessidade,
+    variant = 'doador',
+}: Props) {
     const [deleting, setDeleting] = useState(false);
-    const isAtiva = necessidade.quantidade_atual < necessidade.quantidade_objetivo;
+    const isAtiva =
+        necessidade.quantidade_atual < necessidade.quantidade_objetivo;
 
     const pct = Math.min(
         100,
-        Math.round((necessidade.quantidade_atual / necessidade.quantidade_objetivo) * 100)
+        Math.round(
+            (necessidade.quantidade_atual / necessidade.quantidade_objetivo) *
+                100,
+        ),
     );
 
     const cfg = prioridadeConfig[necessidade.prioridade];
@@ -54,7 +62,6 @@ export function NecessidadeCard({ onEdit, necessidade, variant = 'doador' }: Pro
 
     return (
         <div className="flex flex-col gap-3 rounded-xl border p-4 shadow-sm">
-
             <div className="flex flex-col gap-1">
                 <div className="flex items-center justify-between gap-2">
                     <span className="text-sm font-medium">
@@ -66,34 +73,38 @@ export function NecessidadeCard({ onEdit, necessidade, variant = 'doador' }: Pro
                     </Badge>
                 </div>
 
-                <Badge className="self-start" variant={isAtiva ? 'default' : 'secondary'}>
+                <Badge
+                    className="self-start"
+                    variant={isAtiva ? 'default' : 'secondary'}
+                >
                     {isAtiva ? 'Ativa' : 'Concluída'}
                 </Badge>
             </div>
 
             {necessidade.descricao && (
-                <p className="text-muted-foreground text-sm">
+                <p className="text-sm text-muted-foreground">
                     {necessidade.descricao}
                 </p>
             )}
 
             {variant === 'doador' && necessidade.instituicao && (
-                <p className="text-muted-foreground text-xs">
+                <p className="text-xs text-muted-foreground">
                     {necessidade.instituicao.nome_fantasia}
                 </p>
             )}
 
             <div className="flex flex-col gap-1">
-                <div className="text-muted-foreground flex justify-between text-xs">
+                <div className="flex justify-between text-xs text-muted-foreground">
                     <span>{pct}% atendido</span>
                     <span>
-                        {necessidade.quantidade_atual} / {necessidade.quantidade_objetivo}
+                        {necessidade.quantidade_atual} /{' '}
+                        {necessidade.quantidade_objetivo}
                     </span>
                 </div>
 
-                <div className="bg-secondary h-2 rounded-full">
+                <div className="h-2 rounded-full bg-secondary">
                     <div
-                        className="bg-primary h-full rounded-full transition-all"
+                        className="h-full rounded-full bg-primary transition-all"
                         style={{ width: `${pct}%` }}
                     />
                 </div>
@@ -101,13 +112,14 @@ export function NecessidadeCard({ onEdit, necessidade, variant = 'doador' }: Pro
 
             {variant === 'instituicao' && (
                 <div className="flex gap-2 pt-2">
-                    <Button onClick={onEdit}>
-                        Editar
-                    </Button>
+                    <Button onClick={onEdit}>Editar</Button>
 
                     <Dialog>
                         <DialogTrigger asChild>
-                            <Button variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                            <Button
+                                variant="ghost"
+                                className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                            >
                                 Deletar
                             </Button>
                         </DialogTrigger>
@@ -115,15 +127,25 @@ export function NecessidadeCard({ onEdit, necessidade, variant = 'doador' }: Pro
                             <DialogTitle>Excluir necessidade</DialogTitle>
                             <DialogDescription>
                                 Tem certeza que deseja excluir a necessidade{' '}
-                                <span className="font-medium text-foreground">{necessidade.categoria.nome}</span>
+                                <span className="font-medium text-foreground">
+                                    {necessidade.categoria.nome}
+                                </span>
                                 {necessidade.descricao && (
-                                    <> — <span className="italic">{necessidade.descricao}</span></>
+                                    <>
+                                        {' '}
+                                        —{' '}
+                                        <span className="italic">
+                                            {necessidade.descricao}
+                                        </span>
+                                    </>
                                 )}
                                 ? Esta ação não pode ser desfeita.
                             </DialogDescription>
                             <DialogFooter className="gap-2">
                                 <DialogClose asChild>
-                                    <Button variant="secondary">Cancelar</Button>
+                                    <Button variant="secondary">
+                                        Cancelar
+                                    </Button>
                                 </DialogClose>
                                 <Button
                                     variant="destructive"

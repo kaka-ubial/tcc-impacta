@@ -17,7 +17,6 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { StarDisplay } from '@/components/ui/star-display';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem } from '@/types';
 import {
     aceitarSugestao as aceitarRoute,
     cancel as cancelRoute,
@@ -25,6 +24,7 @@ import {
     recusarSugestao as recusarRoute,
 } from '@/routes/doacoes';
 import { index as instituicoesIndex } from '@/routes/instituicoes';
+import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Minhas Doações', href: doacoesIndex.url() },
@@ -32,10 +32,16 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 // ─── status config ─────────────────────────────────────────────────────────────
 
-type StatusKey = 'pendente' | 'confirmada' | 'entregue' | 'cancelado' | 'recusada' | 'nao_entregue';
+type StatusKey =
+    | 'pendente'
+    | 'confirmada'
+    | 'entregue'
+    | 'cancelado'
+    | 'recusada'
+    | 'nao_entregue';
 
 const statusConfig: Record<StatusKey, { label: string; className: string }> = {
-    pendente:   {
+    pendente: {
         label: 'Aguardando confirmação',
         className: 'border-pending/30 bg-pending/10 text-pending',
     },
@@ -43,7 +49,7 @@ const statusConfig: Record<StatusKey, { label: string; className: string }> = {
         label: 'Confirmada',
         className: 'border-success/20 bg-success/10 text-success',
     },
-    entregue:   {
+    entregue: {
         label: 'Entregue',
         className: 'border-success/20 bg-success/10 text-success',
     },
@@ -51,11 +57,11 @@ const statusConfig: Record<StatusKey, { label: string; className: string }> = {
         label: 'Não entregue',
         className: 'border-destructive/20 bg-destructive/5 text-destructive',
     },
-    cancelado:  {
+    cancelado: {
         label: 'Cancelada',
         className: 'border-border bg-muted/50 text-muted-foreground',
     },
-    recusada:   {
+    recusada: {
         label: 'Recusada',
         className: 'border-destructive/20 bg-destructive/5 text-destructive',
     },
@@ -83,7 +89,12 @@ type Doacao = {
     id: number;
     status: StatusKey;
     instituicao: { id: number; nome_fantasia: string };
-    itens: { id: number; categoria: string; quantidade: number; descricao: string | null }[];
+    itens: {
+        id: number;
+        categoria: string;
+        quantidade: number;
+        descricao: string | null;
+    }[];
     agendamento: Agendamento | null;
     criado_em: string;
     avaliacao: { nota: number; descricao: string } | null;
@@ -97,40 +108,52 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
     const [processing, setProcessing] = useState(false);
     const temSugestao = doacao.agendamento?.status === 'alteracao_sugerida';
     const cfg = temSugestao
-        ? { label: 'Aguardando sua resposta', className: 'border-pending/30 bg-pending/10 text-pending' }
+        ? {
+              label: 'Aguardando sua resposta',
+              className: 'border-pending/30 bg-pending/10 text-pending',
+          }
         : (statusConfig[doacao.status] ?? statusConfig.pendente);
-    const canCancel = doacao.status === 'pendente' || doacao.status === 'confirmada';
+    const canCancel =
+        doacao.status === 'pendente' || doacao.status === 'confirmada';
 
     function handleCancel() {
         setProcessing(true);
-        router.post(cancelRoute(doacao.id).url, {}, {
-            onFinish: () => setProcessing(false),
-        });
+        router.post(
+            cancelRoute(doacao.id).url,
+            {},
+            {
+                onFinish: () => setProcessing(false),
+            },
+        );
     }
 
     function handleSugestao(url: string) {
         setProcessing(true);
-        router.post(url, {}, {
-            preserveScroll: true,
-            onFinish: () => setProcessing(false),
-        });
+        router.post(
+            url,
+            {},
+            {
+                preserveScroll: true,
+                onFinish: () => setProcessing(false),
+            },
+        );
     }
 
     return (
         <article className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card">
-
             {/* Header */}
             <div className="flex items-start justify-between gap-3 px-5 pt-5 pb-4">
                 <div>
                     <Link
                         href={`/instituicoes/${doacao.instituicao.id}`}
-                        className="flex items-center gap-1.5 font-semibold text-foreground hover:text-brand transition-colors"
+                        className="flex items-center gap-1.5 font-semibold text-foreground transition-colors hover:text-brand"
                     >
-                        <Building2 className="size-4 text-muted-foreground shrink-0" />
+                        <Building2 className="size-4 shrink-0 text-muted-foreground" />
                         {doacao.instituicao.nome_fantasia}
                     </Link>
                     <p className="mt-0.5 pl-[22px] text-xs text-muted-foreground">
-                        Solicitado em {new Date(doacao.criado_em).toLocaleDateString('pt-BR')}
+                        Solicitado em{' '}
+                        {new Date(doacao.criado_em).toLocaleDateString('pt-BR')}
                     </p>
                 </div>
                 <Badge
@@ -145,20 +168,24 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
 
             {/* Body */}
             <div className="flex flex-col gap-4 px-5 py-4">
-
                 {/* Items */}
                 <div>
-                    <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    <div className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                         <Package className="size-3.5" />
                         Itens
                     </div>
                     <ul className="mt-2 flex flex-col gap-1.5 pl-5">
                         {doacao.itens.map((item) => (
                             <li key={item.id} className="text-sm">
-                                <span className="font-medium text-foreground">{item.quantidade}×</span>{' '}
+                                <span className="font-medium text-foreground">
+                                    {item.quantidade}×
+                                </span>{' '}
                                 <span>{item.categoria}</span>
                                 {item.descricao && (
-                                    <span className="text-muted-foreground"> — {item.descricao}</span>
+                                    <span className="text-muted-foreground">
+                                        {' '}
+                                        — {item.descricao}
+                                    </span>
                                 )}
                             </li>
                         ))}
@@ -168,21 +195,27 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
                 {/* Scheduling */}
                 {doacao.agendamento && (
                     <div>
-                        <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        <div className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                             <Calendar className="size-3.5" />
                             Agendamento
                         </div>
                         <div className="mt-2 rounded-xl border border-border bg-muted/30 px-4 py-3 text-sm">
                             <div className="flex flex-wrap items-center gap-2">
-                                <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${
-                                    doacao.agendamento.tipo === 'coleta'
-                                        ? 'border-brand/20 bg-brand/8 text-brand'
-                                        : 'border-success/20 bg-success/8 text-success'
-                                }`}>
-                                    {doacao.agendamento.tipo === 'coleta' ? 'Coleta' : 'Entrega'}
+                                <span
+                                    className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${
+                                        doacao.agendamento.tipo === 'coleta'
+                                            ? 'border-brand/20 bg-brand/8 text-brand'
+                                            : 'border-success/20 bg-success/8 text-success'
+                                    }`}
+                                >
+                                    {doacao.agendamento.tipo === 'coleta'
+                                        ? 'Coleta'
+                                        : 'Entrega'}
                                 </span>
                                 <span className="text-foreground">
-                                    {formatDataHora(doacao.agendamento.data_hora)}
+                                    {formatDataHora(
+                                        doacao.agendamento.data_hora,
+                                    )}
                                 </span>
                             </div>
                             {doacao.agendamento.endereco_referencia && (
@@ -192,33 +225,45 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
                             )}
                         </div>
 
-                        {doacao.agendamento.status === 'alteracao_sugerida' && doacao.agendamento.data_hora_sugerida && (
-                            <div className="mt-2 rounded-xl border border-pending/30 bg-pending/10 px-4 py-3">
-                                <p className="text-sm text-foreground">
-                                    A instituição sugeriu uma nova data:{' '}
-                                    <span className="font-semibold">
-                                        {formatDataHora(doacao.agendamento.data_hora_sugerida)}
-                                    </span>
-                                </p>
-                                <div className="mt-2 flex gap-2">
-                                    <Button
-                                        size="sm"
-                                        disabled={processing}
-                                        onClick={() => handleSugestao(aceitarRoute(doacao.id).url)}
-                                    >
-                                        Aceitar
-                                    </Button>
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        disabled={processing}
-                                        onClick={() => handleSugestao(recusarRoute(doacao.id).url)}
-                                    >
-                                        Recusar
-                                    </Button>
+                        {doacao.agendamento.status === 'alteracao_sugerida' &&
+                            doacao.agendamento.data_hora_sugerida && (
+                                <div className="mt-2 rounded-xl border border-pending/30 bg-pending/10 px-4 py-3">
+                                    <p className="text-sm text-foreground">
+                                        A instituição sugeriu uma nova data:{' '}
+                                        <span className="font-semibold">
+                                            {formatDataHora(
+                                                doacao.agendamento
+                                                    .data_hora_sugerida,
+                                            )}
+                                        </span>
+                                    </p>
+                                    <div className="mt-2 flex gap-2">
+                                        <Button
+                                            size="sm"
+                                            disabled={processing}
+                                            onClick={() =>
+                                                handleSugestao(
+                                                    aceitarRoute(doacao.id).url,
+                                                )
+                                            }
+                                        >
+                                            Aceitar
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            disabled={processing}
+                                            onClick={() =>
+                                                handleSugestao(
+                                                    recusarRoute(doacao.id).url,
+                                                )
+                                            }
+                                        >
+                                            Recusar
+                                        </Button>
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
                     </div>
                 )}
             </div>
@@ -242,24 +287,33 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
                             <DialogContent>
                                 <DialogTitle>Cancelar doação</DialogTitle>
                                 <DialogDescription>
-                                    Tem certeza que deseja cancelar a doação para{' '}
-                                    <span className="font-medium text-foreground">{doacao.instituicao.nome_fantasia}</span>?
+                                    Tem certeza que deseja cancelar a doação
+                                    para{' '}
+                                    <span className="font-medium text-foreground">
+                                        {doacao.instituicao.nome_fantasia}
+                                    </span>
+                                    ?
                                     {doacao.status === 'confirmada' && (
-                                        <span className="mt-2 block text-destructive font-medium">
-                                            Esta doação já foi confirmada pela instituição.
+                                        <span className="mt-2 block font-medium text-destructive">
+                                            Esta doação já foi confirmada pela
+                                            instituição.
                                         </span>
                                     )}
                                 </DialogDescription>
                                 <DialogFooter className="gap-2">
                                     <DialogClose asChild>
-                                        <Button variant="secondary">Voltar</Button>
+                                        <Button variant="secondary">
+                                            Voltar
+                                        </Button>
                                     </DialogClose>
                                     <Button
                                         variant="destructive"
                                         onClick={handleCancel}
                                         disabled={processing}
                                     >
-                                        {processing ? 'Cancelando...' : 'Confirmar cancelamento'}
+                                        {processing
+                                            ? 'Cancelando...'
+                                            : 'Confirmar cancelamento'}
                                     </Button>
                                 </DialogFooter>
                             </DialogContent>
@@ -294,13 +348,34 @@ function EmptyState() {
                 aria-hidden
                 className="text-muted-foreground/30"
             >
-                <path d="M8 24h48v28a4 4 0 01-4 4H12a4 4 0 01-4-4V24z" stroke="currentColor" strokeWidth="2" />
-                <path d="M4 16h56a2 2 0 012 2v6H2v-6a2 2 0 012-2z" stroke="currentColor" strokeWidth="2" />
-                <path d="M24 16v-4a8 8 0 0116 0v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                <path d="M24 36l4 4 12-12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path
+                    d="M8 24h48v28a4 4 0 01-4 4H12a4 4 0 01-4-4V24z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                />
+                <path
+                    d="M4 16h56a2 2 0 012 2v6H2v-6a2 2 0 012-2z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                />
+                <path
+                    d="M24 16v-4a8 8 0 0116 0v4"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                />
+                <path
+                    d="M24 36l4 4 12-12"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                />
             </svg>
             <div>
-                <p className="font-semibold text-foreground">Nenhuma doação ainda</p>
+                <p className="font-semibold text-foreground">
+                    Nenhuma doação ainda
+                </p>
                 <p className="mt-1 text-sm text-muted-foreground">
                     Encontre uma instituição e faça sua primeira solicitação.
                 </p>
@@ -321,14 +396,21 @@ export default function MinhasDoacoes({ doacoes }: Props) {
     const { auth } = usePage().props;
     const nome = (auth.user as any).doador?.nome_completo ?? auth.user.email;
 
-    const pending = doacoes.filter((d) => d.status === 'pendente' || d.status === 'confirmada');
-    const past    = doacoes.filter((d) => d.status !== 'pendente' && d.status !== 'confirmada');
+    const pending = doacoes.filter(
+        (d) => d.status === 'pendente' || d.status === 'confirmada',
+    );
+    const past = doacoes.filter(
+        (d) => d.status !== 'pendente' && d.status !== 'confirmada',
+    );
 
-    const stats = useMemo(() => ({
-        total: doacoes.length,
-        entregues: doacoes.filter((d) => d.status === 'entregue').length,
-        pendentes: pending.length,
-    }), [doacoes, pending.length]);
+    const stats = useMemo(
+        () => ({
+            total: doacoes.length,
+            entregues: doacoes.filter((d) => d.status === 'entregue').length,
+            pendentes: pending.length,
+        }),
+        [doacoes, pending.length],
+    );
 
     // Derive unique institution names they've donated to
     const instituicoesDoadas = useMemo(() => {
@@ -336,10 +418,11 @@ export default function MinhasDoacoes({ doacoes }: Props) {
 
         return doacoes
             .filter((d) => {
- const ok = !seen.has(d.instituicao.id); seen.add(d.instituicao.id);
+                const ok = !seen.has(d.instituicao.id);
+                seen.add(d.instituicao.id);
 
- return ok; 
-})
+                return ok;
+            })
             .map((d) => d.instituicao);
     }, [doacoes]);
 
@@ -348,16 +431,15 @@ export default function MinhasDoacoes({ doacoes }: Props) {
             <Head title="Minhas Doações" />
 
             <div className="flex flex-col gap-0">
-
                 {/* ── Profile header ──────────────────────────── */}
                 <div className="border-b border-border bg-card px-6 py-8">
                     <div className="mx-auto max-w-4xl">
                         <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
                             <div>
-                                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                                <p className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
                                     Suas doações
                                 </p>
-                                <h1 className="font-display mt-1.5 text-2xl font-bold text-foreground md:text-3xl">
+                                <h1 className="mt-1.5 font-display text-2xl font-bold text-foreground md:text-3xl">
                                     {nome}
                                 </h1>
                             </div>
@@ -378,7 +460,9 @@ export default function MinhasDoacoes({ doacoes }: Props) {
                                         {stats.total}
                                     </span>
                                     <span className="mt-0.5 block text-xs text-muted-foreground">
-                                        {stats.total === 1 ? 'doação total' : 'doações totais'}
+                                        {stats.total === 1
+                                            ? 'doação total'
+                                            : 'doações totais'}
                                     </span>
                                 </div>
                                 <div className="border-l border-border pl-6">
@@ -386,7 +470,9 @@ export default function MinhasDoacoes({ doacoes }: Props) {
                                         {stats.entregues}
                                     </span>
                                     <span className="mt-0.5 block text-xs text-muted-foreground">
-                                        {stats.entregues === 1 ? 'entregue' : 'entregues'}
+                                        {stats.entregues === 1
+                                            ? 'entregue'
+                                            : 'entregues'}
                                     </span>
                                 </div>
                                 {stats.pendentes > 0 && (
@@ -405,7 +491,9 @@ export default function MinhasDoacoes({ doacoes }: Props) {
                                             {instituicoesDoadas.length}
                                         </span>
                                         <span className="mt-0.5 block text-xs text-muted-foreground">
-                                            {instituicoesDoadas.length === 1 ? 'instituição apoiada' : 'instituições apoiadas'}
+                                            {instituicoesDoadas.length === 1
+                                                ? 'instituição apoiada'
+                                                : 'instituições apoiadas'}
                                         </span>
                                     </div>
                                 )}
