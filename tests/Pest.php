@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Agendamento;
 use App\Models\CategoriaItem;
 use App\Models\Doacao;
 use App\Models\Doador;
@@ -193,6 +194,32 @@ function criarDoacaoPendente(Instituicao $instituicao, string $status = 'pendent
         'doador_id' => $doadorUser->doador->usuario_id,
         'instituicao_id' => $instituicao->usuario_id,
         'status' => $status,
+    ]);
+}
+
+/**
+ * Cria uma doação pendente com um agendamento associado, prontos para os
+ * testes de notificação do RF10 (tests/Feature/Agendamento/*).
+ */
+function criarAgendamento(
+    Instituicao $instituicao,
+    User $doadorUser,
+    string $status = 'confirmado',
+    ?string $dataHoraSugerida = null,
+): Agendamento {
+    $doacao = Doacao::create([
+        'doador_id' => $doadorUser->doador->usuario_id,
+        'instituicao_id' => $instituicao->usuario_id,
+        'status' => 'pendente',
+    ]);
+
+    return Agendamento::create([
+        'doacao_id' => $doacao->id,
+        'data_hora' => now()->addDays(3),
+        'tipo' => 'coleta',
+        'endereco_referencia' => 'Portão azul, fundos',
+        'status' => $status,
+        'data_hora_sugerida' => $dataHoraSugerida,
     ]);
 }
 

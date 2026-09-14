@@ -115,4 +115,16 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
+    /*
+    | O plano gratuito do Resend só entrega para o endereço verificado da
+    | conta. Quando MAIL_OVERRIDE_TO está setada, App\Listeners\
+    | RedirectMailToOverride reescreve todo e-mail de saída para este
+    | endereço, preservando o destinatário original no assunto e no corpo.
+    | Vazia por padrão — nunca deve ir setada em produção com domínio
+    | verificado.
+    |
+    */
+
+    'override_to' => env('MAIL_OVERRIDE_TO'),
+
 ];
