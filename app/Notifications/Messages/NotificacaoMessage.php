@@ -2,7 +2,6 @@
 
 namespace App\Notifications\Messages;
 
-
 class NotificacaoMessage
 {
     public function __construct(

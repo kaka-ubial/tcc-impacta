@@ -39,7 +39,6 @@ class Agendamento extends Model
         return $this->belongsTo(HorarioDisponivel::class, 'horario_disponivel_id');
     }
 
-    
     public function doadorUser(): ?User
     {
         return User::find($this->doacao->doador_id);

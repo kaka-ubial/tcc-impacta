@@ -5,7 +5,6 @@ namespace App\Listeners;
 use Illuminate\Mail\Events\MessageSending;
 use Symfony\Component\Mime\Address;
 
-
 class RedirectMailToOverride
 {
     public function handle(MessageSending $event): void

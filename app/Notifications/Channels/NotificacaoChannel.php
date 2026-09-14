@@ -10,7 +10,7 @@ use Illuminate\Notifications\Notification;
  * Canal customizado que grava o sino in-app. Delega para o writer que já
  * existia antes do RF10 (Notificacao::enviar()) para que as linhas geradas
  * por notificações novas fiquem idênticas às antigas — NotificacaoController
- * e a página notificacoes.tsx não precisam mudar. 
+ * e a página notificacoes.tsx não precisam mudar.
  */
 class NotificacaoChannel
 {
