@@ -4,8 +4,8 @@ namespace App\Services;
 
 use App\Enums\AgendamentoStatus;
 use App\Models\Agendamento;
-use App\Models\Notificacao;
 use App\Models\User;
+use App\Notifications\NovaDataSugerida;
 
 /**
  * Regra de negócio da sugestão de nova data pela instituição sobre um
@@ -24,15 +24,13 @@ class AgendaService
             403
         );
 
+        $doadorId = $agendamento->doacao->doador_id;
+
         $agendamento->update([
             'data_hora_sugerida' => $validated['data_hora_sugerida'],
             'status' => AgendamentoStatus::AlteracaoSugerida,
         ]);
 
-        Notificacao::enviar(
-            $agendamento->doacao->doador_id,
-            'Nova data sugerida',
-            $instituicaoUser->instituicao->nome_fantasia.' sugeriu uma nova data para a sua doação.'
-        );
+        User::find($doadorId)?->notify(new NovaDataSugerida($agendamento->withoutRelations()));
     }
 }

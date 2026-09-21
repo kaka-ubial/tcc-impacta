@@ -11,6 +11,9 @@ use App\Models\HorarioDisponivel;
 use App\Models\ItemDoacao;
 use App\Models\Notificacao;
 use App\Models\User;
+use App\Notifications\AgendamentoCriado;
+use App\Notifications\DoacaoSolicitada;
+use App\Notifications\SugestaoDeDataRespondida;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -37,7 +40,9 @@ class DoacaoService
             throw new DoacaoException('Esta instituição ainda não cadastrou horários disponíveis para receber doações.');
         }
 
-        $doacao = DB::transaction(function () use ($validated, $doadorId) {
+        $agendamento = null;
+
+        $doacao = DB::transaction(function () use ($validated, $doadorId, &$agendamento) {
             $doacao = Doacao::create([
                 'doador_id' => $doadorId,
                 'instituicao_id' => $validated['instituicao_id'],
@@ -54,7 +59,7 @@ class DoacaoService
                 ]);
             }
 
-            Agendamento::create([
+            $agendamento = Agendamento::create([
                 'doacao_id' => $doacao->id,
                 'horario_disponivel_id' => $validated['agendamento']['horario_disponivel_id'] ?? null,
                 'data_hora' => $validated['agendamento']['data_hora'],
@@ -65,11 +70,13 @@ class DoacaoService
             return $doacao;
         });
 
-        Notificacao::enviar(
-            $validated['instituicao_id'],
-            'Nova solicitação de doação',
-            $doadorUser->doador->nome_completo.' enviou uma nova solicitação de doação.'
-        );
+        // withoutRelations() evita que a instância notificada pendure
+        // lazy-loads no $doacao devolvido ao controller/resposta.
+        $agendamentoNotificacao = $agendamento->withoutRelations();
+
+        $instituicaoUser = User::find($validated['instituicao_id']);
+        $doadorUser->notify(new AgendamentoCriado($agendamentoNotificacao));
+        $instituicaoUser?->notify(new DoacaoSolicitada($agendamentoNotificacao));
 
         return $doacao->fresh(['instituicao', 'itens.categoria', 'agendamento']);
     }
@@ -102,16 +109,19 @@ class DoacaoService
         $agendamento = $doacao->agendamento;
         abort_if(! $agendamento || $agendamento->status !== AgendamentoStatus::AlteracaoSugerida, 422);
 
+        // Capturada antes do update: data_hora_sugerida é zerada abaixo, e
+        // SerializesModels re-lê o Agendamento do banco quando a notificação
+        // roda — a essa altura o campo já teria sumido.
+        $dataSugerida = $agendamento->data_hora_sugerida;
+
         $agendamento->update([
             'data_hora' => $agendamento->data_hora_sugerida,
             'data_hora_sugerida' => null,
             'status' => AgendamentoStatus::Confirmado,
         ]);
 
-        Notificacao::enviar(
-            $doacao->instituicao_id,
-            'Nova data aceita',
-            $doadorUser->doador->nome_completo.' aceitou a nova data sugerida.'
+        User::find($doacao->instituicao_id)?->notify(
+            new SugestaoDeDataRespondida($agendamento->withoutRelations(), $dataSugerida, aceitou: true)
         );
     }
 
@@ -122,15 +132,15 @@ class DoacaoService
         $agendamento = $doacao->agendamento;
         abort_if(! $agendamento || $agendamento->status !== AgendamentoStatus::AlteracaoSugerida, 422);
 
+        $dataSugerida = $agendamento->data_hora_sugerida;
+
         $agendamento->update([
             'data_hora_sugerida' => null,
             'status' => AgendamentoStatus::Confirmado,
         ]);
 
-        Notificacao::enviar(
-            $doacao->instituicao_id,
-            'Nova data recusada',
-            $doadorUser->doador->nome_completo.' recusou a nova data sugerida.'
+        User::find($doacao->instituicao_id)?->notify(
+            new SugestaoDeDataRespondida($agendamento->withoutRelations(), $dataSugerida, aceitou: false)
         );
     }
 

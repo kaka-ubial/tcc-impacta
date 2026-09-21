@@ -1,0 +1,23 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+  external_labels:
+    origem: github-actions-pipeline
+
+remote_write:
+  - url: https://prometheus-prod-40-prod-sa-east-1.grafana.net/api/prom/push
+    basic_auth:
+      username: '3548186'
+      password_file: grafana-cloud-token.txt
+    queue_config:
+      max_samples_per_send: 1000
+      capacity: 10000
+      max_shards: 10
+
+scrape_configs:
+  - job_name: pipeline
+    metrics_path: /github_actions.prom
+    static_configs:
+      - targets: ['localhost:9109']
+        labels:
+          app: impacta
