@@ -2,7 +2,7 @@
 
 Plataforma que conecta **doadores** a **instituições** para doação e transferência de itens,
 com agendamento de entregas, recomendação de instituições por afinidade de causa e proximidade,
-e um fluxo de aprovação de instituições por administradores.
+e um fluxo de aprovação de instituições por administradores. 
 
 O sistema atende três perfis de usuário (`doador`, `instituicao`, `admin`), cada um com sua área
 própria após o login. Instituições passam por um fluxo de aprovação (`pending` → `approved`/`rejected`)
