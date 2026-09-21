@@ -72,7 +72,7 @@ function buildUpcomingDates(
             );
 
             if (d > agora) {
-                const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}T${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+                const value = d.toISOString().slice(0, 16);
                 opcoes.push({
                     label: `${DIAS[h.dia_semana]}, ${d.toLocaleDateString('pt-BR')} — ${h.hora_inicio.slice(0, 5)} às ${h.hora_fim.slice(0, 5)}`,
                     value,
