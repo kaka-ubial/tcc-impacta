@@ -42,7 +42,7 @@ export default function Login({
                 </Link>
             </header>
 
-            <div className="flex flex-1 items-center justify-center px-6 py-12">
+            <main className="flex flex-1 items-center justify-center px-6 py-12">
                 <div className="w-full max-w-[420px]">
                     <div className="mb-8">
                         <h1 className="font-display text-2xl font-bold text-foreground md:text-3xl">
@@ -160,7 +160,7 @@ export default function Login({
                         )}
                     </Form>
                 </div>
-            </div>
+            </main>
         </div>
     );
 }

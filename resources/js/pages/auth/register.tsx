@@ -410,7 +410,7 @@ export default function Register({ causas }: { causas: any[] }) {
                 </header>
 
                 {/* Form area */}
-                <div className="flex flex-col px-6 pt-6 pb-12 lg:px-10 lg:pt-8">
+                <main className="flex flex-col px-6 pt-6 pb-12 lg:px-10 lg:pt-8">
                     <div className="mx-auto w-full max-w-md">
                         {/* Heading */}
                         <div className="mb-8">
@@ -1033,7 +1033,7 @@ export default function Register({ causas }: { causas: any[] }) {
                             <TextLink href={login.url()}>Entrar</TextLink>
                         </p>
                     </div>
-                </div>
+                </main>
             </div>
 
             {/* ── Right — Brand panel ─────────────────────── */}
