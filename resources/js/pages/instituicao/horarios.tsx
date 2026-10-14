@@ -21,27 +21,12 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import AppLayout from '@/layouts/app-layout';
+import { DIAS, HORAS } from '@/lib/horarios';
 import {
     destroy as destroyHorario,
     store as storeHorario,
 } from '@/routes/instituicao/horarios';
 import type { BreadcrumbItem, HorarioDisponivel } from '@/types';
-
-const DIAS = [
-    'Domingo',
-    'Segunda-feira',
-    'Terça-feira',
-    'Quarta-feira',
-    'Quinta-feira',
-    'Sexta-feira',
-    'Sábado',
-];
-
-const HORAS = Array.from({ length: 24 }, (_, i) => {
-    const h = String(i).padStart(2, '0');
-
-    return [`${h}:00`, `${h}:30`];
-}).flat();
 
 type Props = {
     horarios: HorarioDisponivel[];
