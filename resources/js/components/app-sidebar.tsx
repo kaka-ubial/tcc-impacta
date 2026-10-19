@@ -5,23 +5,24 @@ import {
     LayoutGrid,
     LayoutDashboard,
     Box,
-    Calendar,
     CalendarClock,
     Bell,
     ArrowLeftRight,
     Users,
+    Pin,
+    PinOff,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
-import { NavUser } from '@/components/nav-user';
+import { Button } from '@/components/ui/button';
 import {
     Sidebar,
     SidebarContent,
-    SidebarFooter,
     SidebarHeader,
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
+    useSidebar,
 } from '@/components/ui/sidebar';
 import admin from '@/routes/admin';
 import { index as doacoesIndex } from '@/routes/doacoes';
@@ -51,11 +52,6 @@ const instituicaoNavItems: NavItem[] = [
         title: 'Necessidades',
         href: '/instituicao/necessidades',
         icon: Box,
-    },
-    {
-        title: 'Horários Disponíveis',
-        href: '/instituicao/horarios',
-        icon: Calendar,
     },
     {
         title: 'Agenda',
@@ -91,6 +87,7 @@ export function AppSidebar() {
     const { auth, notificacoes_nao_lidas } = usePage().props as any;
     const tipo: string = auth.user.tipo_usuario;
     const naoLidas: number = notificacoes_nao_lidas ?? 0;
+    const { open: fixado, toggleSidebar } = useSidebar();
 
     const baseItems: NavItem[] =
         tipo === 'admin'
@@ -120,24 +117,40 @@ export function AppSidebar() {
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
-                <SidebarMenu>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild>
-                            <Link href={homeHref} prefetch>
-                                <AppLogo />
-                            </Link>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                </SidebarMenu>
+                <div className="flex items-center gap-1">
+                    <SidebarMenu className="min-w-0 flex-1">
+                        <SidebarMenuItem>
+                            <SidebarMenuButton size="lg" asChild>
+                                <Link href={homeHref} prefetch>
+                                    <AppLogo />
+                                </Link>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                    </SidebarMenu>
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="size-8 shrink-0 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:hidden"
+                        aria-pressed={fixado}
+                        aria-label={
+                            fixado ? 'Soltar menu' : 'Manter menu aberto'
+                        }
+                        title={fixado ? 'Soltar menu' : 'Manter menu aberto'}
+                        onClick={toggleSidebar}
+                    >
+                        {fixado ? (
+                            <PinOff aria-hidden="true" />
+                        ) : (
+                            <Pin aria-hidden="true" />
+                        )}
+                    </Button>
+                </div>
             </SidebarHeader>
 
             <SidebarContent>
                 <NavMain items={navItems} />
             </SidebarContent>
-
-            <SidebarFooter>
-                <NavUser />
-            </SidebarFooter>
         </Sidebar>
     );
 }
