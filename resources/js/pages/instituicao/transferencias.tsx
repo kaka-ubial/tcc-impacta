@@ -215,7 +215,6 @@ function TransferenciaCard({
             <Separator />
 
             <CardContent className="flex flex-col gap-3 pt-4">
-                {/* Agendamento */}
                 {t.data_hora && (
                     <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-1.5 text-sm font-medium">
@@ -245,7 +244,6 @@ function TransferenciaCard({
                     </div>
                 )}
 
-                {/* Data sugerida */}
                 {t.status === 'alteracao_sugerida' && t.data_hora_sugerida && (
                     <p className="rounded-md bg-amber-500/10 px-3 py-2 text-xs text-amber-600">
                         Alteração sugerida para{' '}
@@ -254,7 +252,6 @@ function TransferenciaCard({
                     </p>
                 )}
 
-                {/* Itens */}
                 <div className="flex items-center gap-1.5 text-sm font-medium">
                     <Package className="size-3.5 text-muted-foreground" />
                     Itens
@@ -277,7 +274,6 @@ function TransferenciaCard({
                 </ul>
             </CardContent>
 
-            {/* Ações: recebida + pendente → confirmar/recusar/sugerir */}
             {t.direcao === 'recebida' && t.status === 'pendente' && (
                 <>
                     <Separator />
@@ -390,7 +386,6 @@ function TransferenciaCard({
                 </>
             )}
 
-            {/* Ações: enviada + alteracao_sugerida → aceitar/recusar sugestão */}
             {t.direcao === 'enviada' && t.status === 'alteracao_sugerida' && (
                 <>
                     <Separator />
@@ -414,7 +409,6 @@ function TransferenciaCard({
                 </>
             )}
 
-            {/* Ações: recebida + confirmada → entregue / não entregue */}
             {t.direcao === 'recebida' && t.status === 'confirmada' && (
                 <>
                     <Separator />
@@ -440,7 +434,6 @@ function TransferenciaCard({
                 </>
             )}
 
-            {/* Ações: enviada + pendente → cancelar */}
             {t.direcao === 'enviada' && t.status === 'pendente' && (
                 <>
                     <Separator />
@@ -558,12 +551,12 @@ export default function Transferencias({
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Transferências" />
-            <div className="flex flex-col gap-8 p-6">
+            <div className="flex flex-col gap-8">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-2">
                             <ArrowLeftRight className="size-5" />
-                            <h1 className="text-2xl font-semibold">
+                            <h1 className="font-display text-2xl font-bold text-foreground md:text-3xl">
                                 Transferências
                             </h1>
                         </div>

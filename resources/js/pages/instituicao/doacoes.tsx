@@ -53,8 +53,6 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Doações', href: doacoesIndex.url() },
 ];
 
-// ─── types ────────────────────────────────────────────────────────────────────
-
 type StatusKey =
     | 'pendente'
     | 'confirmada'
@@ -102,8 +100,6 @@ type Props = {
     horarios: Horario[];
 };
 
-// ─── status config ────────────────────────────────────────────────────────────
-
 const statusConfig: Record<
     StatusKey,
     {
@@ -135,8 +131,6 @@ function iniciais(nome: string) {
         .map((p) => p[0]?.toUpperCase() ?? '')
         .join('');
 }
-
-// ─── star picker ─────────────────────────────────────────────────────────────
 
 function StarPicker({
     value,
@@ -170,8 +164,6 @@ function StarPicker({
         </div>
     );
 }
-
-// ─── card ─────────────────────────────────────────────────────────────────────
 
 function DoacaoCard({
     doacao,
@@ -329,7 +321,6 @@ function DoacaoCard({
                 )}
             </CardContent>
 
-            {/* actions — only for actionable statuses */}
             {doacao.status === 'pendente' && !temSugestao && (
                 <>
                     <Separator />
@@ -510,8 +501,6 @@ function DoacaoCard({
     );
 }
 
-// ─── section ─────────────────────────────────────────────────────────────────
-
 const PER_PAGE = 10;
 
 function Section({
@@ -569,8 +558,6 @@ function Section({
     );
 }
 
-// ─── page ─────────────────────────────────────────────────────────────────────
-
 export default function InstituicaoDoacoes({
     doacoes,
     itens_recebidos,
@@ -587,10 +574,12 @@ export default function InstituicaoDoacoes({
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Doações" />
-            <div className="flex flex-col gap-8 p-6">
+            <div className="flex flex-col gap-8">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex flex-col gap-1">
-                        <h1 className="text-2xl font-semibold">Doações</h1>
+                        <h1 className="font-display text-2xl font-bold text-foreground md:text-3xl">
+                            Doações
+                        </h1>
                         <p className="text-sm text-muted-foreground">
                             {totalAtivas > 0
                                 ? `${pendentes.length} pendente${pendentes.length !== 1 ? 's' : ''} · ${confirmadas.length} confirmada${confirmadas.length !== 1 ? 's' : ''}`

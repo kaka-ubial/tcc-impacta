@@ -17,10 +17,6 @@ class DoacaoSeeder extends Seeder
 {
     private const TOTAL = 60;
 
-    /**
-     * Distribuição dos 60 registros. As entregues dominam de propósito:
-     * são as únicas que aparecem no portal de transparência.
-     */
     private const DISTRIBUICAO = [
         'entregue' => 34,
         'confirmada' => 8,
@@ -143,6 +139,7 @@ class DoacaoSeeder extends Seeder
             'usuario_id' => $doador->usuario_id,
             'titulo' => $titulo,
             'mensagem' => $mensagem,
+            'url' => '/doacoes',
             'lida' => $doacao->id % 3 === 0,
         ]);
     }

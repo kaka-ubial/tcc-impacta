@@ -12,6 +12,7 @@ use App\Http\Controllers\Instituicao\DoadorController as InstituicaoDoadorContro
 use App\Http\Controllers\Instituicao\EstatisticasController;
 use App\Http\Controllers\Instituicao\HorarioController;
 use App\Http\Controllers\Instituicao\InstituicaoController;
+use App\Http\Controllers\Instituicao\OnboardingController;
 use App\Http\Controllers\Instituicao\PainelController;
 use App\Http\Controllers\Instituicao\TransferenciaController;
 use App\Http\Controllers\NecessidadeController;
@@ -52,7 +53,6 @@ Route::middleware(['auth', 'verified', 'user_type:instituicao', EnsureInstitutio
 
     Route::get('estatisticas', [EstatisticasController::class, 'index'])->name('estatisticas');
 
-    Route::get('horarios', [HorarioController::class, 'index'])->name('horarios.index');
     Route::post('horarios', [HorarioController::class, 'store'])->name('horarios.store');
     Route::delete('horarios/{horario}', [HorarioController::class, 'destroy'])->name('horarios.destroy');
 
@@ -118,12 +118,16 @@ Route::middleware(['auth', 'user_type:admin'])->prefix('admin')->name('admin.')-
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('notificacoes', [NotificacaoController::class, 'index'])->name('notificacoes.index');
+    Route::post('notificacoes/lidas', [NotificacaoController::class, 'marcarTodasLidas'])->name('notificacoes.lidas');
+    Route::get('notificacoes/{notificacao}/abrir', [NotificacaoController::class, 'abrir'])->name('notificacoes.abrir');
+    Route::patch('notificacoes/{notificacao}/lida', [NotificacaoController::class, 'marcarLida'])->name('notificacoes.lida');
 
-    Route::get('waiting-validation', function () {
-        return auth()->user()->instituicao?->isApproved()
-            ? redirect()->route('instituicao.painel')
-            : Inertia::render('auth/waiting-approval');
-    })->name('waiting-validation');
+    Route::middleware('user_type:instituicao')->group(function () {
+        Route::get('waiting-validation', [OnboardingController::class, 'show'])->name('waiting-validation');
+        Route::get('waiting-validation/ficha', [OnboardingController::class, 'ficha'])->name('waiting-validation.ficha');
+        Route::post('waiting-validation/horarios', [OnboardingController::class, 'storeHorario'])->name('waiting-validation.horarios.store');
+        Route::delete('waiting-validation/horarios/{horario}', [OnboardingController::class, 'destroyHorario'])->name('waiting-validation.horarios.destroy');
+    });
     Route::get('rejected', function () {
         $analise = auth()->user()
             ->instituicao

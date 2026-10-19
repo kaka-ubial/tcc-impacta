@@ -1,13 +1,17 @@
-import { Head } from '@inertiajs/react';
-import { Bell } from 'lucide-react';
+import { Head, Link, router } from '@inertiajs/react';
+import { Bell, Check, CheckCheck } from 'lucide-react';
 
+import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
+import { tempoRelativo } from '@/lib/tempo';
+import { abrir, lida, lidas } from '@/routes/notificacoes';
 import type { BreadcrumbItem } from '@/types';
 
 type Notificacao = {
     id: number;
     titulo: string;
     mensagem: string;
+    url: string | null;
     lida: boolean;
     criado_em: string;
 };
@@ -18,44 +22,39 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Notificações', href: '/notificacoes' },
 ];
 
-function tempoRelativo(iso: string): string {
-    const diff = Date.now() - new Date(iso).getTime();
-    const min = Math.floor(diff / 60000);
-
-    if (min < 1) {
-        return 'agora';
-    }
-
-    if (min < 60) {
-        return `há ${min} min`;
-    }
-
-    const horas = Math.floor(min / 60);
-
-    if (horas < 24) {
-        return `há ${horas} h`;
-    }
-
-    const dias = Math.floor(horas / 24);
-
-    if (dias < 7) {
-        return `há ${dias} d`;
-    }
-
-    return new Date(iso).toLocaleDateString('pt-BR');
-}
-
 export default function Notificacoes({ notificacoes }: Props) {
+    const naoLidas = notificacoes.filter((n) => !n.lida).length;
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Notificações" />
 
-            <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-6">
-                <div className="flex flex-col gap-1">
-                    <h1 className="text-2xl font-semibold">Notificações</h1>
-                    <p className="text-sm text-muted-foreground">
-                        Atualizações das suas doações e agendamentos.
-                    </p>
+            <div className="flex flex-col gap-6">
+                <div className="flex flex-wrap items-end justify-between gap-3">
+                    <div className="flex flex-col gap-1">
+                        <h1 className="font-display text-2xl font-bold text-foreground md:text-3xl">
+                            Notificações
+                        </h1>
+                        <p className="text-sm text-muted-foreground">
+                            Atualizações das suas doações e agendamentos.
+                        </p>
+                    </div>
+                    {naoLidas > 0 && (
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                                router.post(
+                                    lidas().url,
+                                    {},
+                                    { preserveScroll: true },
+                                )
+                            }
+                        >
+                            <CheckCheck aria-hidden="true" />
+                            Marcar todas como lidas
+                        </Button>
+                    )}
                 </div>
 
                 {notificacoes.length === 0 ? (
@@ -64,37 +63,68 @@ export default function Notificacoes({ notificacoes }: Props) {
                         Nenhuma notificação ainda.
                     </div>
                 ) : (
-                    <div className="flex flex-col gap-2">
+                    <ul className="flex flex-col gap-2">
                         {notificacoes.map((n) => (
-                            <div
+                            <li
                                 key={n.id}
-                                className={`flex gap-3 rounded-lg border px-4 py-3 ${
+                                className={`flex items-start gap-1 rounded-lg border ${
                                     n.lida
                                         ? 'border-border'
-                                        : 'border-primary/30 bg-primary/5'
+                                        : 'border-primary/40 bg-primary/10'
                                 }`}
                             >
-                                <div
-                                    className={`mt-1.5 size-2 shrink-0 rounded-full ${
-                                        n.lida ? 'bg-transparent' : 'bg-primary'
-                                    }`}
-                                />
-                                <div className="flex flex-col gap-0.5">
-                                    <div className="flex flex-wrap items-baseline gap-2">
-                                        <span className="font-medium">
-                                            {n.titulo}
+                                <Link
+                                    href={abrir(n.id).url}
+                                    className="flex min-w-0 flex-1 gap-3 rounded-lg px-4 py-3 transition-colors hover:bg-accent/60 focus-visible:outline-2"
+                                >
+                                    <span
+                                        aria-hidden="true"
+                                        className={`mt-1.5 size-2 shrink-0 rounded-full ${
+                                            n.lida
+                                                ? 'bg-transparent'
+                                                : 'bg-primary'
+                                        }`}
+                                    />
+                                    <span className="flex flex-col gap-0.5">
+                                        <span className="flex flex-wrap items-baseline gap-2">
+                                            <span className="font-medium">
+                                                {n.titulo}
+                                            </span>
+                                            <span className="text-xs text-muted-foreground">
+                                                {tempoRelativo(n.criado_em)}
+                                            </span>
+                                            {!n.lida && (
+                                                <span className="sr-only">
+                                                    (não lida)
+                                                </span>
+                                            )}
                                         </span>
-                                        <span className="text-xs text-muted-foreground">
-                                            {tempoRelativo(n.criado_em)}
+                                        <span className="text-sm text-muted-foreground">
+                                            {n.mensagem}
                                         </span>
-                                    </div>
-                                    <p className="text-sm text-muted-foreground">
-                                        {n.mensagem}
-                                    </p>
-                                </div>
-                            </div>
+                                    </span>
+                                </Link>
+                                {!n.lida && (
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="mt-2 mr-2 size-8 shrink-0"
+                                        aria-label={`Marcar "${n.titulo}" como lida`}
+                                        title="Marcar como lida"
+                                        onClick={() =>
+                                            router.patch(
+                                                lida(n.id).url,
+                                                {},
+                                                { preserveScroll: true },
+                                            )
+                                        }
+                                    >
+                                        <Check aria-hidden="true" />
+                                    </Button>
+                                )}
+                            </li>
                         ))}
-                    </div>
+                    </ul>
                 )}
             </div>
         </AppLayout>

@@ -45,8 +45,6 @@ import {
 import { store as storeHorario } from '@/routes/instituicao/horarios';
 import type { BreadcrumbItem } from '@/types';
 
-// ─── types ──────────────────────────────────────────────────────────────────
-
 type Agendamento = {
     id: number;
     doacao_id: number;
@@ -81,8 +79,6 @@ type Props = {
     horarios: Horario[];
     transferencias: TransferenciaAgenda[];
 };
-
-// ─── constants ──────────────────────────────────────────────────────────────
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Painel', href: '/instituicao/painel' },
@@ -119,8 +115,6 @@ const HORAS = Array.from({ length: 24 }, (_, i) => {
     return [`${h}:00`, `${h}:30`];
 }).flat();
 
-// ─── helpers ────────────────────────────────────────────────────────────────
-
 function dateKey(d: Date): string {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
@@ -137,8 +131,6 @@ function formatDataHora(iso: string): string {
 
     return `${d.toLocaleDateString('pt-BR')} às ${formatHora(iso)}`;
 }
-
-// ─── status visual ──────────────────────────────────────────────────────────
 
 function statusVisual(
     doacaoStatus: string,
@@ -194,8 +186,6 @@ function statusVisual(
         badge: 'border-border bg-muted text-muted-foreground',
     };
 }
-
-// ─── add-availability dialog ────────────────────────────────────────────────
 
 function AddHorarioDialog({ trigger }: { trigger?: React.ReactNode }) {
     const [open, setOpen] = useState(false);
@@ -355,8 +345,6 @@ function AddHorarioDialog({ trigger }: { trigger?: React.ReactNode }) {
     );
 }
 
-// ─── agendamento detail ─────────────────────────────────────────────────────
-
 function AgendamentoItem({
     agendamento,
     horarios,
@@ -511,8 +499,6 @@ function AgendamentoItem({
     );
 }
 
-// ─── page ───────────────────────────────────────────────────────────────────
-
 export default function Agenda({
     agendamentos,
     horarios,
@@ -525,7 +511,6 @@ export default function Agenda({
     }));
     const [diaSelecionado, setDiaSelecionado] = useState<string | null>(null);
 
-    // agendamentos agrupados por dia (YYYY-MM-DD)
     const porDia = useMemo(() => {
         const map: Record<string, Agendamento[]> = {};
 
@@ -537,7 +522,6 @@ export default function Agenda({
         return map;
     }, [agendamentos]);
 
-    // células da grade do mês (inclui dias vazios antes do dia 1)
     const celulas = useMemo(() => {
         const primeiroDiaSemana = new Date(ref.ano, ref.mes, 1).getDay();
         const diasNoMes = new Date(ref.ano, ref.mes + 1, 0).getDate();
@@ -606,10 +590,12 @@ export default function Agenda({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Agenda" />
 
-            <div className="flex flex-col gap-6 p-6">
+            <div className="flex flex-col gap-6">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex flex-col gap-1">
-                        <h1 className="text-2xl font-semibold">Agenda</h1>
+                        <h1 className="font-display text-2xl font-bold text-foreground md:text-3xl">
+                            Agenda
+                        </h1>
                         <p className="text-sm text-muted-foreground">
                             Doações agendadas e sua disponibilidade recorrente.
                         </p>
@@ -618,7 +604,6 @@ export default function Agenda({
                 </div>
 
                 <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
-                    {/* calendário */}
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between gap-2 pb-3">
                             <CardTitle className="text-base">
@@ -731,9 +716,7 @@ export default function Agenda({
                         </CardContent>
                     </Card>
 
-                    {/* painel lateral */}
                     <div className="flex flex-col gap-6">
-                        {/* dia selecionado */}
                         <Card>
                             <CardHeader className="pb-3">
                                 <CardTitle className="text-base">
@@ -812,7 +795,6 @@ export default function Agenda({
                             </CardContent>
                         </Card>
 
-                        {/* disponibilidade recorrente */}
                         <Card>
                             <CardHeader className="pb-3">
                                 <CardTitle className="flex items-center gap-2 text-base">

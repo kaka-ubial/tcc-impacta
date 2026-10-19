@@ -1,5 +1,5 @@
 import { Form, Head, Link } from '@inertiajs/react';
-import { Heart } from 'lucide-react';
+import { HeartHandshake } from 'lucide-react';
 
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
@@ -29,20 +29,19 @@ export default function Login({
         <div className="flex min-h-svh flex-col bg-warm-neutral">
             <Head title="Entrar" />
 
-            {/* Logo bar */}
             <header className="flex h-14 shrink-0 items-center px-6">
                 <Link
                     href={home()}
                     className="flex items-center gap-2 font-semibold text-foreground transition-opacity hover:opacity-75"
                 >
                     <div className="flex size-7 items-center justify-center rounded-md bg-brand text-primary-foreground">
-                        <Heart className="size-4" />
+                        <HeartHandshake className="size-4" />
                     </div>
                     Impacta
                 </Link>
             </header>
 
-            <div className="flex flex-1 items-center justify-center px-6 py-12">
+            <main className="flex flex-1 items-center justify-center px-6 py-12">
                 <div className="w-full max-w-[420px]">
                     <div className="mb-8">
                         <h1 className="font-display text-2xl font-bold text-foreground md:text-3xl">
@@ -160,7 +159,7 @@ export default function Login({
                         )}
                     </Form>
                 </div>
-            </div>
+            </main>
         </div>
     );
 }

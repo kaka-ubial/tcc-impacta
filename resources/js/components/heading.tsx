@@ -5,8 +5,23 @@ export default function Heading({
 }: {
     title: string;
     description?: string;
-    variant?: 'default' | 'small';
+    variant?: 'default' | 'small' | 'page';
 }) {
+    if (variant === 'page') {
+        return (
+            <header className="mb-6 space-y-1">
+                <h1 className="font-display text-2xl font-bold text-foreground md:text-3xl">
+                    {title}
+                </h1>
+                {description && (
+                    <p className="text-sm text-muted-foreground">
+                        {description}
+                    </p>
+                )}
+            </header>
+        );
+    }
+
     return (
         <header className={variant === 'small' ? '' : 'mb-8 space-y-0.5'}>
             <h2

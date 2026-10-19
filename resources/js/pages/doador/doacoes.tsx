@@ -30,8 +30,6 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Minhas Doações', href: doacoesIndex.url() },
 ];
 
-// ─── status config ─────────────────────────────────────────────────────────────
-
 type StatusKey =
     | 'pendente'
     | 'confirmada'
@@ -75,8 +73,6 @@ function formatDataHora(iso: string) {
     return `${DIAS[d.getDay()]}, ${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
 }
 
-// ─── types ─────────────────────────────────────────────────────────────────────
-
 type Agendamento = {
     data_hora: string;
     tipo: 'coleta' | 'entrega';
@@ -101,8 +97,6 @@ type Doacao = {
 };
 
 type Props = { doacoes: Doacao[] };
-
-// ─── Doação card ───────────────────────────────────────────────────────────────
 
 function DoacaoCard({ doacao }: { doacao: Doacao }) {
     const [processing, setProcessing] = useState(false);
@@ -141,7 +135,6 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
 
     return (
         <article className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card">
-            {/* Header */}
             <div className="flex items-start justify-between gap-3 px-5 pt-5 pb-4">
                 <div>
                     <Link
@@ -166,9 +159,7 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
 
             <Separator />
 
-            {/* Body */}
             <div className="flex flex-col gap-4 px-5 py-4">
-                {/* Items */}
                 <div>
                     <div className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                         <Package className="size-3.5" />
@@ -192,7 +183,6 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
                     </ul>
                 </div>
 
-                {/* Scheduling */}
                 {doacao.agendamento && (
                     <div>
                         <div className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
@@ -268,7 +258,6 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
                 )}
             </div>
 
-            {/* Footer — cancel */}
             {canCancel && (
                 <>
                     <Separator />
@@ -335,8 +324,6 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
     );
 }
 
-// ─── Empty state ───────────────────────────────────────────────────────────────
-
 function EmptyState() {
     return (
         <div className="flex flex-col items-center gap-5 rounded-2xl border border-dashed border-border py-20 text-center">
@@ -390,8 +377,6 @@ function EmptyState() {
     );
 }
 
-// ─── Page ──────────────────────────────────────────────────────────────────────
-
 export default function MinhasDoacoes({ doacoes }: Props) {
     const { auth } = usePage().props;
     const nome = (auth.user as any).doador?.nome_completo ?? auth.user.email;
@@ -412,7 +397,6 @@ export default function MinhasDoacoes({ doacoes }: Props) {
         [doacoes, pending.length],
     );
 
-    // Derive unique institution names they've donated to
     const instituicoesDoadas = useMemo(() => {
         const seen = new Set<number>();
 
@@ -431,17 +415,17 @@ export default function MinhasDoacoes({ doacoes }: Props) {
             <Head title="Minhas Doações" />
 
             <div className="flex flex-col gap-0">
-                {/* ── Profile header ──────────────────────────── */}
-                <div className="border-b border-border bg-card px-6 py-8">
-                    <div className="mx-auto max-w-4xl">
+                <div>
+                    <div className="border-b border-border pb-8">
                         <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
                             <div>
-                                <p className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
-                                    Suas doações
-                                </p>
-                                <h1 className="mt-1.5 font-display text-2xl font-bold text-foreground md:text-3xl">
-                                    {nome}
+                                <h1 className="font-display text-2xl font-bold text-foreground md:text-3xl">
+                                    Minhas doações
                                 </h1>
+                                <p className="mt-1 text-sm text-muted-foreground">
+                                    {nome}, acompanhe aqui o status de todas as
+                                    suas doações.
+                                </p>
                             </div>
 
                             <Button asChild size="sm" className="w-fit gap-1.5">
@@ -452,7 +436,6 @@ export default function MinhasDoacoes({ doacoes }: Props) {
                             </Button>
                         </div>
 
-                        {/* Stats strip */}
                         {stats.total > 0 && (
                             <div className="mt-6 flex flex-wrap gap-6 border-t border-border pt-6">
                                 <div>
@@ -502,8 +485,7 @@ export default function MinhasDoacoes({ doacoes }: Props) {
                     </div>
                 </div>
 
-                {/* ── Donation list ───────────────────────────── */}
-                <div className="mx-auto w-full max-w-4xl px-6 py-8">
+                <div className="w-full py-8">
                     {doacoes.length === 0 ? (
                         <EmptyState />
                     ) : (

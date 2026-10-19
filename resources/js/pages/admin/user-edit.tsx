@@ -210,9 +210,10 @@ export default function UserEdit({ usuario, perfil }: Props) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={usuario.nome ?? usuario.email} />
-            <div className="flex flex-1 flex-col gap-6 p-4">
+            <div className="flex flex-1 flex-col gap-6">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                     <Heading
+                        variant="page"
                         title={usuario.nome ?? usuario.email}
                         description={`${usuario.email} · ${usuario.tipo_usuario}`}
                     />

@@ -8,15 +8,6 @@ use App\Support\DateTimeFormatter;
 use Carbon\CarbonInterface;
 use Illuminate\Notifications\Messages\MailMessage;
 
-/**
- * Enviada à instituição quando o doador aceita ou recusa a data sugerida.
- * Disparada em DoacaoService::aceitarSugestao() / recusarSugestao().
- *
- * A data sugerida é recebida como escalar (não lida de volta do model): as
- * duas rotas de disparo zeram `data_hora_sugerida` antes de notificar, e
- * SerializesModels re-lê o Agendamento do banco quando o job roda — a essa
- * altura o campo já teria sumido.
- */
 class SugestaoDeDataRespondida extends AgendamentoNotification
 {
     public function __construct(
@@ -35,7 +26,8 @@ class SugestaoDeDataRespondida extends AgendamentoNotification
 
         return new NotificacaoMessage(
             titulo: $this->aceitou ? 'Nova data aceita' : 'Nova data recusada',
-            mensagem: "{$doador} {$verbo} a data sugerida ({$dataHora})."
+            mensagem: "{$doador} {$verbo} a data sugerida ({$dataHora}).",
+            url: '/instituicao/agenda'
         );
     }
 

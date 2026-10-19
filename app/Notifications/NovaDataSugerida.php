@@ -6,10 +6,6 @@ use App\Notifications\Messages\NotificacaoMessage;
 use App\Support\DateTimeFormatter;
 use Illuminate\Notifications\Messages\MailMessage;
 
-/**
- * Enviada ao doador quando a instituição sugere uma nova data para o
- * agendamento. Disparada em AgendaService::sugerirAlteracao().
- */
 class NovaDataSugerida extends AgendamentoNotification
 {
     public function toNotificacao(object $notifiable): NotificacaoMessage
@@ -19,7 +15,8 @@ class NovaDataSugerida extends AgendamentoNotification
 
         return new NotificacaoMessage(
             titulo: 'Nova data sugerida',
-            mensagem: "{$instituicao} sugeriu uma nova data para a sua doação: {$dataHora}."
+            mensagem: "{$instituicao} sugeriu uma nova data para a sua doação: {$dataHora}.",
+            url: '/doacoes'
         );
     }
 

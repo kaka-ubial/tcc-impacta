@@ -12,18 +12,8 @@ use App\Models\Transferencia;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Regras de negócio das transferências de itens entre instituições.
- * Extraído de Instituicao\TransferenciaController para que a UI Inertia e a
- * API REST reaproveitem exatamente a mesma lógica.
- */
 class TransferenciaService
 {
-    /**
-     * @param  array{instituicao_destino_id:int, itens:array<int, array{categoria_id:int, necessidade_id?:int|null, quantidade:int, descricao?:string|null}>, agendamento:array{tipo:string, data_hora:string, horario_disponivel_id?:int|null, endereco_referencia?:string|null}}  $validated
-     *
-     * @throws TransferenciaException se for autotransferência ou a quantidade exceder o estoque disponível
-     */
     public function store(array $validated, User $origemUser): Transferencia
     {
         $origemId = $origemUser->instituicaoId();
@@ -64,7 +54,8 @@ class TransferenciaService
         Notificacao::enviar(
             $validated['instituicao_destino_id'],
             'Nova solicitação de transferência',
-            $origemUser->instituicao->nome_fantasia.' enviou uma solicitação de transferência de itens.'
+            $origemUser->instituicao->nome_fantasia.' enviou uma solicitação de transferência de itens.',
+            '/instituicao/transferencias'
         );
 
         return $transferencia->fresh(['origem', 'destino', 'itens.categoria']);
@@ -86,7 +77,8 @@ class TransferenciaService
         Notificacao::enviar(
             $transferencia->instituicao_origem_id,
             'Transferência confirmada',
-            $destinoUser->instituicao->nome_fantasia.' confirmou a sua solicitação de transferência.'
+            $destinoUser->instituicao->nome_fantasia.' confirmou a sua solicitação de transferência.',
+            '/instituicao/transferencias'
         );
     }
 
@@ -100,7 +92,8 @@ class TransferenciaService
         Notificacao::enviar(
             $transferencia->instituicao_origem_id,
             'Transferência recusada',
-            $destinoUser->instituicao->nome_fantasia.' recusou a sua solicitação de transferência.'
+            $destinoUser->instituicao->nome_fantasia.' recusou a sua solicitação de transferência.',
+            '/instituicao/transferencias'
         );
     }
 
@@ -114,7 +107,8 @@ class TransferenciaService
         Notificacao::enviar(
             $transferencia->instituicao_origem_id,
             'Transferência concluída',
-            $destinoUser->instituicao->nome_fantasia.' marcou a transferência como entregue.'
+            $destinoUser->instituicao->nome_fantasia.' marcou a transferência como entregue.',
+            '/instituicao/transferencias'
         );
     }
 
@@ -133,13 +127,11 @@ class TransferenciaService
         Notificacao::enviar(
             $transferencia->instituicao_origem_id,
             'Transferência não entregue',
-            $destinoUser->instituicao->nome_fantasia.' marcou a transferência como não entregue.'
+            $destinoUser->instituicao->nome_fantasia.' marcou a transferência como não entregue.',
+            '/instituicao/transferencias'
         );
     }
 
-    /**
-     * @param  array{data_hora_sugerida:string}  $validated
-     */
     public function sugerirAlteracao(array $validated, Transferencia $transferencia, User $destinoUser): void
     {
         abort_if($transferencia->instituicao_destino_id !== $destinoUser->instituicaoId(), 403);
@@ -152,7 +144,8 @@ class TransferenciaService
         Notificacao::enviar(
             $transferencia->instituicao_origem_id,
             'Nova data sugerida',
-            $destinoUser->instituicao->nome_fantasia.' sugeriu uma nova data para a transferência.'
+            $destinoUser->instituicao->nome_fantasia.' sugeriu uma nova data para a transferência.',
+            '/instituicao/transferencias'
         );
     }
 
@@ -170,7 +163,8 @@ class TransferenciaService
         Notificacao::enviar(
             $transferencia->instituicao_destino_id,
             'Sugestão aceita',
-            $origemUser->instituicao->nome_fantasia.' aceitou a nova data sugerida.'
+            $origemUser->instituicao->nome_fantasia.' aceitou a nova data sugerida.',
+            '/instituicao/transferencias'
         );
     }
 
@@ -187,7 +181,8 @@ class TransferenciaService
         Notificacao::enviar(
             $transferencia->instituicao_destino_id,
             'Sugestão recusada',
-            $origemUser->instituicao->nome_fantasia.' recusou a nova data sugerida.'
+            $origemUser->instituicao->nome_fantasia.' recusou a nova data sugerida.',
+            '/instituicao/transferencias'
         );
     }
 
@@ -201,7 +196,8 @@ class TransferenciaService
         Notificacao::enviar(
             $transferencia->instituicao_destino_id,
             'Transferência cancelada',
-            $origemUser->instituicao->nome_fantasia.' cancelou a solicitação de transferência.'
+            $origemUser->instituicao->nome_fantasia.' cancelou a solicitação de transferência.',
+            '/instituicao/transferencias'
         );
     }
 

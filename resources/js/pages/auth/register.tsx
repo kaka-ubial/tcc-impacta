@@ -1,5 +1,11 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { Building2, Check, Heart, LocateFixed, UserRound } from 'lucide-react';
+import {
+    Building2,
+    Check,
+    HeartHandshake,
+    LocateFixed,
+    UserRound,
+} from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 
@@ -24,12 +30,8 @@ import type { EnderecoFields } from '@/lib/validators';
 import { home, login } from '@/routes';
 import { store } from '@/routes/register';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 type TipoUsuario = 'doador' | 'instituicao' | null;
 type Step = 1 | 2 | 3 | 4;
-
-// ─── Constants ────────────────────────────────────────────────────────────────
 
 const stepLabels = ['Conta', 'Perfil', 'Informações', 'Causas'];
 
@@ -59,8 +61,6 @@ const brandSlides = [
     },
 ] as const;
 
-// ─── Brand Panel ──────────────────────────────────────────────────────────────
-
 function BrandPanel() {
     const [current, setCurrent] = useState(0);
     const [paused, setPaused] = useState(false);
@@ -83,13 +83,11 @@ function BrandPanel() {
             onMouseEnter={() => setPaused(true)}
             onMouseLeave={() => setPaused(false)}
         >
-            {/* Decorative fills */}
             <div className="pointer-events-none absolute inset-0">
                 <div className="absolute -top-24 -right-24 h-80 w-80 rounded-full bg-white/[0.05]" />
                 <div className="absolute bottom-28 -left-16 h-56 w-56 rounded-full bg-white/[0.04]" />
             </div>
 
-            {/* Slides */}
             <div className="relative flex-1">
                 {brandSlides.map((slide, i) => (
                     <div
@@ -131,7 +129,6 @@ function BrandPanel() {
                 ))}
             </div>
 
-            {/* Dot navigation */}
             <div className="relative z-10 flex shrink-0 justify-center gap-2 pb-10">
                 {brandSlides.map((_, i) => (
                     <button
@@ -151,16 +148,12 @@ function BrandPanel() {
     );
 }
 
-// ─── Step Indicator ───────────────────────────────────────────────────────────
-
 function StepIndicator({ step }: { step: Step }) {
     const progress = (step - 1) / (stepLabels.length - 1);
 
     return (
         <div className="relative mb-8 flex items-start justify-between">
-            {/* Track */}
             <div className="absolute top-4 right-4 left-4 h-px bg-border" />
-            {/* Progress fill */}
             <div
                 className="absolute top-4 left-4 h-px bg-brand transition-all duration-500 ease-out"
                 style={{ width: `calc(${progress} * (100% - 2rem))` }}
@@ -206,8 +199,6 @@ function StepIndicator({ step }: { step: Step }) {
         </div>
     );
 }
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function Register({ causas }: { causas: any[] }) {
     const [step, setStep] = useState<Step>(1);
@@ -383,36 +374,106 @@ export default function Register({ causas }: { causas: any[] }) {
         setStep((s) => (s > 1 ? ((s - 1) as Step) : s));
     }
 
-    function submit(e: FormEvent) {
-        e.preventDefault();
+    const podeAvancar =
+        (step === 1 &&
+            !processing &&
+            !!data.email &&
+            !!data.password &&
+            !!data.password_confirmation) ||
+        (step === 2 && !!tipo) ||
+        (step === 3 &&
+            tipo === 'doador' &&
+            !!data.nome_completo &&
+            !!data.cpf &&
+            !!data.telefone) ||
+        (step === 3 &&
+            tipo === 'instituicao' &&
+            !!data.nome_fantasia &&
+            !!data.razao_social &&
+            !!data.cnpj &&
+            !!data.telefone_inst &&
+            !!endereco.cep &&
+            !!endereco.logradouro &&
+            !!endereco.numero) ||
+        (step === 4 && !processing && data.causas_apoiadas.length > 0);
+
+    function avancar() {
+        if (!podeAvancar) {
+            return;
+        }
+
+        if (step === 1) {
+            handleStepOne();
+
+            return;
+        }
+
+        if (step < 4) {
+            nextStep();
+
+            return;
+        }
+
         post(store.url(), {
             onSuccess: () => reset('password', 'password_confirmation'),
         });
     }
 
+    function submit(e: FormEvent) {
+        e.preventDefault();
+        avancar();
+    }
+
+    const avancarRef = useRef(avancar);
+
+    useEffect(() => {
+        avancarRef.current = avancar;
+    });
+
+    useEffect(() => {
+        function onKeyDown(e: KeyboardEvent) {
+            if (e.key !== 'Enter' || e.isComposing || e.defaultPrevented) {
+                return;
+            }
+
+            const alvo = e.target as HTMLElement | null;
+
+            if (
+                alvo?.closest(
+                    'button, a, textarea, select, [role="combobox"], [role="listbox"], [role="option"], [role="dialog"]',
+                )
+            ) {
+                return;
+            }
+
+            e.preventDefault();
+            avancarRef.current();
+        }
+
+        document.addEventListener('keydown', onKeyDown);
+
+        return () => document.removeEventListener('keydown', onKeyDown);
+    }, []);
+
     return (
         <div className="min-h-svh lg:grid lg:h-svh lg:grid-cols-2 lg:overflow-hidden">
             <Head title="Cadastro" />
 
-            {/* ── Left — Form column ──────────────────────── */}
             <div className="flex flex-col bg-warm-neutral lg:overflow-y-auto">
-                {/* Logo bar */}
                 <header className="flex h-14 shrink-0 items-center px-6 lg:px-10">
                     <Link
                         href={home()}
                         className="flex items-center gap-2 font-semibold text-foreground transition-opacity hover:opacity-75"
                     >
                         <div className="flex size-7 items-center justify-center rounded-md bg-brand text-primary-foreground">
-                            <Heart className="size-4" />
+                            <HeartHandshake className="size-4" />
                         </div>
                         Impacta
                     </Link>
                 </header>
 
-                {/* Form area */}
-                <div className="flex flex-col px-6 pt-6 pb-12 lg:px-10 lg:pt-8">
+                <main className="flex flex-col px-6 pt-6 pb-12 lg:px-10 lg:pt-8">
                     <div className="mx-auto w-full max-w-md">
-                        {/* Heading */}
                         <div className="mb-8">
                             <h1 className="font-display text-2xl font-bold text-foreground md:text-3xl">
                                 Criar conta
@@ -422,12 +483,9 @@ export default function Register({ causas }: { causas: any[] }) {
                             </p>
                         </div>
 
-                        {/* Step indicator */}
                         <StepIndicator step={step} />
 
-                        {/* Form content */}
                         <form onSubmit={submit} className="flex flex-col gap-5">
-                            {/* ── Step 1 — Credenciais ── */}
                             {step === 1 && (
                                 <div className="flex flex-col gap-5">
                                     <div className="flex flex-col gap-1.5">
@@ -526,7 +584,6 @@ export default function Register({ causas }: { causas: any[] }) {
                                 </div>
                             )}
 
-                            {/* ── Step 2 — Tipo de conta ── */}
                             {step === 2 && (
                                 <div className="flex flex-col gap-5">
                                     <div className="grid grid-cols-2 gap-4">
@@ -620,7 +677,6 @@ export default function Register({ causas }: { causas: any[] }) {
                                 </div>
                             )}
 
-                            {/* ── Step 3A — Dados do Doador ── */}
                             {step === 3 && tipo === 'doador' && (
                                 <div className="flex flex-col gap-5">
                                     <div className="flex flex-col gap-1.5">
@@ -790,7 +846,6 @@ export default function Register({ causas }: { causas: any[] }) {
                                 </div>
                             )}
 
-                            {/* ── Step 3B — Dados da Instituição ── */}
                             {step === 3 && tipo === 'instituicao' && (
                                 <div className="flex flex-col gap-5">
                                     <div className="flex flex-col gap-1.5">
@@ -951,7 +1006,6 @@ export default function Register({ causas }: { causas: any[] }) {
                                 </div>
                             )}
 
-                            {/* ── Step 4 — Causas ── */}
                             {step === 4 && (
                                 <div className="flex flex-col gap-5">
                                     <p className="text-sm text-muted-foreground">
@@ -1027,16 +1081,14 @@ export default function Register({ causas }: { causas: any[] }) {
                             )}
                         </form>
 
-                        {/* Login link */}
                         <p className="mt-6 text-center text-sm text-muted-foreground">
                             Já tem uma conta?{' '}
                             <TextLink href={login.url()}>Entrar</TextLink>
                         </p>
                     </div>
-                </div>
+                </main>
             </div>
 
-            {/* ── Right — Brand panel ─────────────────────── */}
             <BrandPanel />
         </div>
     );
