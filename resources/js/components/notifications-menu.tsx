@@ -81,7 +81,10 @@ export function NotificationsMenu() {
 
                 {recentes.length === 0 ? (
                     <div className="flex flex-col items-center gap-2 px-4 py-10 text-center text-sm text-muted-foreground">
-                        <Bell className="size-7 opacity-40" aria-hidden="true" />
+                        <Bell
+                            className="size-7 opacity-40"
+                            aria-hidden="true"
+                        />
                         Você está em dia! Nenhuma notificação nova.
                     </div>
                 ) : (

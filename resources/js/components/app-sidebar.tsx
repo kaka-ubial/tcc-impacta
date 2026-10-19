@@ -137,7 +137,7 @@ export function AppSidebar() {
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="size-8 shrink-0 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:hidden"
+                        className="size-8 shrink-0 text-sidebar-foreground group-data-[collapsible=icon]:hidden hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                         aria-pressed={fixado}
                         aria-label={
                             fixado ? 'Soltar menu' : 'Manter menu aberto'

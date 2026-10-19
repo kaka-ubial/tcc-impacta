@@ -102,9 +102,7 @@ export function AppTopbar() {
                             data-test="sidebar-menu-button"
                         >
                             <Avatar className="size-9">
-                                {foto && (
-                                    <AvatarImage src={foto} alt={nome} />
-                                )}
+                                {foto && <AvatarImage src={foto} alt={nome} />}
                                 <AvatarFallback className="bg-brand text-sm font-semibold text-primary-foreground">
                                     {iniciais}
                                 </AvatarFallback>

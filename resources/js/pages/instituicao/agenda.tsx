@@ -593,7 +593,9 @@ export default function Agenda({
             <div className="flex flex-col gap-6">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex flex-col gap-1">
-                        <h1 className="font-display text-2xl font-bold text-foreground md:text-3xl">Agenda</h1>
+                        <h1 className="font-display text-2xl font-bold text-foreground md:text-3xl">
+                            Agenda
+                        </h1>
                         <p className="text-sm text-muted-foreground">
                             Doações agendadas e sua disponibilidade recorrente.
                         </p>

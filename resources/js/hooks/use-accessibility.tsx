@@ -73,6 +73,7 @@ export function useAccessibility() {
         try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
         } catch {
+            void 0;
         }
 
         apply(current);

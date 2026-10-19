@@ -32,7 +32,9 @@ export default function Notificacoes({ notificacoes }: Props) {
             <div className="flex flex-col gap-6">
                 <div className="flex flex-wrap items-end justify-between gap-3">
                     <div className="flex flex-col gap-1">
-                        <h1 className="font-display text-2xl font-bold text-foreground md:text-3xl">Notificações</h1>
+                        <h1 className="font-display text-2xl font-bold text-foreground md:text-3xl">
+                            Notificações
+                        </h1>
                         <p className="text-sm text-muted-foreground">
                             Atualizações das suas doações e agendamentos.
                         </p>

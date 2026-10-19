@@ -577,7 +577,9 @@ export default function InstituicaoDoacoes({
             <div className="flex flex-col gap-8">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex flex-col gap-1">
-                        <h1 className="font-display text-2xl font-bold text-foreground md:text-3xl">Doações</h1>
+                        <h1 className="font-display text-2xl font-bold text-foreground md:text-3xl">
+                            Doações
+                        </h1>
                         <p className="text-sm text-muted-foreground">
                             {totalAtivas > 0
                                 ? `${pendentes.length} pendente${pendentes.length !== 1 ? 's' : ''} · ${confirmadas.length} confirmada${confirmadas.length !== 1 ? 's' : ''}`

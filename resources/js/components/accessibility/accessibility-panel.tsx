@@ -8,11 +8,8 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover';
-import {
-    useAccessibility
-    
-} from '@/hooks/use-accessibility';
-import type {AccessibilityPreferences} from '@/hooks/use-accessibility';
+import { useAccessibility } from '@/hooks/use-accessibility';
+import type { AccessibilityPreferences } from '@/hooks/use-accessibility';
 import { useAppearance } from '@/hooks/use-appearance';
 
 const fontScales: AccessibilityPreferences['fontScale'][] = [
@@ -126,7 +123,9 @@ export function AccessibilityPanel() {
                                 type="button"
                                 size="sm"
                                 variant={
-                                    activeTheme === value ? 'default' : 'outline'
+                                    activeTheme === value
+                                        ? 'default'
+                                        : 'outline'
                                 }
                                 className={
                                     value === 'contrast' ? 'col-span-2' : ''

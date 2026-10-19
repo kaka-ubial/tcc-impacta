@@ -44,7 +44,10 @@ function HorarioForm() {
         hora_fim: '',
     });
 
-    const fimInvalido = !!data.hora_inicio && !!data.hora_fim && data.hora_fim <= data.hora_inicio;
+    const fimInvalido =
+        !!data.hora_inicio &&
+        !!data.hora_fim &&
+        data.hora_fim <= data.hora_inicio;
     const incompleto =
         !data.tipo || !data.dia_semana || !data.hora_inicio || !data.hora_fim;
 
@@ -157,7 +160,10 @@ function HorarioForm() {
             </div>
 
             {fimInvalido && (
-                <p className="text-xs text-destructive sm:col-span-2" role="alert">
+                <p
+                    className="text-xs text-destructive sm:col-span-2"
+                    role="alert"
+                >
                     O horário de fim deve ser depois do horário de início.
                 </p>
             )}
@@ -421,8 +427,8 @@ export default function WaitingApproval({ nomeFantasia, horarios }: Props) {
                                     </h1>
                                     <p className="text-sm text-muted-foreground">
                                         Informe quando você recebe doações ou
-                                        faz coletas. É com esses horários que
-                                        os doadores vão agendar.
+                                        faz coletas. É com esses horários que os
+                                        doadores vão agendar.
                                     </p>
                                 </div>
 
@@ -532,7 +538,10 @@ export default function WaitingApproval({ nomeFantasia, horarios }: Props) {
                     </section>
                 </div>
 
-                <p className="text-center text-xs text-muted-foreground" aria-live="polite">
+                <p
+                    className="text-center text-xs text-muted-foreground"
+                    aria-live="polite"
+                >
                     {concluidas} de {STEPS.length} etapas concluídas
                 </p>
             </main>

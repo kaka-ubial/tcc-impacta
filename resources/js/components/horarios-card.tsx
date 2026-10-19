@@ -42,7 +42,9 @@ function HorarioModal({
         });
 
     const fimInvalido =
-        !!data.hora_inicio && !!data.hora_fim && data.hora_fim <= data.hora_inicio;
+        !!data.hora_inicio &&
+        !!data.hora_fim &&
+        data.hora_fim <= data.hora_inicio;
     const incompleto =
         !data.tipo || !data.dia_semana || !data.hora_inicio || !data.hora_fim;
 
@@ -129,9 +131,7 @@ function HorarioModal({
                             <Label htmlFor="hor-inicio">Início</Label>
                             <Select
                                 value={data.hora_inicio}
-                                onValueChange={(v) =>
-                                    setData('hora_inicio', v)
-                                }
+                                onValueChange={(v) => setData('hora_inicio', v)}
                             >
                                 <SelectTrigger
                                     id="hor-inicio"
@@ -231,7 +231,10 @@ export function HorariosCard({ horarios }: { horarios: HorarioDisponivel[] }) {
                                     key={h.id}
                                     className="flex items-center gap-2 rounded-md border bg-background py-1 pr-1 pl-2 text-xs"
                                 >
-                                    <Badge variant="outline" className="px-1.5 text-[0.6875rem]">
+                                    <Badge
+                                        variant="outline"
+                                        className="px-1.5 text-[0.6875rem]"
+                                    >
                                         {DIAS[h.dia_semana].slice(0, 3)}
                                     </Badge>
                                     <span>

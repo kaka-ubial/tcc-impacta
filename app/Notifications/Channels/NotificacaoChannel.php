@@ -3,7 +3,6 @@
 namespace App\Notifications\Channels;
 
 use App\Models\Notificacao;
-use App\Notifications\Messages\NotificacaoMessage;
 use Illuminate\Notifications\Notification;
 
 class NotificacaoChannel

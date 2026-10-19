@@ -1,5 +1,11 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { Building2, Check, HeartHandshake, LocateFixed, UserRound } from 'lucide-react';
+import {
+    Building2,
+    Check,
+    HeartHandshake,
+    LocateFixed,
+    UserRound,
+} from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 
