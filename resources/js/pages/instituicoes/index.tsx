@@ -53,7 +53,6 @@ import type {
     SimplePaginated,
 } from '@/types';
 
-// Valor sentinela do Select para "sem filtro" — Radix Select não aceita value="".
 const SEM_FILTRO = 'all';
 
 type Filters = {
@@ -72,7 +71,6 @@ type Props = {
     recomendacoes: Recomendacao[];
 };
 
-// Opções de raio do filtro de proximidade (RF4), em km.
 const RAIO_OPTIONS = [5, 10, 25, 50, 100] as const;
 
 function formatDistancia(km: number): string {
@@ -242,15 +240,10 @@ export default function InstituicoesIndex({
     const [searching, setSearching] = useState(false);
     const [recsOpen, setRecsOpen] = useState(true);
     const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-    // Só liga o skeleton se a navegação realmente demorar — em requests
-    // rápidas (localhost, cache) trocar a grade inteira por skeleton e
-    // voltar em poucos ms lê como um "flicker" na tela.
     const searchingTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
         undefined,
     );
 
-    // Sincroniza o input quando o filtro muda via navegacao (padrao "adjust
-    // state during render" — evita setState dentro de useEffect)
     const [prevFilterSearch, setPrevFilterSearch] = useState(filters.search);
 
     if (prevFilterSearch !== filters.search) {
@@ -373,9 +366,8 @@ export default function InstituicoesIndex({
             <Head title="Instituições" />
 
             <div className="flex flex-col gap-0">
-                {/* ── Page header ─────────────────────────────── */}
-                <div className="border-b border-border bg-card px-6 py-8">
-                    <div className="mx-auto max-w-5xl">
+                <div>
+                    <div className="border-b border-border pb-8">
                         <h1 className="font-display text-2xl font-bold text-foreground md:text-3xl">
                             Instituições
                         </h1>
@@ -384,7 +376,6 @@ export default function InstituicoesIndex({
                             necessidades ativas.
                         </p>
 
-                        {/* Search + filtro de item/proximidade */}
                         <div className="mt-5 flex max-w-lg items-center gap-2">
                             <div className="relative flex-1">
                                 <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -554,8 +545,7 @@ export default function InstituicoesIndex({
                     </div>
                 </div>
 
-                <div className="mx-auto w-full max-w-5xl px-6 py-6">
-                    {/* ── Causa filter pills ───────────────────── */}
+                <div className="w-full py-6">
                     {causas.length > 0 && (
                         <div className="mb-6 flex flex-wrap gap-2">
                             <button
@@ -593,7 +583,6 @@ export default function InstituicoesIndex({
                         </div>
                     )}
 
-                    {/* ── Recommendations ─────────────────────── */}
                     {!hasActiveFilters &&
                         (recomendacoes.length > 0 ? (
                             <div className="mb-8">
@@ -648,7 +637,6 @@ export default function InstituicoesIndex({
                             </div>
                         ) : null)}
 
-                    {/* ── Content ─────────────────────────────── */}
                     {searching ? (
                         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             {Array.from({ length: 6 }, (_, i) => (
@@ -669,7 +657,6 @@ export default function InstituicoesIndex({
                                     className="group focus-visible:outline-none"
                                 >
                                     <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all duration-200 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 hover:border-brand/30 hover:shadow-md">
-                                        {/* Card body */}
                                         <div className="flex flex-col gap-3 p-5 pb-4">
                                             <div className="flex items-start justify-between gap-2">
                                                 <h2 className="leading-snug font-semibold text-foreground transition-colors group-hover:text-brand">
@@ -712,7 +699,6 @@ export default function InstituicoesIndex({
                                             )}
                                         </div>
 
-                                        {/* Card footer */}
                                         <div className="mt-auto flex items-center justify-between border-t border-border px-5 py-3">
                                             <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                                                 <Package className="size-3.5" />
@@ -735,7 +721,6 @@ export default function InstituicoesIndex({
                         </div>
                     )}
 
-                    {/* ── Pagination ──────────────────────────── */}
                     {hasPagination && !searching && (
                         <div className="mt-8">
                             <Pagination>

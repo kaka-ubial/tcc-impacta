@@ -4,7 +4,7 @@ import {
     ArrowRight,
     CalendarClock,
     Check,
-    Heart,
+    HeartHandshake,
     PartyPopper,
     ShieldCheck,
     Trash2,
@@ -250,7 +250,7 @@ function Stepper({
                                         done
                                             ? 'border-brand bg-brand text-primary-foreground'
                                             : active
-                                              ? 'border-brand bg-brand-soft text-foreground'
+                                              ? 'border-brand-strong bg-brand-soft text-foreground'
                                               : 'border-dashed text-muted-foreground'
                                     } ${active ? 'scale-110' : ''}`}
                                 >
@@ -282,7 +282,7 @@ function Stepper({
                                     className="mx-2 mb-5 h-0.5 flex-1 overflow-hidden rounded-full bg-border"
                                 >
                                     <span
-                                        className={`block h-full bg-brand transition-all duration-500 ${
+                                        className={`block h-full bg-brand-strong transition-all duration-500 ${
                                             index < current || done
                                                 ? 'w-full'
                                                 : 'w-0'
@@ -301,7 +301,6 @@ function Stepper({
 export default function WaitingApproval({ nomeFantasia, horarios }: Props) {
     const temHorarios = horarios.length > 0;
 
-    // Quem já tem horários cai direto na espera; senão começa do início.
     const [step, setStep] = useState(temHorarios ? 2 : 0);
     const [direction, setDirection] = useState<'forward' | 'back'>('forward');
     const headingRef = useRef<HTMLHeadingElement>(null);
@@ -316,7 +315,6 @@ export default function WaitingApproval({ nomeFantasia, horarios }: Props) {
         setStep(next);
     }
 
-    // Move o foco para o título da nova etapa (leitores de tela / teclado).
     useEffect(() => {
         if (firstRender.current) {
             firstRender.current = false;
@@ -351,7 +349,7 @@ export default function WaitingApproval({ nomeFantasia, horarios }: Props) {
                     className="flex items-center gap-2 font-semibold text-foreground transition-opacity hover:opacity-75"
                 >
                     <div className="flex size-7 items-center justify-center rounded-md bg-brand text-primary-foreground">
-                        <Heart className="size-4" aria-hidden="true" />
+                        <HeartHandshake className="size-4" aria-hidden="true" />
                     </div>
                     Impacta
                 </Link>
@@ -375,7 +373,7 @@ export default function WaitingApproval({ nomeFantasia, horarios }: Props) {
                                 <div className="flex flex-col items-center gap-4 text-center">
                                     <div className="flex size-16 items-center justify-center rounded-full bg-brand-soft">
                                         <PartyPopper
-                                            className="size-8 text-brand"
+                                            className="size-8 text-brand-strong"
                                             aria-hidden="true"
                                         />
                                     </div>
@@ -409,7 +407,7 @@ export default function WaitingApproval({ nomeFantasia, horarios }: Props) {
                                 <div className="flex flex-col gap-2">
                                     <div className="flex size-12 items-center justify-center rounded-full bg-brand-soft">
                                         <CalendarClock
-                                            className="size-6 text-brand"
+                                            className="size-6 text-brand-strong"
                                             aria-hidden="true"
                                         />
                                     </div>
@@ -468,10 +466,10 @@ export default function WaitingApproval({ nomeFantasia, horarios }: Props) {
                                     <div className="relative flex size-16 items-center justify-center rounded-full bg-brand-soft">
                                         <span
                                             aria-hidden="true"
-                                            className="absolute inset-0 animate-ping rounded-full bg-brand/20"
+                                            className="absolute inset-0 animate-ping rounded-full bg-brand/30"
                                         />
                                         <ShieldCheck
-                                            className="relative size-8 text-brand"
+                                            className="relative size-8 text-brand-strong"
                                             aria-hidden="true"
                                         />
                                     </div>

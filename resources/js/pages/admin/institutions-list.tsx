@@ -34,8 +34,9 @@ export default function InstitutionsList({ instituicoes, stats }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Instituições Pendentes" />
             <div>
-                <div className="flex flex-1 flex-col gap-4 p-4">
+                <div className="flex flex-1 flex-col gap-4">
                     <Heading
+                        variant="page"
                         title="Fila de Validação"
                         description="Revise novos cadastros de instituição e regule a plataforma."
                     />

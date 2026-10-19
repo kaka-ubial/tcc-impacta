@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, Heart } from 'lucide-react';
+import { ArrowLeft, HeartHandshake } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -61,7 +61,7 @@ export default function RegistrationSummary({ ficha, horarios }: Props) {
                     className="flex items-center gap-2 font-semibold text-foreground transition-opacity hover:opacity-75"
                 >
                     <div className="flex size-7 items-center justify-center rounded-md bg-brand text-primary-foreground">
-                        <Heart className="size-4" aria-hidden="true" />
+                        <HeartHandshake className="size-4" aria-hidden="true" />
                     </div>
                     Impacta
                 </Link>

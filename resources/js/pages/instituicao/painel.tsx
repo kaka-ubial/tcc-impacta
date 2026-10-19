@@ -1,7 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
     ArrowRight,
-    Calendar,
     CalendarClock,
     Gift,
     Package,
@@ -42,15 +41,6 @@ const painelItems: PainelItem[] = [
         href: '/instituicao/necessidades',
         accent: 'bg-brand-green/10',
         accentText: 'text-brand-green',
-    },
-    {
-        title: 'Horários Disponíveis',
-        description:
-            'Configure os dias e horários em que aceita receber ou coletar doações.',
-        icon: Calendar,
-        href: '/instituicao/horarios',
-        accent: 'bg-pending/10',
-        accentText: 'text-pending',
     },
     {
         title: 'Agenda',
@@ -114,9 +104,8 @@ export default function Painel() {
             <Head title="Painel" />
 
             <div className="flex flex-col gap-0">
-                {/* ── Welcome banner ──────────────────────────── */}
-                <div className="border-b border-border bg-card px-6 py-10">
-                    <div className="mx-auto max-w-4xl">
+                <div>
+                    <div className="border-b border-border pb-10">
                         <p className="text-sm text-muted-foreground">
                             {getGreeting()},
                         </p>
@@ -129,9 +118,7 @@ export default function Painel() {
                     </div>
                 </div>
 
-                {/* ── Action cards ────────────────────────────── */}
-                <div className="mx-auto w-full max-w-4xl px-6 py-8">
-                    {/* Primary actions */}
+                <div className="w-full py-8">
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {available.map((item) => {
                             const Icon = item.icon;
@@ -183,7 +170,6 @@ export default function Painel() {
                         })}
                     </div>
 
-                    {/* Unavailable items */}
                     {unavailable.length > 0 && (
                         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             {unavailable.map((item) => {

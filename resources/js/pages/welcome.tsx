@@ -88,7 +88,7 @@ const steps = [
 ];
 
 const footerLinkCls =
-    'text-sm text-[oklch(0.62_0.018_41.0)] transition-colors duration-150 hover:text-[oklch(0.88_0.02_41.0)]';
+    'text-sm text-[oklch(0.8_0.015_188)] transition-colors duration-150 hover:text-[oklch(0.96_0.01_188)]';
 
 export default function Welcome({
     canRegister = true,
@@ -135,9 +135,6 @@ export default function Welcome({
                 <header className="sticky top-0 z-40 border-b border-border bg-warm-neutral/90 backdrop-blur-sm">
                     <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
                         <div className="flex items-center gap-2 font-semibold">
-                            {/* <div className="flex size-7 items-center justify-center rounded-md bg-brand text-primary-foreground">
-                                <Heart className="size-4" />
-                            </div> */}
                             <div className="flex aspect-square size-10 items-center justify-center">
                                 <AppLogoIcon />
                             </div>
@@ -345,15 +342,15 @@ export default function Welcome({
                     </section>
 
                     {canRegister && !auth.user && (
-                        <section className="bg-brand">
+                        <section className="bg-brand dark:bg-[oklch(0.3_0.06_188)]">
                             <div className="mx-auto max-w-6xl px-6 py-24">
-                                <p className="text-xs font-semibold tracking-[0.15em] text-primary-foreground/50 uppercase">
+                                <p className="text-xs font-semibold tracking-[0.15em] text-white/75 uppercase">
                                     Pronta para começar?
                                 </p>
-                                <h2 className="mt-4 max-w-xl font-display text-3xl font-bold text-primary-foreground md:text-4xl lg:text-5xl">
+                                <h2 className="mt-4 max-w-xl font-display text-3xl font-bold text-white md:text-4xl lg:text-5xl">
                                     Faça a diferença hoje mesmo.
                                 </h2>
-                                <p className="mt-5 max-w-md text-base leading-relaxed text-primary-foreground/70">
+                                <p className="mt-5 max-w-md text-base leading-relaxed text-white/85">
                                     Junte-se à rede Impacta e conecte sua
                                     generosidade com quem precisa de apoio.
                                 </p>
@@ -361,7 +358,7 @@ export default function Welcome({
                                     <Button
                                         asChild
                                         size="lg"
-                                        className="gap-2 bg-card font-semibold text-brand hover:bg-card/90"
+                                        className="gap-2 bg-white font-semibold text-[oklch(0.36_0.07_188)] hover:bg-white/90"
                                     >
                                         <Link href={register()}>
                                             Criar conta gratuita
@@ -372,7 +369,7 @@ export default function Welcome({
                                         asChild
                                         size="lg"
                                         variant="ghost"
-                                        className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
+                                        className="text-white hover:bg-white/10 hover:text-white"
                                     >
                                         <Link href={login()}>
                                             Já tenho conta
@@ -383,30 +380,27 @@ export default function Welcome({
                         </section>
                     )}
                 </main>
-                <footer className="bg-[oklch(0.17_0.012_41.0)]">
+                <footer className="bg-[oklch(0.17_0.015_188)]">
                     <div className="mx-auto max-w-6xl px-6 py-16">
                         <div className="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-[2fr_1fr_1fr]">
                             <div>
                                 <div className="flex items-center gap-2">
-                                    {/* <div className="flex size-7 items-center justify-center rounded-md bg-brand text-primary-foreground">
-                                        <Heart className="size-4" />
-                                    </div> */}
-                                    <span className="font-semibold text-[oklch(0.88_0.02_41.0)]">
+                                    <span className="font-semibold text-[oklch(0.96_0.01_188)]">
                                         Impacta
                                     </span>
                                 </div>
-                                <p className="mt-4 max-w-xs text-sm leading-relaxed text-[oklch(0.65_0.02_41.0)]">
+                                <p className="mt-4 max-w-xs text-sm leading-relaxed text-[oklch(0.82_0.015_188)]">
                                     Conectando quem quer ajudar com quem
                                     precisa.
                                 </p>
-                                <p className="mt-1.5 text-xs text-[oklch(0.48_0.012_41.0)]">
+                                <p className="mt-1.5 text-xs text-[oklch(0.74_0.015_188)]">
                                     Rápido, transparente e humano.
                                 </p>
                             </div>
 
                             <div className="grid grid-cols-2 gap-8 lg:contents">
                                 <div>
-                                    <p className="text-[0.625rem] font-semibold tracking-[0.14em] text-[oklch(0.48_0.012_41.0)] uppercase">
+                                    <p className="text-[0.625rem] font-semibold tracking-[0.14em] text-[oklch(0.74_0.015_188)] uppercase">
                                         Plataforma
                                     </p>
                                     <ul className="mt-4 flex flex-col gap-3">
@@ -454,7 +448,7 @@ export default function Welcome({
                                 </div>
 
                                 <div>
-                                    <p className="text-[0.625rem] font-semibold tracking-[0.14em] text-[oklch(0.48_0.012_41.0)] uppercase">
+                                    <p className="text-[0.625rem] font-semibold tracking-[0.14em] text-[oklch(0.74_0.015_188)] uppercase">
                                         Institucional
                                     </p>
                                     <ul className="mt-4 flex flex-col gap-3">
@@ -498,7 +492,7 @@ export default function Welcome({
                             </div>
                         </div>
 
-                        <div className="mt-12 flex flex-col items-start justify-between gap-2 border-t border-white/8 pt-8 text-xs text-[oklch(0.43_0.010_41.0)] sm:flex-row sm:items-center">
+                        <div className="mt-12 flex flex-col items-start justify-between gap-2 border-t border-white/8 pt-8 text-xs text-[oklch(0.72_0.012_188)] sm:flex-row sm:items-center">
                             <p>© {new Date().getFullYear()} Impacta</p>
                             <p>
                                 Plataforma de doações solidárias. Comprometida

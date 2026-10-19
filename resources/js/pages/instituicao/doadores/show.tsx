@@ -137,7 +137,7 @@ export default function DoadorPerfilPage({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={isOwnProfile ? 'Meu perfil' : doador.nome_completo} />
 
-            <div className="flex flex-col gap-8 p-6">
+            <div className="flex flex-col gap-8">
                 <Link
                     href={voltarHref}
                     className="flex w-fit items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
@@ -146,7 +146,6 @@ export default function DoadorPerfilPage({
                     {voltarLabel}
                 </Link>
 
-                {/* Hero */}
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                     <Avatar className="size-20 border">
                         {fotoUrl(doador.foto_perfil) && (
@@ -163,7 +162,7 @@ export default function DoadorPerfilPage({
                     </Avatar>
 
                     <div className="flex flex-col gap-1">
-                        <h1 className="text-2xl leading-tight font-bold">
+                        <h1 className="font-display text-2xl leading-tight font-bold md:text-3xl">
                             {doador.nome_completo}
                         </h1>
                         {doador.estatisticas.media_avaliacoes !== null && (
@@ -195,7 +194,6 @@ export default function DoadorPerfilPage({
                     </div>
                 </div>
 
-                {/* Stats */}
                 <div
                     className={`grid gap-3 sm:grid-cols-2 ${isOwnProfile ? 'lg:grid-cols-3' : 'lg:grid-cols-4'}`}
                 >
@@ -224,7 +222,6 @@ export default function DoadorPerfilPage({
                 </div>
 
                 <div className="grid gap-6 lg:grid-cols-5">
-                    {/* Sidebar */}
                     <div className="flex flex-col gap-6 lg:col-span-2">
                         <Card>
                             <CardHeader className="pb-3">
@@ -247,7 +244,6 @@ export default function DoadorPerfilPage({
                         </Card>
                     </div>
 
-                    {/* Delivered donations */}
                     <div className="flex flex-col gap-3 lg:col-span-3">
                         <h2 className="flex items-center gap-2 font-semibold">
                             <Heart className="size-4 text-muted-foreground" />

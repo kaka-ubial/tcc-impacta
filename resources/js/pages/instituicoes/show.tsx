@@ -207,8 +207,7 @@ export default function InstituicaoShow({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={instituicao.nome_fantasia} />
 
-            <div className="flex flex-col gap-8 p-6">
-                {/* Hero */}
+            <div className="flex flex-col gap-8">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="flex flex-col gap-2">
                         {isDoador && (
@@ -226,7 +225,7 @@ export default function InstituicaoShow({
                                 <Building2 className="size-6" />
                             </div>
                             <div className="flex flex-col items-start gap-2 md:flex-row md:items-center">
-                                <h1 className="text-2xl leading-tight font-bold">
+                                <h1 className="font-display text-2xl leading-tight font-bold md:text-3xl">
                                     {instituicao.nome_fantasia}
                                 </h1>
                                 <VerificadaBadge
@@ -398,7 +397,6 @@ export default function InstituicaoShow({
                     </>
                 )}
 
-                {/* Mapa — largura total */}
                 {hasMap && (
                     <MapSection
                         lat={instituicao.latitude!}
