@@ -1,6 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
     ArrowRight,
+    BarChart3,
     Calendar,
     CalendarClock,
     Gift,
@@ -60,6 +61,15 @@ const painelItems: PainelItem[] = [
         href: '/instituicao/agenda',
         accent: 'bg-brand/10',
         accentText: 'text-brand',
+    },
+    {
+        title: 'Estatísticas',
+        description:
+            'Acompanhe doações concluídas, canceladas, transferências e avaliações em gráficos.',
+        icon: BarChart3,
+        href: '/instituicao/estatisticas',
+        accent: 'bg-brand-green/10',
+        accentText: 'text-brand-green',
     },
     {
         title: 'Perfil da Instituição',

@@ -1,5 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import {
+    BarChart3,
     Building2,
     Gift,
     LayoutGrid,
@@ -46,6 +47,11 @@ const instituicaoNavItems: NavItem[] = [
         title: 'Painel',
         href: '/instituicao/painel',
         icon: LayoutDashboard,
+    },
+    {
+        title: 'Estatísticas',
+        href: '/instituicao/estatisticas',
+        icon: BarChart3,
     },
     {
         title: 'Necessidades',

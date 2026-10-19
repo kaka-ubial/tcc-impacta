@@ -9,6 +9,7 @@ use App\Http\Controllers\Instituicao\AgendaController;
 use App\Http\Controllers\Instituicao\AvaliacaoController;
 use App\Http\Controllers\Instituicao\DoacaoController as InstituicaoDoacaoController;
 use App\Http\Controllers\Instituicao\DoadorController as InstituicaoDoadorController;
+use App\Http\Controllers\Instituicao\EstatisticasController;
 use App\Http\Controllers\Instituicao\HorarioController;
 use App\Http\Controllers\Instituicao\InstituicaoController;
 use App\Http\Controllers\Instituicao\PainelController;
@@ -48,6 +49,8 @@ Route::post('/validate/register-step-one', ValidateRegisterStepOne::class);
 Route::middleware(['auth', 'verified', 'user_type:instituicao', EnsureInstitutionIsApproved::class])->prefix('instituicao')->name('instituicao.')->group(function () {
 
     Route::get('painel', [PainelController::class, 'index'])->name('painel');
+
+    Route::get('estatisticas', [EstatisticasController::class, 'index'])->name('estatisticas');
 
     Route::get('horarios', [HorarioController::class, 'index'])->name('horarios.index');
     Route::post('horarios', [HorarioController::class, 'store'])->name('horarios.store');
