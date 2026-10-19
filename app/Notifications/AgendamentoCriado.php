@@ -6,9 +6,6 @@ use App\Notifications\Messages\NotificacaoMessage;
 use App\Support\DateTimeFormatter;
 use Illuminate\Notifications\Messages\MailMessage;
 
-/**
- * enviada ao doador quando ele cria uma doação com um horário de agendamento.
- */
 class AgendamentoCriado extends AgendamentoNotification
 {
     public function toNotificacao(object $notifiable): NotificacaoMessage
@@ -18,7 +15,8 @@ class AgendamentoCriado extends AgendamentoNotification
 
         return new NotificacaoMessage(
             titulo: 'Agendamento confirmado',
-            mensagem: "Sua doação para {$instituicao} foi agendada para {$dataHora}."
+            mensagem: "Sua doação para {$instituicao} foi agendada para {$dataHora}.",
+            url: '/doacoes'
         );
     }
 

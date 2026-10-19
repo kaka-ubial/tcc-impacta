@@ -16,18 +16,8 @@ use App\Notifications\DoacaoSolicitada;
 use App\Notifications\SugestaoDeDataRespondida;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Regras de negócio do fluxo de doação do doador. Extraído de
- * Doador\DoacaoController para que a UI Inertia e a API REST reaproveitem
- * exatamente a mesma lógica (transações, transições de status, notificações).
- */
 class DoacaoService
 {
-    /**
-     * @param  array{instituicao_id:int, itens:array<int, array{necessidade_id?:int|null, categoria_id:int, quantidade:int, descricao?:string|null}>, agendamento:array{tipo:string, data_hora:string, horario_disponivel_id?:int|null, endereco_referencia?:string|null}}  $validated
-     *
-     * @throws DoacaoException se a instituição não tiver horários disponíveis cadastrados
-     */
     public function store(array $validated, User $doadorUser): Doacao
     {
         $doadorId = $doadorUser->doadorId();
@@ -70,8 +60,6 @@ class DoacaoService
             return $doacao;
         });
 
-        // withoutRelations() evita que a instância notificada pendure
-        // lazy-loads no $doacao devolvido ao controller/resposta.
         $agendamentoNotificacao = $agendamento->withoutRelations();
 
         $instituicaoUser = User::find($validated['instituicao_id']);
@@ -98,7 +86,8 @@ class DoacaoService
         Notificacao::enviar(
             $doacao->instituicao_id,
             'Doação cancelada',
-            $doadorUser->doador->nome_completo.' cancelou uma solicitação de doação.'
+            $doadorUser->doador->nome_completo.' cancelou uma solicitação de doação.',
+            '/instituicao/doacoes'
         );
     }
 
@@ -109,9 +98,6 @@ class DoacaoService
         $agendamento = $doacao->agendamento;
         abort_if(! $agendamento || $agendamento->status !== AgendamentoStatus::AlteracaoSugerida, 422);
 
-        // Capturada antes do update: data_hora_sugerida é zerada abaixo, e
-        // SerializesModels re-lê o Agendamento do banco quando a notificação
-        // roda — a essa altura o campo já teria sumido.
         $dataSugerida = $agendamento->data_hora_sugerida;
 
         $agendamento->update([
@@ -160,7 +146,8 @@ class DoacaoService
         Notificacao::enviar(
             $doacao->doador_id,
             'Doação confirmada',
-            $instituicaoUser->instituicao->nome_fantasia.' confirmou a sua solicitação de doação.'
+            $instituicaoUser->instituicao->nome_fantasia.' confirmou a sua solicitação de doação.',
+            '/doacoes'
         );
     }
 
@@ -174,7 +161,8 @@ class DoacaoService
         Notificacao::enviar(
             $doacao->doador_id,
             'Doação recusada',
-            $instituicaoUser->instituicao->nome_fantasia.' recusou a sua solicitação de doação.'
+            $instituicaoUser->instituicao->nome_fantasia.' recusou a sua solicitação de doação.',
+            '/doacoes'
         );
     }
 
@@ -188,7 +176,8 @@ class DoacaoService
         Notificacao::enviar(
             $doacao->doador_id,
             'Doação concluída',
-            $instituicaoUser->instituicao->nome_fantasia.' marcou a sua doação como entregue.'
+            $instituicaoUser->instituicao->nome_fantasia.' marcou a sua doação como entregue.',
+            '/doacoes'
         );
     }
 
@@ -207,7 +196,8 @@ class DoacaoService
         Notificacao::enviar(
             $doacao->doador_id,
             'Doação não entregue',
-            $instituicaoUser->instituicao->nome_fantasia.' marcou a sua doação como não entregue.'
+            $instituicaoUser->instituicao->nome_fantasia.' marcou a sua doação como não entregue.',
+            '/doacoes'
         );
     }
 }

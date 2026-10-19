@@ -13,6 +13,7 @@ class Notificacao extends Model
         'usuario_id',
         'titulo',
         'mensagem',
+        'url',
         'lida',
     ];
 
@@ -28,12 +29,13 @@ class Notificacao extends Model
         return $this->belongsTo(User::class, 'usuario_id');
     }
 
-    public static function enviar(int $usuarioId, string $titulo, string $mensagem): void
+    public static function enviar(int $usuarioId, string $titulo, string $mensagem, ?string $url = null): void
     {
         static::create([
             'usuario_id' => $usuarioId,
             'titulo' => $titulo,
             'mensagem' => $mensagem,
+            'url' => $url,
         ]);
     }
 }

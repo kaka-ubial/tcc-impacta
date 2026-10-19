@@ -6,10 +6,6 @@ use App\Notifications\Messages\NotificacaoMessage;
 use App\Support\DateTimeFormatter;
 use Illuminate\Notifications\Messages\MailMessage;
 
-/**
- * Enviada à instituição quando um doador cria uma doação com um horário de
- * agendamento. Disparada em DoacaoService::store().
- */
 class DoacaoSolicitada extends AgendamentoNotification
 {
     public function toNotificacao(object $notifiable): NotificacaoMessage
@@ -19,7 +15,8 @@ class DoacaoSolicitada extends AgendamentoNotification
 
         return new NotificacaoMessage(
             titulo: 'Nova solicitação de doação',
-            mensagem: "{$doador} enviou uma nova solicitação de doação, agendada para {$dataHora}."
+            mensagem: "{$doador} enviou uma nova solicitação de doação, agendada para {$dataHora}.",
+            url: '/instituicao/doacoes'
         );
     }
 

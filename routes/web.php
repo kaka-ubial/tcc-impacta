@@ -116,6 +116,9 @@ Route::middleware(['auth', 'user_type:admin'])->prefix('admin')->name('admin.')-
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('notificacoes', [NotificacaoController::class, 'index'])->name('notificacoes.index');
+    Route::post('notificacoes/lidas', [NotificacaoController::class, 'marcarTodasLidas'])->name('notificacoes.lidas');
+    Route::get('notificacoes/{notificacao}/abrir', [NotificacaoController::class, 'abrir'])->name('notificacoes.abrir');
+    Route::patch('notificacoes/{notificacao}/lida', [NotificacaoController::class, 'marcarLida'])->name('notificacoes.lida');
 
     Route::middleware('user_type:instituicao')->group(function () {
         Route::get('waiting-validation', [OnboardingController::class, 'show'])->name('waiting-validation');
