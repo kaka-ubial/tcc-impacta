@@ -50,7 +50,6 @@ Route::middleware(['auth', 'verified', 'user_type:instituicao', EnsureInstitutio
 
     Route::get('painel', [PainelController::class, 'index'])->name('painel');
 
-    Route::get('horarios', [HorarioController::class, 'index'])->name('horarios.index');
     Route::post('horarios', [HorarioController::class, 'store'])->name('horarios.store');
     Route::delete('horarios/{horario}', [HorarioController::class, 'destroy'])->name('horarios.destroy');
 

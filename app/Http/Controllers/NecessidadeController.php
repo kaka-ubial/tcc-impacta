@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\DoacaoStatus;
 use App\Exceptions\NecessidadeException;
 use App\Http\Requests\NecessidadeRequest;
+use App\Http\Resources\HorarioResource;
 use App\Models\CategoriaItem;
 use App\Models\Necessidade;
 use App\Services\NecessidadeService;
@@ -27,8 +29,19 @@ class NecessidadeController extends Controller
             $necessidades = Necessidade::with(['categoria', 'instituicao'])->get();
         }
 
+        $horarios = $user->instituicao
+            ? $user->instituicao->horarios()
+                ->where('ativo', true)
+                ->withExists(['agendamentos as tem_doacoes_ativas' => fn ($q) => $q
+                    ->whereHas('doacao', fn ($q) => $q->whereIn('status', [DoacaoStatus::Pendente, DoacaoStatus::Confirmada]))])
+                ->orderBy('dia_semana')
+                ->orderBy('hora_inicio')
+                ->get()
+            : collect();
+
         return Inertia::render('instituicao/necessidades', [
             'necessidades' => $necessidades,
+            'horarios' => HorarioResource::collection($horarios)->resolve($request),
             'necessidades_count' => $user->instituicao
                 ? $user->instituicao->necessidades()->count()
                 : 0,
@@ -57,7 +70,7 @@ class NecessidadeController extends Controller
         try {
             $this->necessidades->store($request->validated(), $request->user()->instituicao);
         } catch (NecessidadeException $e) {
-            return redirect()->route('instituicao.horarios.index')->with('error', $e->getMessage());
+            return redirect()->route('instituicao.necessidades.index')->with('error', $e->getMessage());
         }
 
         return redirect()->route('instituicao.necessidades.index')->with('success', 'Necessidade criada com sucesso!');

@@ -2,37 +2,15 @@
 
 namespace App\Http\Controllers\Instituicao;
 
-use App\Enums\DoacaoStatus;
 use App\Exceptions\HorarioException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instituicao\StoreHorarioRequest;
-use App\Http\Resources\HorarioResource;
 use App\Models\HorarioDisponivel;
 use App\Services\HorarioService;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Inertia\Response;
 
 class HorarioController extends Controller
 {
     public function __construct(private readonly HorarioService $horarios) {}
-
-    public function index(Request $request): Response
-    {
-        $instituicaoId = auth()->user()->instituicaoId();
-
-        $horarios = HorarioDisponivel::where('instituicao_id', $instituicaoId)
-            ->where('ativo', true)
-            ->withExists(['agendamentos as tem_doacoes_ativas' => fn ($q) => $q
-                ->whereHas('doacao', fn ($q) => $q->whereIn('status', [DoacaoStatus::Pendente, DoacaoStatus::Confirmada]))])
-            ->orderBy('dia_semana')
-            ->orderBy('hora_inicio')
-            ->get();
-
-        return Inertia::render('instituicao/horarios', [
-            'horarios' => HorarioResource::collection($horarios)->resolve($request),
-        ]);
-    }
 
     public function store(StoreHorarioRequest $request)
     {
