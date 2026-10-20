@@ -46,6 +46,7 @@ export type NecessidadeAtiva = {
 export type InstituicaoListItem = {
     usuario_id: number;
     nome_fantasia: string;
+    foto_perfil: string | null;
     endereco_completo: string;
     verificada: boolean;
     causas: Causa[];
@@ -56,6 +57,7 @@ export type InstituicaoListItem = {
 export type Recomendacao = {
     usuario_id: number;
     nome_fantasia: string;
+    foto_perfil: string | null;
     endereco_completo: string;
     causas: Causa[];
     causa_overlap: number;
@@ -65,6 +67,7 @@ export type Recomendacao = {
 export type InstituicaoDetalhe = {
     usuario_id: number;
     nome_fantasia: string;
+    foto_perfil: string | null;
     razao_social: string;
     verificada: boolean;
     cnpj: string;
@@ -76,6 +79,11 @@ export type InstituicaoDetalhe = {
     causas: Causa[];
     necessidades_ativas: NecessidadeAtiva[];
     horarios_disponiveis: HorarioDisponivel[];
+    impacto: {
+        doacoes_entregues: number;
+        itens_recebidos: number;
+        doadores: number;
+    };
 };
 
 export type Doador = {
@@ -139,6 +147,7 @@ export type Instituicao = {
     cnpj: string;
     telefone: string;
     endereco_completo: string;
+    foto_perfil: string | null;
 };
 
 export type User = {

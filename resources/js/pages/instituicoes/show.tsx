@@ -2,19 +2,27 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
     ArrowLeftRight,
-    Building2,
     FileText,
     Heart,
     HandHeart,
     MapPin,
     Package,
+    Pencil,
     Phone,
+    Settings,
 } from 'lucide-react';
 import { lazy, Suspense, useState } from 'react';
 
 import { CausaBadge } from '@/components/causa-badge';
 import { DoacaoNecessidadesModal } from '@/components/doacao/DoacaoNecessidadesModal';
 import { SolicitacaoDoacaoModal } from '@/components/doacao/SolicitacaoDoacaoModal';
+import { HorariosCard } from '@/components/horarios-card';
+import { HorariosPublicosCard } from '@/components/instituicao/HorariosPublicosCard';
+import { ImpactoResumo } from '@/components/instituicao/ImpactoResumo';
+import { InstituicaoLogo } from '@/components/instituicao/InstituicaoLogo';
+import { PerfilCausasDialog } from '@/components/instituicao/PerfilCausasDialog';
+import { PerfilLogoEditavel } from '@/components/instituicao/PerfilLogoEditavel';
+import { PerfilSobreCard } from '@/components/instituicao/PerfilSobreCard';
 import { TransferenciaNecessidadesModal } from '@/components/transferencia/TransferenciaNecessidadesModal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -22,13 +30,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { VerificadaBadge } from '@/components/verificada-badge';
 import AppLayout from '@/layouts/app-layout';
+import { painel, perfil } from '@/routes/instituicao';
+import { index as necessidadesIndex } from '@/routes/instituicao/necessidades';
 import {
     index as instituicoesIndex,
     show as instituicoesShow,
 } from '@/routes/instituicoes';
+import { edit as editProfile } from '@/routes/profile';
 import type {
     BreadcrumbItem,
     CategoriaItem,
+    Causa,
+    HorarioDisponivel,
     InstituicaoDetalhe,
 } from '@/types';
 
@@ -39,6 +52,11 @@ type Props = {
     categorias: CategoriaItem[];
     canTransfer: boolean;
     estoque: Record<number, number>;
+    // Só vêm preenchidos quando a própria instituição abre o seu perfil
+    // (Instituicao\PerfilController).
+    isOwnProfile?: boolean;
+    horariosEditaveis?: HorarioDisponivel[];
+    todasCausas?: Causa[];
 };
 
 const prioridadeConfig: Record<
@@ -171,6 +189,9 @@ export default function InstituicaoShow({
     categorias,
     canTransfer,
     estoque,
+    isOwnProfile = false,
+    horariosEditaveis = [],
+    todasCausas = [],
 }: Props) {
     const { auth } = usePage().props;
     const isDoador = auth.user.tipo_usuario === 'doador';
@@ -183,21 +204,27 @@ export default function InstituicaoShow({
     const [transferenciaModalId, setTransferenciaModalId] = useState<
         number | null
     >(null);
+    const [causasOpen, setCausasOpen] = useState(false);
 
-    const breadcrumbs: BreadcrumbItem[] = isDoador
+    const breadcrumbs: BreadcrumbItem[] = isOwnProfile
         ? [
-              { title: 'Instituições', href: instituicoesIndex() },
-              {
-                  title: instituicao.nome_fantasia,
-                  href: instituicoesShow(instituicao.usuario_id),
-              },
+              { title: 'Painel', href: painel() },
+              { title: 'Meu perfil', href: perfil() },
           ]
-        : [
-              {
-                  title: instituicao.nome_fantasia,
-                  href: instituicoesShow(instituicao.usuario_id),
-              },
-          ];
+        : isDoador
+          ? [
+                { title: 'Instituições', href: instituicoesIndex() },
+                {
+                    title: instituicao.nome_fantasia,
+                    href: instituicoesShow(instituicao.usuario_id),
+                },
+            ]
+          : [
+                {
+                    title: instituicao.nome_fantasia,
+                    href: instituicoesShow(instituicao.usuario_id),
+                },
+            ];
 
     const hasMap =
         instituicao.latitude !== null && instituicao.longitude !== null;
@@ -205,7 +232,9 @@ export default function InstituicaoShow({
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={instituicao.nome_fantasia} />
+            <Head
+                title={isOwnProfile ? 'Meu perfil' : instituicao.nome_fantasia}
+            />
 
             <div className="flex flex-col gap-8">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -221,9 +250,18 @@ export default function InstituicaoShow({
                         )}
 
                         <div className="mt-3 flex items-center gap-3">
-                            <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                                <Building2 className="size-6" />
-                            </div>
+                            {isOwnProfile ? (
+                                <PerfilLogoEditavel
+                                    foto={instituicao.foto_perfil}
+                                    nome={instituicao.nome_fantasia}
+                                />
+                            ) : (
+                                <InstituicaoLogo
+                                    foto={instituicao.foto_perfil}
+                                    nome={instituicao.nome_fantasia}
+                                    tamanho="lg"
+                                />
+                            )}
                             <div className="flex flex-col items-start gap-2 md:flex-row md:items-center">
                                 <h1 className="font-display text-2xl leading-tight font-bold md:text-3xl">
                                     {instituicao.nome_fantasia}
@@ -244,14 +282,41 @@ export default function InstituicaoShow({
                             )}
                         </div>
 
-                        {instituicao.causas.length > 0 && (
-                            <div className="flex flex-wrap gap-1.5 pt-1">
+                        {(instituicao.causas.length > 0 || isOwnProfile) && (
+                            <div className="flex flex-wrap items-center gap-1.5 pt-1">
                                 {instituicao.causas.map((causa) => (
                                     <CausaBadge key={causa.id} causa={causa} />
                                 ))}
+                                {isOwnProfile && (
+                                    <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="h-6 gap-1 px-2 text-xs"
+                                        onClick={() => setCausasOpen(true)}
+                                    >
+                                        <Pencil className="size-3" />
+                                        {instituicao.causas.length > 0
+                                            ? 'Editar causas'
+                                            : 'Adicionar causas'}
+                                    </Button>
+                                )}
                             </div>
                         )}
                     </div>
+
+                    {isOwnProfile && (
+                        <div className="flex shrink-0 flex-col gap-2 sm:mt-8 sm:max-w-xs sm:items-end">
+                            <Button variant="outline" className="gap-2" asChild>
+                                <Link href={editProfile()}>
+                                    <Settings className="size-4" />
+                                    Editar dados cadastrais
+                                </Link>
+                            </Button>
+                            <p className="text-xs text-muted-foreground sm:text-right">
+                                É assim que doadores veem a sua instituição.
+                            </p>
+                        </div>
+                    )}
 
                     {canDonate && (
                         <div className="flex shrink-0 flex-col gap-2 sm:mt-8 sm:max-w-xs">
@@ -276,8 +341,13 @@ export default function InstituicaoShow({
 
                 <Separator />
 
+                <ImpactoResumo
+                    impacto={instituicao.impacto}
+                    isOwnProfile={isOwnProfile}
+                />
+
                 <div className="grid gap-6 lg:grid-cols-5">
-                    <div className="lg:col-span-2">
+                    <div className="flex flex-col gap-6 lg:col-span-2">
                         <Card>
                             <CardHeader className="pb-3">
                                 <CardTitle className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
@@ -299,23 +369,37 @@ export default function InstituicaoShow({
                                 </div>
                             </CardContent>
                         </Card>
+
+                        {isOwnProfile ? (
+                            <HorariosCard horarios={horariosEditaveis} />
+                        ) : (
+                            <HorariosPublicosCard
+                                horarios={instituicao.horarios_disponiveis}
+                            />
+                        )}
                     </div>
 
                     <div className="flex flex-col gap-6 lg:col-span-3">
-                        {instituicao.descricao && (
-                            <Card>
-                                <CardHeader className="pb-3">
-                                    <CardTitle className="flex items-center gap-2 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
-                                        <FileText className="size-4" />
-                                        Sobre a instituição
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-sm leading-relaxed whitespace-pre-line">
-                                        {instituicao.descricao}
-                                    </p>
-                                </CardContent>
-                            </Card>
+                        {isOwnProfile ? (
+                            <PerfilSobreCard
+                                descricao={instituicao.descricao}
+                            />
+                        ) : (
+                            instituicao.descricao && (
+                                <Card>
+                                    <CardHeader className="pb-3">
+                                        <CardTitle className="flex items-center gap-2 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+                                            <FileText className="size-4" />
+                                            Sobre a instituição
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <p className="text-sm leading-relaxed whitespace-pre-line">
+                                            {instituicao.descricao}
+                                        </p>
+                                    </CardContent>
+                                </Card>
+                            )
                         )}
 
                         <div className="flex flex-col gap-3">
@@ -325,6 +409,14 @@ export default function InstituicaoShow({
                                 <span className="text-sm font-normal text-muted-foreground">
                                     ({instituicao.necessidades_ativas.length})
                                 </span>
+                                {isOwnProfile && (
+                                    <Link
+                                        href={necessidadesIndex()}
+                                        className="ml-auto text-sm font-normal text-primary hover:underline"
+                                    >
+                                        Gerenciar necessidades
+                                    </Link>
+                                )}
                             </h2>
 
                             {instituicao.necessidades_ativas.length === 0 ? (
@@ -357,6 +449,15 @@ export default function InstituicaoShow({
                         </div>
                     </div>
                 </div>
+
+                {isOwnProfile && (
+                    <PerfilCausasDialog
+                        open={causasOpen}
+                        onClose={() => setCausasOpen(false)}
+                        todasCausas={todasCausas}
+                        selecionadas={instituicao.causas.map((c) => c.id)}
+                    />
+                )}
 
                 {canTransfer && (
                     <TransferenciaNecessidadesModal

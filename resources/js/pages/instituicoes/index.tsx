@@ -15,6 +15,7 @@ import {
 import { useCallback, useRef, useState } from 'react';
 
 import { CausaBadge } from '@/components/causa-badge';
+import { InstituicaoLogo } from '@/components/instituicao/InstituicaoLogo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -85,7 +86,10 @@ function CardSkeleton() {
     return (
         <div className="flex flex-col gap-0 overflow-hidden rounded-2xl border border-border bg-card">
             <div className="flex flex-col gap-3 p-5 pb-4">
-                <Skeleton className="h-5 w-3/5" />
+                <div className="flex items-center gap-3">
+                    <Skeleton className="size-10 shrink-0 rounded-lg" />
+                    <Skeleton className="h-5 w-3/5" />
+                </div>
                 <div className="flex items-center gap-1.5">
                     <Skeleton className="size-3 shrink-0 rounded-full" />
                     <Skeleton className="h-3.5 w-4/5" />
@@ -109,9 +113,15 @@ function RecommendationCard({ rec }: { rec: Recomendacao }) {
             className="group flex h-full flex-col gap-3 overflow-hidden rounded-2xl border border-border bg-card p-5 transition-all duration-200 hover:border-brand/30 hover:shadow-md"
         >
             <div className="flex items-start justify-between gap-2">
-                <h3 className="leading-snug font-semibold text-foreground transition-colors group-hover:text-brand">
-                    {rec.nome_fantasia}
-                </h3>
+                <div className="flex min-w-0 items-center gap-3">
+                    <InstituicaoLogo
+                        foto={rec.foto_perfil}
+                        nome={rec.nome_fantasia}
+                    />
+                    <h3 className="leading-snug font-semibold text-foreground transition-colors group-hover:text-brand">
+                        {rec.nome_fantasia}
+                    </h3>
+                </div>
                 <ChevronRight className="size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
             </div>
 
@@ -659,9 +669,17 @@ export default function InstituicoesIndex({
                                     <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all duration-200 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 hover:border-brand/30 hover:shadow-md">
                                         <div className="flex flex-col gap-3 p-5 pb-4">
                                             <div className="flex items-start justify-between gap-2">
-                                                <h2 className="leading-snug font-semibold text-foreground transition-colors group-hover:text-brand">
-                                                    {inst.nome_fantasia}
-                                                </h2>
+                                                <div className="flex min-w-0 items-center gap-3">
+                                                    <InstituicaoLogo
+                                                        foto={inst.foto_perfil}
+                                                        nome={
+                                                            inst.nome_fantasia
+                                                        }
+                                                    />
+                                                    <h2 className="leading-snug font-semibold text-foreground transition-colors group-hover:text-brand">
+                                                        {inst.nome_fantasia}
+                                                    </h2>
+                                                </div>
                                                 <VerificadaBadge
                                                     verificada={inst.verificada}
                                                 />

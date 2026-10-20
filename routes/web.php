@@ -14,6 +14,7 @@ use App\Http\Controllers\Instituicao\HorarioController;
 use App\Http\Controllers\Instituicao\InstituicaoController;
 use App\Http\Controllers\Instituicao\OnboardingController;
 use App\Http\Controllers\Instituicao\PainelController;
+use App\Http\Controllers\Instituicao\PerfilController as InstituicaoPerfilController;
 use App\Http\Controllers\Instituicao\TransferenciaController;
 use App\Http\Controllers\NecessidadeController;
 use App\Http\Controllers\NotificacaoController;
@@ -52,6 +53,9 @@ Route::middleware(['auth', 'verified', 'user_type:instituicao', EnsureInstitutio
     Route::get('painel', [PainelController::class, 'index'])->name('painel');
 
     Route::get('estatisticas', [EstatisticasController::class, 'index'])->name('estatisticas');
+
+    Route::get('perfil', [InstituicaoPerfilController::class, 'show'])->name('perfil');
+    Route::patch('perfil', [InstituicaoPerfilController::class, 'update'])->name('perfil.update');
 
     Route::post('horarios', [HorarioController::class, 'store'])->name('horarios.store');
     Route::delete('horarios/{horario}', [HorarioController::class, 'destroy'])->name('horarios.destroy');

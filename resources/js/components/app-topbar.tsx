@@ -38,7 +38,9 @@ export function AppTopbar() {
     const user = auth.user;
     const getInitials = useInitials();
     const nome = nomeDe(user);
-    const foto = fotoUrl(user.doador?.foto_perfil ?? null);
+    const foto = fotoUrl(
+        user.doador?.foto_perfil ?? user.instituicao?.foto_perfil ?? null,
+    );
     const iniciais =
         nome
             .split(/\s+/)

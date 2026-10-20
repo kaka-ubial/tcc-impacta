@@ -78,6 +78,7 @@ class RecommendationService
             ->map(fn ($item) => [
                 'usuario_id' => $item['instituicao']->usuario_id,
                 'nome_fantasia' => $item['instituicao']->nome_fantasia,
+                'foto_perfil' => $item['instituicao']->foto_perfil,
                 'endereco_completo' => $item['instituicao']->endereco_completo,
                 'causas' => $item['instituicao']->causas->map(fn ($c) => [
                     'id' => $c->id,

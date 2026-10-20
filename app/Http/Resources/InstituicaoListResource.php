@@ -22,6 +22,7 @@ class InstituicaoListResource extends JsonResource
         return [
             'usuario_id' => $this->usuario_id,
             'nome_fantasia' => $this->nome_fantasia,
+            'foto_perfil' => $this->foto_perfil,
             'endereco_completo' => $this->endereco_completo,
             'verificada' => $this->isApproved(),
             'causas' => $this->causas->map(fn ($c) => ['id' => $c->id, 'nome' => $c->nome, 'icone' => $c->icone]),

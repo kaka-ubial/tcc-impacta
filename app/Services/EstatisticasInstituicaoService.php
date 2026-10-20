@@ -54,6 +54,24 @@ class EstatisticasInstituicaoService
         ];
     }
 
+    /**
+     * Números de impacto exibidos no perfil público da instituição. Só conta
+     * o que foi de fato entregue, desde sempre — nada de pendências, recusas
+     * ou avaliações, que são dados internos.
+     *
+     * @return array{doacoes_entregues: int, itens_recebidos: int, doadores: int}
+     */
+    public function resumoPublico(int $instituicaoId): array
+    {
+        return [
+            'doacoes_entregues' => $this->doacoesDoPeriodo($instituicaoId, null)
+                ->where('status', DoacaoStatus::Entregue)
+                ->count(),
+            'itens_recebidos' => array_sum(array_column($this->itensPorCategoria($instituicaoId, null), 'quantidade')),
+            'doadores' => $this->doadores($instituicaoId, null)['unicos'],
+        ];
+    }
+
     private function doacoesDoPeriodo(int $instituicaoId, ?CarbonImmutable $inicio)
     {
         return Doacao::query()

@@ -63,16 +63,12 @@ class InstituicaoController extends Controller
      * Detalhar instituição
      *
      * Retorna os detalhes públicos de uma instituição, incluindo necessidades
-     * ativas e horários disponíveis.
+     * ativas, horários disponíveis e números de impacto (doações entregues,
+     * itens recebidos e doadores).
      */
     public function show(int $id): InstituicaoShowResource
     {
-        $instituicao = Instituicao::with([
-            'causas',
-            'necessidades' => fn ($q) => $q->whereColumn('quantidade_atual', '<', 'quantidade_objetivo'),
-            'necessidades.categoria',
-            'horarios' => fn ($q) => $q->where('ativo', true)->orderBy('dia_semana')->orderBy('hora_inicio'),
-        ])->findOrFail($id);
+        $instituicao = Instituicao::findOrFail($id)->loadPerfilPublico();
 
         return new InstituicaoShowResource($instituicao);
     }

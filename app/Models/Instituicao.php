@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 
-#[Fillable(['usuario_id', 'nome_fantasia', 'razao_social', 'cnpj', 'telefone', 'endereco_completo', 'descricao', 'latitude', 'longitude', 'status'])]
+#[Fillable(['usuario_id', 'nome_fantasia', 'razao_social', 'cnpj', 'telefone', 'endereco_completo', 'descricao', 'foto_perfil', 'latitude', 'longitude', 'status'])]
 class Instituicao extends Model
 {
     use HasFactory;
@@ -76,6 +76,21 @@ class Instituicao extends Model
     public function horarios(): HasMany
     {
         return $this->hasMany(HorarioDisponivel::class, 'instituicao_id', 'usuario_id');
+    }
+
+    /**
+     * Relações exibidas no perfil público (InstituicaoShowResource) — usado
+     * tanto pela página que doadores veem quanto pelo "meu perfil" da
+     * própria instituição, para que as duas mostrem exatamente o mesmo.
+     */
+    public function loadPerfilPublico(): static
+    {
+        return $this->load([
+            'causas',
+            'necessidades' => fn ($q) => $q->whereColumn('quantidade_atual', '<', 'quantidade_objetivo'),
+            'necessidades.categoria',
+            'horarios' => fn ($q) => $q->where('ativo', true)->orderBy('dia_semana')->orderBy('hora_inicio'),
+        ]);
     }
 
     /**

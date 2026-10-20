@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use App\Enums\UserType;
 use App\Models\Instituicao;
+use App\Services\EstatisticasInstituicaoService;
 use App\Services\TransferenciaService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -28,6 +29,7 @@ class InstituicaoShowResource extends JsonResource
             'nome_fantasia' => $this->nome_fantasia,
             'razao_social' => $this->razao_social,
             'verificada' => $this->isApproved(),
+            'foto_perfil' => $this->foto_perfil,
             'cnpj' => $this->cnpj,
             'telefone' => $this->telefone,
             'endereco_completo' => $this->endereco_completo,
@@ -50,6 +52,7 @@ class InstituicaoShowResource extends JsonResource
                 'hora_fim' => $h->hora_fim,
                 'tipo' => $h->tipo,
             ])->values(),
+            'impacto' => app(EstatisticasInstituicaoService::class)->resumoPublico($this->usuario_id),
             'estoque' => $this->when(
                 $request->user()?->tipo_usuario === UserType::Instituicao,
                 fn () => TransferenciaService::calcularEstoque($request->user()->instituicaoId())
