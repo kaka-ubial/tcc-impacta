@@ -412,6 +412,11 @@ export default function Profile({
                                                     name="endereco_completo"
                                                     value={enderecoCompleto}
                                                 />
+                                                <input
+                                                    type="hidden"
+                                                    name="geocoding_query"
+                                                    value={geocodingQuery}
+                                                />
 
                                                 {/* <
                                                 id="endereco_completo"

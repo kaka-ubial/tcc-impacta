@@ -5,13 +5,13 @@ namespace App\Actions\UserTypes\Handlers;
 use App\Actions\UserTypes\Contracts\UserTypeHandler;
 use App\Models\Doador;
 use App\Models\User;
-use Illuminate\Support\Facades\Http;
+use App\Services\GeocodingService;
 
 class DoadorHandler implements UserTypeHandler
 {
     public function create(User $user, array $data): void
     {
-        $coords = $this->resolveCoords($data);
+        $coords = app(GeocodingService::class)->resolver($data);
 
         Doador::create([
             'usuario_id' => $user->id,
@@ -32,7 +32,7 @@ class DoadorHandler implements UserTypeHandler
 
     public function update(User $user, array $data): void
     {
-        $coords = $this->resolveCoords($data);
+        $coords = app(GeocodingService::class)->resolver($data);
 
         $atributos = [
             'nome_completo' => $data['nome_completo'],
@@ -52,43 +52,5 @@ class DoadorHandler implements UserTypeHandler
         if (array_key_exists('causas_submitted', $data)) {
             $user->causas()->sync($data['causas_apoiadas'] ?? []);
         }
-    }
-
-    private function resolveCoords(array $data): array
-    {
-        // GPS coordinates from the browser take priority
-        if (! empty($data['latitude']) && ! empty($data['longitude'])) {
-            return ['lat' => $data['latitude'], 'lon' => $data['longitude']];
-        }
-
-        // Geocode from the address query sent by the frontend
-        if (! empty($data['geocoding_query'])) {
-            return $this->geocode($data['geocoding_query']) ?? ['lat' => null, 'lon' => null];
-        }
-
-        return ['lat' => null, 'lon' => null];
-    }
-
-    private function geocode(string $query): ?array
-    {
-        try {
-            $response = Http::withOptions(['verify' => false])
-                ->timeout(5)
-                ->get('https://nominatim.openstreetmap.org/search', [
-                    'q' => $query,
-                    'format' => 'json',
-                    'limit' => 1,
-                    'countrycodes' => 'br',
-                ]);
-
-            $results = $response->json();
-            if (! empty($results)) {
-                return ['lat' => (float) $results[0]['lat'], 'lon' => (float) $results[0]['lon']];
-            }
-        } catch (\Throwable) {
-            // Geocoding unavailable — coordinates stay null
-        }
-
-        return null;
     }
 }

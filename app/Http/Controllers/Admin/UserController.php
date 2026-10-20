@@ -67,7 +67,7 @@ class UserController extends Controller
     {
         abort_unless($user->instituicao, 404);
 
-        $user->instituicao->update($request->validated());
+        $user->instituicao->atualizarComEndereco($request->validated());
 
         return back()->with('message', 'Instituição atualizada com sucesso.');
     }

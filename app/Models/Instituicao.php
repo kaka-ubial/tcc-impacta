@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\InstituicaoStatus;
+use App\Services\GeocodingService;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -76,6 +77,29 @@ class Instituicao extends Model
     public function horarios(): HasMany
     {
         return $this->hasMany(HorarioDisponivel::class, 'instituicao_id', 'usuario_id');
+    }
+
+    /**
+     * Atualiza os dados cadastrais e, quando o endereço muda (ou a
+     * instituição ainda não tem localização), recalcula latitude/longitude
+     * para o mapa e a busca por proximidade. $localizacao aceita o que o
+     * formulário mandar (latitude/longitude do GPS, geocoding_query) — ver
+     * GeocodingService::resolver().
+     */
+    public function atualizarComEndereco(array $atributos, array $localizacao = []): void
+    {
+        $this->fill($atributos);
+
+        if ($this->isDirty('endereco_completo') || $this->latitude === null || $this->longitude === null) {
+            $coords = app(GeocodingService::class)->resolver([
+                ...$localizacao,
+                'endereco_completo' => $this->endereco_completo,
+            ]);
+            $this->latitude = $coords['lat'];
+            $this->longitude = $coords['lon'];
+        }
+
+        $this->save();
     }
 
     /**
