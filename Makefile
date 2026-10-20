@@ -42,6 +42,8 @@ assets: ## Builda os assets do front (public/build)
 
 install: ## Instala dependências PHP e JS dentro do container
 	$(SAIL) composer install
+	@# O volume sail-node-modules nasce com dono root; o npm do Sail roda como `sail`.
+	$(SAIL) exec -u root laravel.test chown sail /var/www/html/node_modules
 	$(SAIL) npm install
 
 migrate: ## Roda as migrations

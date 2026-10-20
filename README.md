@@ -50,15 +50,24 @@ MAIL_MAILER=log
 ./vendor/bin/sail up -d              # 1ª vez builda a imagem (alguns minutos)
 ./vendor/bin/sail artisan key:generate   # só se APP_KEY estiver vazio
 ./vendor/bin/sail artisan migrate --seed
+./vendor/bin/sail exec -u root laravel.test chown sail /var/www/html/node_modules  # 1ª vez
 ./vendor/bin/sail npm install        # binários Linux dentro do container
 ./vendor/bin/sail npm run dev        # Vite (HMR) na porta 5173
 ```
+
+Com `make`: `make up`, `make install` (já inclui o `chown`) e `make dev`.
 
 App em `http://localhost:8000`. O Postgres fica exposto em `localhost:5432` para clientes
 externos. Testes: `./vendor/bin/sail artisan test`.
 
 - `sail down` desliga os containers e mantém os dados (volume `sail-pgsql`).
-  **`sail down -v` apaga o banco.**
+  **`sail down -v` apaga o banco** (e o volume `sail-node-modules`).
+- O container tem um `node_modules` **próprio** (volume `sail-node-modules`), separado do
+  `node_modules` da sua máquina. Assim um `npm install` no macOS/Windows não apaga os binários
+  Linux que o Vite do container usa, e vice-versa. Consequência: dependência JS nova precisa ser
+  instalada nos dois lados — `sail npm install` (para o `sail npm run dev`) e `npm install` no
+  host (para o editor, ESLint e TypeScript). O `chown` acima só é necessário quando o volume é
+  criado (1ª vez ou depois de `sail down -v`).
 - O `Dockerfile` da raiz é a imagem de **produção** (Render); não é usado no dev local.
 - Com `DB_HOST=pgsql`, `php artisan` direto no host não alcança o banco: use `sail artisan`.
 
