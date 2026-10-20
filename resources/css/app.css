@@ -207,6 +207,12 @@
     }
 }
 
+@keyframes impacta-ciranda-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 @keyframes impacta-dialog-enter {
     from {
         opacity: 0;
