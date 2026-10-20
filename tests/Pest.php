@@ -10,6 +10,7 @@ use App\Models\ItemDoacao;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 /*
@@ -25,6 +26,11 @@ use Tests\TestCase;
 
 pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
+    // Cadastro/edição de doador e instituição geocodificam o endereço: nenhum
+    // teste deve bater no Nominatim de verdade. A requisição bloqueada lança
+    // exceção, que o GeocodingService trata como "endereço não encontrado".
+    // Testes de geocoding registram o próprio Http::fake().
+    ->beforeEach(fn () => Http::preventStrayRequests())
     ->in('Feature');
 
 /*

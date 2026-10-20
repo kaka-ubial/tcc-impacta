@@ -55,12 +55,7 @@ class InstituicaoController extends Controller
 
     public function show(Request $request, int $id): Response
     {
-        $instituicao = Instituicao::with([
-            'causas',
-            'necessidades' => fn ($q) => $q->whereColumn('quantidade_atual', '<', 'quantidade_objetivo'),
-            'necessidades.categoria',
-            'horarios' => fn ($q) => $q->where('ativo', true)->orderBy('dia_semana')->orderBy('hora_inicio'),
-        ])->findOrFail($id);
+        $instituicao = Instituicao::findOrFail($id)->loadPerfilPublico();
 
         $categorias = CategoriaItem::orderBy('nome')->get(['id', 'nome']);
 

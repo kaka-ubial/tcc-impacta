@@ -1,15 +1,18 @@
 import { router } from '@inertiajs/react';
-import { Camera, Loader2, Trash2, Upload } from 'lucide-react';
+import { Building2, Camera, Loader2, Trash2, Upload } from 'lucide-react';
 import { useRef, useState } from 'react';
 
 import InputError from '@/components/input-error';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { fotoUrl } from '@/lib/foto';
+import { cn } from '@/lib/utils';
 
 type Props = {
     nome: string;
     fotoAtual: string | null;
+    // 'logo' (instituição): quadrado, imagem inteira visível, sem iniciais.
+    variante?: 'avatar' | 'logo';
 };
 
 const MAX_BYTES = 2 * 1024 * 1024;
@@ -24,7 +27,14 @@ function iniciais(nome: string) {
         .join('');
 }
 
-export function DoadorFotoUploader({ nome, fotoAtual }: Props) {
+export function FotoPerfilUploader({
+    nome,
+    fotoAtual,
+    variante = 'avatar',
+}: Props) {
+    const isLogo = variante === 'logo';
+    const rotulo = isLogo ? 'logo' : 'foto';
+
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [preview, setPreview] = useState<string | null>(null);
     const [clientError, setClientError] = useState<string | null>(null);
@@ -70,7 +80,7 @@ export function DoadorFotoUploader({ nome, fotoAtual }: Props) {
                 forceFormData: true,
                 preserveScroll: true,
                 onError: (errs) => {
-                    setServerError(errs.foto ?? 'Falha ao enviar a foto.');
+                    setServerError(errs.foto ?? `Falha ao enviar a ${rotulo}.`);
                 },
                 onFinish: () => {
                     URL.revokeObjectURL(objectUrl);
@@ -95,15 +105,37 @@ export function DoadorFotoUploader({ nome, fotoAtual }: Props) {
 
     return (
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <div className="relative">
-                <Avatar className="size-20 border">
-                    {fotoSrc && <AvatarImage src={fotoSrc} alt={nome} />}
-                    <AvatarFallback className="text-lg font-semibold">
-                        {iniciais(nome) || <Camera className="size-7" />}
+            <div className="relative w-fit">
+                <Avatar
+                    className={cn('size-20 border', isLogo && 'rounded-xl')}
+                >
+                    {fotoSrc && (
+                        <AvatarImage
+                            src={fotoSrc}
+                            alt={nome}
+                            className={cn(isLogo && 'bg-card object-contain')}
+                        />
+                    )}
+                    <AvatarFallback
+                        className={cn(
+                            'text-lg font-semibold',
+                            isLogo && 'rounded-xl bg-primary/10 text-primary',
+                        )}
+                    >
+                        {isLogo ? (
+                            <Building2 className="size-8" />
+                        ) : (
+                            iniciais(nome) || <Camera className="size-7" />
+                        )}
                     </AvatarFallback>
                 </Avatar>
                 {processing && (
-                    <div className="absolute inset-0 flex items-center justify-center rounded-full bg-background/70">
+                    <div
+                        className={cn(
+                            'absolute inset-0 flex items-center justify-center bg-background/70',
+                            isLogo ? 'rounded-xl' : 'rounded-full',
+                        )}
+                    >
                         <Loader2 className="size-6 animate-spin" />
                     </div>
                 )}
@@ -120,7 +152,7 @@ export function DoadorFotoUploader({ nome, fotoAtual }: Props) {
                         className="gap-1.5"
                     >
                         <Upload className="size-3.5" />
-                        {fotoAtual ? 'Trocar foto' : 'Enviar foto'}
+                        {fotoAtual ? `Trocar ${rotulo}` : `Enviar ${rotulo}`}
                     </Button>
 
                     {fotoAtual && (

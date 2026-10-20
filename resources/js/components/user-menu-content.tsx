@@ -9,6 +9,7 @@ import {
 import { UserInfo } from '@/components/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { logout } from '@/routes';
+import { perfil as perfilInstituicao } from '@/routes/instituicao';
 import { edit } from '@/routes/profile';
 import type { User } from '@/types';
 
@@ -33,11 +34,16 @@ export function UserMenuContent({ user }: Props) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-                {user.tipo_usuario === 'doador' && (
+                {(user.tipo_usuario === 'doador' ||
+                    user.tipo_usuario === 'instituicao') && (
                     <DropdownMenuItem asChild>
                         <Link
                             className="block w-full cursor-pointer"
-                            href="/perfil"
+                            href={
+                                user.tipo_usuario === 'instituicao'
+                                    ? perfilInstituicao()
+                                    : '/perfil'
+                            }
                             prefetch
                             onClick={cleanup}
                         >

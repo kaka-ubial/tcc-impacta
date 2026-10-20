@@ -5,11 +5,14 @@ namespace App\Actions\UserTypes\Handlers;
 use App\Actions\UserTypes\Contracts\UserTypeHandler;
 use App\Models\Instituicao;
 use App\Models\User;
+use App\Services\GeocodingService;
 
 class InstituicaoHandler implements UserTypeHandler
 {
     public function create(User $user, array $data): void
     {
+        $coords = app(GeocodingService::class)->resolver($data);
+
         Instituicao::create([
             'usuario_id' => $user->id,
             'nome_fantasia' => $data['nome_fantasia'],
@@ -17,6 +20,8 @@ class InstituicaoHandler implements UserTypeHandler
             'cnpj' => $data['cnpj'],
             'telefone' => $data['telefone_inst'],
             'endereco_completo' => $data['endereco_completo'],
+            'latitude' => $coords['lat'],
+            'longitude' => $coords['lon'],
             'validada_por_admin' => false,
         ]);
 
@@ -29,14 +34,13 @@ class InstituicaoHandler implements UserTypeHandler
     {
         $instituicao = $user->instituicao;
         if ($instituicao) {
-            $instituicao->fill([
+            $instituicao->atualizarComEndereco([
                 'nome_fantasia' => $data['nome_fantasia'],
                 'razao_social' => $data['razao_social'],
                 'cnpj' => $data['cnpj'],
                 'telefone' => $data['telefone_inst'],
                 'endereco_completo' => $data['endereco_completo'],
-            ]);
-            $instituicao->save();
+            ], $data);
         }
     }
 }

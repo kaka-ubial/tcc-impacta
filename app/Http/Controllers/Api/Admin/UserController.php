@@ -73,7 +73,7 @@ class UserController extends Controller
     {
         abort_unless($user->instituicao, 404);
 
-        $user->instituicao->update($request->validated());
+        $user->instituicao->atualizarComEndereco($request->validated());
 
         return new UserResource($user->fresh(['doador', 'instituicao']));
     }

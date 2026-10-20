@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\InstituicaoStatus;
+use App\Services\GeocodingService;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 
-#[Fillable(['usuario_id', 'nome_fantasia', 'razao_social', 'cnpj', 'telefone', 'endereco_completo', 'descricao', 'latitude', 'longitude', 'status'])]
+#[Fillable(['usuario_id', 'nome_fantasia', 'razao_social', 'cnpj', 'telefone', 'endereco_completo', 'descricao', 'foto_perfil', 'latitude', 'longitude', 'status'])]
 class Instituicao extends Model
 {
     use HasFactory;
@@ -76,6 +77,44 @@ class Instituicao extends Model
     public function horarios(): HasMany
     {
         return $this->hasMany(HorarioDisponivel::class, 'instituicao_id', 'usuario_id');
+    }
+
+    /**
+     * Atualiza os dados cadastrais e, quando o endereço muda (ou a
+     * instituição ainda não tem localização), recalcula latitude/longitude
+     * para o mapa e a busca por proximidade. $localizacao aceita o que o
+     * formulário mandar (latitude/longitude do GPS, geocoding_query) — ver
+     * GeocodingService::resolver().
+     */
+    public function atualizarComEndereco(array $atributos, array $localizacao = []): void
+    {
+        $this->fill($atributos);
+
+        if ($this->isDirty('endereco_completo') || $this->latitude === null || $this->longitude === null) {
+            $coords = app(GeocodingService::class)->resolver([
+                ...$localizacao,
+                'endereco_completo' => $this->endereco_completo,
+            ]);
+            $this->latitude = $coords['lat'];
+            $this->longitude = $coords['lon'];
+        }
+
+        $this->save();
+    }
+
+    /**
+     * Relações exibidas no perfil público (InstituicaoShowResource) — usado
+     * tanto pela página que doadores veem quanto pelo "meu perfil" da
+     * própria instituição, para que as duas mostrem exatamente o mesmo.
+     */
+    public function loadPerfilPublico(): static
+    {
+        return $this->load([
+            'causas',
+            'necessidades' => fn ($q) => $q->whereColumn('quantidade_atual', '<', 'quantidade_objetivo'),
+            'necessidades.categoria',
+            'horarios' => fn ($q) => $q->where('ativo', true)->orderBy('dia_semana')->orderBy('hora_inicio'),
+        ]);
     }
 
     /**

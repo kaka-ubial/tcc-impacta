@@ -3,8 +3,8 @@ import { Form, Head, Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import DeleteUser from '@/components/delete-user';
-import { DoadorFotoUploader } from '@/components/doador-foto-uploader';
 import EnderecoCepFields from '@/components/endereco-cep-fields';
+import { FotoPerfilUploader } from '@/components/foto-perfil-uploader';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import AlertSuccess from '@/components/ui/alert-success';
@@ -181,13 +181,33 @@ export default function Profile({
                                 title="Foto de perfil"
                                 description="Sua foto aparecerá para as instituições ao receberem suas doações."
                             />
-                            <DoadorFotoUploader
+                            <FotoPerfilUploader
                                 nome={
                                     auth.user.doador?.nome_completo ??
                                     auth.user.email
                                 }
                                 fotoAtual={
                                     auth.user.doador?.foto_perfil ?? null
+                                }
+                            />
+                        </div>
+                    )}
+
+                    {tipo === 'instituicao' && (
+                        <div className="space-y-3">
+                            <Heading
+                                variant="small"
+                                title="Logo da instituição"
+                                description="Aparece no seu perfil público e na lista de instituições que os doadores veem."
+                            />
+                            <FotoPerfilUploader
+                                variante="logo"
+                                nome={
+                                    auth.user.instituicao?.nome_fantasia ??
+                                    auth.user.email
+                                }
+                                fotoAtual={
+                                    auth.user.instituicao?.foto_perfil ?? null
                                 }
                             />
                         </div>
@@ -391,6 +411,11 @@ export default function Profile({
                                                     type="hidden"
                                                     name="endereco_completo"
                                                     value={enderecoCompleto}
+                                                />
+                                                <input
+                                                    type="hidden"
+                                                    name="geocoding_query"
+                                                    value={geocodingQuery}
                                                 />
 
                                                 {/* <

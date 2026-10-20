@@ -11,7 +11,9 @@ export function UserInfo({
     showEmail?: boolean;
 }) {
     const getInitials = useInitials();
-    const avatarSrc = fotoUrl(user.doador?.foto_perfil ?? null);
+    const avatarSrc = fotoUrl(
+        user.doador?.foto_perfil ?? user.instituicao?.foto_perfil ?? null,
+    );
 
     return (
         <>
@@ -23,7 +25,9 @@ export function UserInfo({
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">
-                    {user.doador?.nome_completo ?? user.email}
+                    {user.doador?.nome_completo ??
+                        user.instituicao?.nome_fantasia ??
+                        user.email}
                 </span>
                 {showEmail && (
                     <span className="truncate text-xs text-muted-foreground">
