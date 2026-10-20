@@ -538,3 +538,61 @@ html.a11y-reduce-motion *::after {
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
 }
+
+/*
+ * MapLibre (components/map-embed.tsx): popup e controles seguem os tokens do
+ * tema. O CSS do MapLibre carrega depois (chunk lazy do mapa), por isso os
+ * seletores levam o prefixo .maplibregl-map para ganhar em especificidade.
+ */
+.maplibregl-map .maplibregl-popup-content {
+    background: var(--popover);
+    color: var(--popover-foreground);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 8px 24px -8px rgb(0 0 0 / 0.25);
+    font: 500 0.8125rem / 1.4 var(--font-sans);
+    padding: 0.625rem 2rem 0.625rem 0.875rem;
+}
+
+.maplibregl-map .maplibregl-popup-close-button {
+    color: var(--muted-foreground);
+    font-size: 1.125rem;
+    padding: 0 0.5rem;
+}
+
+.maplibregl-map
+    [class*='maplibregl-popup-anchor-bottom']
+    .maplibregl-popup-tip {
+    border-top-color: var(--popover);
+}
+
+.maplibregl-map [class*='maplibregl-popup-anchor-top'] .maplibregl-popup-tip {
+    border-bottom-color: var(--popover);
+}
+
+.maplibregl-map .maplibregl-popup-anchor-left .maplibregl-popup-tip {
+    border-right-color: var(--popover);
+}
+
+.maplibregl-map .maplibregl-popup-anchor-right .maplibregl-popup-tip {
+    border-left-color: var(--popover);
+}
+
+.maplibregl-map .maplibregl-ctrl-group,
+.maplibregl-map .maplibregl-ctrl-attrib.maplibregl-compact {
+    background: var(--popover);
+    color: var(--popover-foreground);
+}
+
+.maplibregl-map .maplibregl-ctrl-group button + button {
+    border-top-color: var(--border);
+}
+
+.maplibregl-map .maplibregl-ctrl-attrib a {
+    color: inherit;
+}
+
+.dark .maplibregl-map .maplibregl-ctrl-icon,
+.dark .maplibregl-map .maplibregl-ctrl-attrib-button {
+    filter: invert(1);
+}

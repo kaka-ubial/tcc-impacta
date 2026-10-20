@@ -11,7 +11,8 @@ import {
     Phone,
     Settings,
 } from 'lucide-react';
-import { lazy, Suspense, useState } from 'react';
+import { Component, lazy, Suspense, useState } from 'react';
+import type { ReactNode } from 'react';
 
 import { CausaBadge } from '@/components/causa-badge';
 import { DoacaoNecessidadesModal } from '@/components/doacao/DoacaoNecessidadesModal';
@@ -68,6 +69,32 @@ const prioridadeConfig: Record<
     baixa: { variant: 'secondary', label: 'Baixa prioridade' },
 };
 
+// Se o chunk do mapa falhar ao carregar (rede, deploy novo com a aba
+// aberta), só o mapa some — o resto do perfil e o "Quero Doar" continuam.
+class MapErrorBoundary extends Component<
+    { children: ReactNode },
+    { falhou: boolean }
+> {
+    state = { falhou: false };
+
+    static getDerivedStateFromError() {
+        return { falhou: true };
+    }
+
+    render() {
+        if (this.state.falhou) {
+            return (
+                <div className="flex h-full w-full items-center justify-center bg-muted p-6 text-center text-sm text-muted-foreground">
+                    Não foi possível carregar o mapa. Use o link “Abrir no mapa”
+                    abaixo.
+                </div>
+            );
+        }
+
+        return this.props.children;
+    }
+}
+
 function MapSection({
     lat,
     lng,
@@ -82,13 +109,15 @@ function MapSection({
     return (
         <div className="isolate overflow-hidden rounded-xl border shadow-sm">
             <div className="h-80">
-                <Suspense
-                    fallback={
-                        <div className="h-full w-full animate-pulse bg-muted" />
-                    }
-                >
-                    <MapEmbed lat={lat} lng={lng} label={label} />
-                </Suspense>
+                <MapErrorBoundary>
+                    <Suspense
+                        fallback={
+                            <div className="h-full w-full animate-pulse bg-muted" />
+                        }
+                    >
+                        <MapEmbed lat={lat} lng={lng} label={label} />
+                    </Suspense>
+                </MapErrorBoundary>
             </div>
             <div className="flex items-center justify-between bg-muted/40 px-3 py-2 text-xs">
                 <span className="text-muted-foreground">{label}</span>
@@ -504,6 +533,23 @@ export default function InstituicaoShow({
                         lng={instituicao.longitude!}
                         label={instituicao.endereco_completo}
                     />
+                )}
+
+                {!hasMap && isOwnProfile && (
+                    <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed px-6 py-8 text-center text-sm text-muted-foreground">
+                        <MapPin className="size-5" />
+                        <p>
+                            Não conseguimos localizar o seu endereço no mapa,
+                            então doadores não veem sua localização nem acham
+                            sua instituição na busca por proximidade.
+                        </p>
+                        <Link
+                            href={editProfile()}
+                            className="text-primary hover:underline"
+                        >
+                            Revisar endereço em Configurações
+                        </Link>
+                    </div>
                 )}
             </div>
         </AppLayout>
