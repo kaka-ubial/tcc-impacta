@@ -64,11 +64,11 @@ const painelItems: PainelItem[] = [
     {
         title: 'Perfil da Instituição',
         description:
-            'Visualize e edite as informações cadastrais da sua instituição.',
+            'Veja seu perfil como os doadores veem e edite descrição, causas, logo e horários.',
         icon: UserCog,
-        href: null,
-        accent: 'bg-muted',
-        accentText: 'text-muted-foreground',
+        href: '/instituicao/perfil',
+        accent: 'bg-brand/10',
+        accentText: 'text-brand',
     },
     {
         title: 'Transferência de Itens',
