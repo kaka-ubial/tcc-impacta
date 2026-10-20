@@ -31,6 +31,37 @@ Instalação **local** (sem Docker). Você precisa ter instalado:
 - **Node.js 20+** e **npm**
 - **PostgreSQL 14+** rodando localmente
 
+## Rodando com Docker (Laravel Sail)
+
+Alternativa à instalação local: app (PHP 8.4) e PostgreSQL sobem em containers via
+[Laravel Sail](https://laravel.com/docs/sail). Só é preciso ter o Docker (e as dependências PHP
+em `vendor/`, instaladas com `composer install`).
+
+No `.env`, use o host de rede do Docker e uma porta livre:
+
+```dotenv
+APP_URL=http://localhost:8000
+APP_PORT=8000
+DB_HOST=pgsql
+MAIL_MAILER=log
+```
+
+```bash
+./vendor/bin/sail up -d              # 1ª vez builda a imagem (alguns minutos)
+./vendor/bin/sail artisan key:generate   # só se APP_KEY estiver vazio
+./vendor/bin/sail artisan migrate --seed
+./vendor/bin/sail npm install        # binários Linux dentro do container
+./vendor/bin/sail npm run dev        # Vite (HMR) na porta 5173
+```
+
+App em `http://localhost:8000`. O Postgres fica exposto em `localhost:5432` para clientes
+externos. Testes: `./vendor/bin/sail artisan test`.
+
+- `sail down` desliga os containers e mantém os dados (volume `sail-pgsql`).
+  **`sail down -v` apaga o banco.**
+- O `Dockerfile` da raiz é a imagem de **produção** (Render); não é usado no dev local.
+- Com `DB_HOST=pgsql`, `php artisan` direto no host não alcança o banco: use `sail artisan`.
+
 ## Configuração do ambiente
 
 ```bash
