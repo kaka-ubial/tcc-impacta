@@ -2,16 +2,28 @@ import type { RequestPayload } from '@inertiajs/core';
 import { Head, Link, router } from '@inertiajs/react';
 import {
     ArrowLeftRight,
+    Ban,
     Building2,
     Calendar,
     CalendarClock,
     Check,
+    CheckCircle2,
+    ChevronRight,
+    Clock,
+    History,
     Package,
+    PackageCheck,
+    PackageX,
     Plus,
+    Send,
     X,
+    XCircle,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { useState } from 'react';
 
+import { ItensDialog } from '@/components/itens-dialog';
+import { ScrollRow } from '@/components/scroll-row';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,6 +32,11 @@ import {
     CardFooter,
     CardHeader,
 } from '@/components/ui/card';
+import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import { Label } from '@/components/ui/label';
 import {
     Select,
@@ -136,16 +153,25 @@ const statusConfig: Record<
     StatusKey,
     {
         label: string;
+        icon: LucideIcon;
         variant: 'default' | 'secondary' | 'destructive' | 'outline';
     }
 > = {
-    pendente: { label: 'Pendente', variant: 'outline' },
-    confirmada: { label: 'Confirmada', variant: 'default' },
-    entregue: { label: 'Entregue', variant: 'secondary' },
-    recusada: { label: 'Recusada', variant: 'destructive' },
-    cancelada: { label: 'Cancelada', variant: 'secondary' },
-    alteracao_sugerida: { label: 'Alteração sugerida', variant: 'outline' },
-    nao_entregue: { label: 'Não entregue', variant: 'destructive' },
+    pendente: { label: 'Pendente', icon: Clock, variant: 'outline' },
+    confirmada: { label: 'Confirmada', icon: CheckCircle2, variant: 'default' },
+    entregue: { label: 'Entregue', icon: PackageCheck, variant: 'secondary' },
+    recusada: { label: 'Recusada', icon: XCircle, variant: 'destructive' },
+    cancelada: { label: 'Cancelada', icon: Ban, variant: 'secondary' },
+    alteracao_sugerida: {
+        label: 'Alteração sugerida',
+        icon: CalendarClock,
+        variant: 'outline',
+    },
+    nao_entregue: {
+        label: 'Não entregue',
+        icon: PackageX,
+        variant: 'destructive',
+    },
 };
 
 function TransferenciaCard({
@@ -202,7 +228,8 @@ function TransferenciaCard({
                         </div>
                     </div>
                     <div className="flex flex-col items-end gap-1">
-                        <Badge variant={cfg.variant} className="text-xs">
+                        <Badge variant={cfg.variant} className="gap-1 text-xs">
+                            <cfg.icon className="size-3" />
                             {cfg.label}
                         </Badge>
                         <span className="text-xs text-muted-foreground">
@@ -459,12 +486,17 @@ function Section({
     title,
     items,
     horarios,
+    icon: Icon,
+    collapsed = false,
 }: {
     title: string;
+    icon: LucideIcon;
     items: Transferencia[];
     horarios: HorarioDisponivel[];
+    collapsed?: boolean;
 }) {
     const [page, setPage] = useState(1);
+    const [open, setOpen] = useState(!collapsed);
 
     if (items.length === 0) {
         return null;
@@ -473,16 +505,20 @@ function Section({
     const totalPages = Math.ceil(items.length / PER_PAGE);
     const visivel = items.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
-    return (
-        <section className="flex flex-col gap-3">
-            <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
-                {title} ({items.length})
-            </h2>
-            <div className="grid gap-4 md:grid-cols-2">
-                {visivel.map((t) => (
-                    <TransferenciaCard key={t.id} t={t} horarios={horarios} />
+    const titulo = `${title} (${items.length})`;
+
+    const cards = (
+        <div className="flex flex-col gap-3">
+            <ScrollRow>
+                {visivel.map((x) => (
+                    <div
+                        key={x.id}
+                        className="flex w-[22rem] shrink-0 snap-start sm:w-[26rem] [&>*]:w-full"
+                    >
+                        <TransferenciaCard t={x} horarios={horarios} />
+                    </div>
                 ))}
-            </div>
+            </ScrollRow>
             {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-2 pt-2">
                     <Button
@@ -506,6 +542,33 @@ function Section({
                     </Button>
                 </div>
             )}
+        </div>
+    );
+
+    if (collapsed) {
+        return (
+            <Collapsible open={open} onOpenChange={setOpen} asChild>
+                <section className="flex flex-col gap-3">
+                    <CollapsibleTrigger className="flex w-fit items-center gap-1.5 text-sm font-semibold tracking-wide text-muted-foreground uppercase hover:text-foreground">
+                        <ChevronRight
+                            className={`size-4 transition-transform ${open ? 'rotate-90' : ''}`}
+                        />
+                        <Icon className="size-4" />
+                        {titulo}
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>{cards}</CollapsibleContent>
+                </section>
+            </Collapsible>
+        );
+    }
+
+    return (
+        <section className="flex flex-col gap-3">
+            <h2 className="flex items-center gap-1.5 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+                <Icon className="size-4" />
+                {titulo}
+            </h2>
+            {cards}
         </section>
     );
 }
@@ -566,12 +629,31 @@ export default function Transferencias({
                                 : 'Nenhuma transferência ativa no momento.'}
                         </p>
                     </div>
-                    <Button asChild>
-                        <Link href="/instituicoes" className="gap-1.5">
-                            <Plus className="size-4" />
-                            Nova transferência
-                        </Link>
-                    </Button>
+                    <div className="flex flex-wrap items-center gap-2">
+                        <ItensDialog
+                            label="Itens"
+                            title="Itens das transferências"
+                            description="Resumo dos itens enviados e recebidos."
+                            grupos={[
+                                {
+                                    titulo: 'Enviados',
+                                    vazio: 'Nenhum item enviado ainda.',
+                                    itens: itensEnviados,
+                                },
+                                {
+                                    titulo: 'Recebidos',
+                                    vazio: 'Nenhum item recebido ainda.',
+                                    itens: itensRecebidos,
+                                },
+                            ]}
+                        />
+                        <Button asChild>
+                            <Link href="/instituicoes" className="gap-1.5">
+                                <Plus className="size-4" />
+                                Nova transferência
+                            </Link>
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
@@ -591,32 +673,36 @@ export default function Transferencias({
                     ))}
                 </div>
 
-                <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+                <div className="flex flex-col gap-6">
                     {enviadas.length === 0 && recebidas.length === 0 ? (
                         <div className="rounded-xl border border-dashed py-16 text-center text-sm text-muted-foreground">
                             Nenhuma transferência encontrada.
                         </div>
                     ) : (
-                        <div className="flex flex-col gap-10">
+                        <div className="flex min-w-0 flex-col gap-10">
                             {(filtro === 'todas' || filtro === 'ativas') && (
                                 <>
                                     <Section
                                         title="Aguardando sua confirmação"
+                                        icon={Clock}
                                         items={pendentesRecebidas}
                                         horarios={horarios}
                                     />
                                     <Section
                                         title="Sugestão de novo horário"
+                                        icon={CalendarClock}
                                         items={sugeridas}
                                         horarios={horarios}
                                     />
                                     <Section
                                         title="Confirmadas — aguardando entrega"
+                                        icon={CheckCircle2}
                                         items={confirmadas}
                                         horarios={horarios}
                                     />
                                     <Section
                                         title="Enviadas pendentes"
+                                        icon={Send}
                                         items={pendenteEnviadas}
                                         horarios={horarios}
                                     />
@@ -626,72 +712,22 @@ export default function Transferencias({
                                 <>
                                     <Section
                                         title="Histórico recebido"
+                                        icon={History}
                                         items={historicoRecebidas}
                                         horarios={horarios}
+                                        collapsed
                                     />
                                     <Section
                                         title="Histórico enviado"
+                                        icon={History}
                                         items={historicoEnviadas}
                                         horarios={horarios}
+                                        collapsed
                                     />
                                 </>
                             )}
                         </div>
                     )}
-
-                    <div className="flex flex-col gap-6">
-                        <Card>
-                            <CardHeader>
-                                <div className="text-base font-semibold">
-                                    Itens Enviados
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                {itensEnviados.length === 0 ? (
-                                    <p className="text-sm text-muted-foreground">
-                                        Nenhum item enviado ainda.
-                                    </p>
-                                ) : (
-                                    <ul className="flex flex-col gap-1 text-sm">
-                                        {itensEnviados.map((item) => (
-                                            <li key={item.categoria}>
-                                                <span className="font-medium">
-                                                    {item.quantidade}×
-                                                </span>{' '}
-                                                {item.categoria}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <div className="text-base font-semibold">
-                                    Itens Recebidos
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                {itensRecebidos.length === 0 ? (
-                                    <p className="text-sm text-muted-foreground">
-                                        Nenhum item recebido ainda.
-                                    </p>
-                                ) : (
-                                    <ul className="flex flex-col gap-1 text-sm">
-                                        {itensRecebidos.map((item) => (
-                                            <li key={item.categoria}>
-                                                <span className="font-medium">
-                                                    {item.quantidade}×
-                                                </span>{' '}
-                                                {item.categoria}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
-                            </CardContent>
-                        </Card>
-                    </div>
                 </div>
             </div>
         </AppLayout>

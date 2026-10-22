@@ -1,19 +1,30 @@
 import { Head, Link, router } from '@inertiajs/react';
 import {
     ArrowLeftRight,
+    Ban,
     Calendar,
     CalendarClock,
     Check,
     CheckCheck,
+    CheckCircle2,
+    ChevronRight,
+    Clock,
+    History,
     Package,
+    PackageCheck,
+    PackageX,
     Phone,
     Star,
     User,
     X,
+    XCircle,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { useState } from 'react';
 import SugerirAlteracaoDialog from '@/components/doacao/SugerirAlteracaoDialog';
 import type { Horario } from '@/components/doacao/SugerirAlteracaoDialog';
+import { ItensDialog } from '@/components/itens-dialog';
+import { ScrollRow } from '@/components/scroll-row';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -22,8 +33,12 @@ import {
     CardContent,
     CardFooter,
     CardHeader,
-    CardTitle,
 } from '@/components/ui/card';
+import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import {
     Dialog,
     DialogContent,
@@ -104,15 +119,20 @@ const statusConfig: Record<
     StatusKey,
     {
         label: string;
+        icon: LucideIcon;
         variant: 'default' | 'secondary' | 'destructive' | 'outline';
     }
 > = {
-    pendente: { label: 'Pendente', variant: 'outline' },
-    confirmada: { label: 'Confirmada', variant: 'default' },
-    entregue: { label: 'Entregue', variant: 'secondary' },
-    nao_entregue: { label: 'Não entregue', variant: 'destructive' },
-    cancelado: { label: 'Cancelada', variant: 'secondary' },
-    recusada: { label: 'Recusada', variant: 'destructive' },
+    pendente: { label: 'Pendente', icon: Clock, variant: 'outline' },
+    confirmada: { label: 'Confirmada', icon: CheckCircle2, variant: 'default' },
+    entregue: { label: 'Entregue', icon: PackageCheck, variant: 'secondary' },
+    nao_entregue: {
+        label: 'Não entregue',
+        icon: PackageX,
+        variant: 'destructive',
+    },
+    cancelado: { label: 'Cancelada', icon: Ban, variant: 'secondary' },
+    recusada: { label: 'Recusada', icon: XCircle, variant: 'destructive' },
 };
 
 const DIAS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -233,7 +253,8 @@ function DoacaoCard({
                         </div>
                     </div>
                     <div className="flex flex-col items-end gap-1">
-                        <Badge variant={cfg.variant} className="text-xs">
+                        <Badge variant={cfg.variant} className="gap-1 text-xs">
+                            <cfg.icon className="size-3" />
                             {cfg.label}
                         </Badge>
                         <span className="text-xs text-muted-foreground">
@@ -507,12 +528,17 @@ function Section({
     title,
     items,
     horarios,
+    icon: Icon,
+    collapsed = false,
 }: {
     title: string;
+    icon: LucideIcon;
     items: Doacao[];
     horarios: Horario[];
+    collapsed?: boolean;
 }) {
     const [page, setPage] = useState(1);
+    const [open, setOpen] = useState(!collapsed);
 
     if (items.length === 0) {
         return null;
@@ -521,16 +547,20 @@ function Section({
     const totalPages = Math.ceil(items.length / PER_PAGE);
     const visivel = items.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
-    return (
-        <section className="flex flex-col gap-3">
-            <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
-                {title} ({items.length})
-            </h2>
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-2">
-                {visivel.map((d) => (
-                    <DoacaoCard key={d.id} doacao={d} horarios={horarios} />
+    const titulo = `${title} (${items.length})`;
+
+    const cards = (
+        <div className="flex flex-col gap-3">
+            <ScrollRow>
+                {visivel.map((x) => (
+                    <div
+                        key={x.id}
+                        className="flex w-[22rem] shrink-0 snap-start sm:w-[26rem] [&>*]:w-full"
+                    >
+                        <DoacaoCard doacao={x} horarios={horarios} />
+                    </div>
                 ))}
-            </div>
+            </ScrollRow>
             {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-2 pt-2">
                     <Button
@@ -554,6 +584,33 @@ function Section({
                     </Button>
                 </div>
             )}
+        </div>
+    );
+
+    if (collapsed) {
+        return (
+            <Collapsible open={open} onOpenChange={setOpen} asChild>
+                <section className="flex flex-col gap-3">
+                    <CollapsibleTrigger className="flex w-fit items-center gap-1.5 text-sm font-semibold tracking-wide text-muted-foreground uppercase hover:text-foreground">
+                        <ChevronRight
+                            className={`size-4 transition-transform ${open ? 'rotate-90' : ''}`}
+                        />
+                        <Icon className="size-4" />
+                        {titulo}
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>{cards}</CollapsibleContent>
+                </section>
+            </Collapsible>
+        );
+    }
+
+    return (
+        <section className="flex flex-col gap-3">
+            <h2 className="flex items-center gap-1.5 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+                <Icon className="size-4" />
+                {titulo}
+            </h2>
+            {cards}
         </section>
     );
 }
@@ -586,73 +643,57 @@ export default function InstituicaoDoacoes({
                                 : 'Nenhuma solicitação ativa no momento.'}
                         </p>
                     </div>
+                    <ItensDialog
+                        label="Itens disponíveis"
+                        title="Itens disponíveis"
+                        description="Itens recebidos disponíveis para transferência."
+                        grupos={[
+                            {
+                                vazio: 'Nenhum item disponível.',
+                                itens: itens_recebidos,
+                            },
+                        ]}
+                        footer={
+                            itens_recebidos.length > 0 && (
+                                <Link
+                                    href="/instituicoes"
+                                    className="inline-flex items-center justify-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/5"
+                                >
+                                    <ArrowLeftRight className="size-3.5" />
+                                    Transferir itens
+                                </Link>
+                            )
+                        }
+                    />
                 </div>
-                <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+                <div className="flex flex-col gap-6">
                     {doacoes.length === 0 ? (
                         <div className="rounded-xl border border-dashed py-16 text-center text-sm text-muted-foreground">
                             Nenhuma solicitação de doação recebida ainda.
                         </div>
                     ) : (
-                        <div className="flex flex-col gap-10">
+                        <div className="flex min-w-0 flex-col gap-10">
                             <Section
                                 title="Pendentes"
+                                icon={Clock}
                                 items={pendentes}
                                 horarios={horarios}
                             />
                             <Section
                                 title="Confirmadas"
+                                icon={CheckCircle2}
                                 items={confirmadas}
                                 horarios={horarios}
                             />
                             <Section
                                 title="Histórico"
+                                icon={History}
                                 items={historico}
                                 horarios={horarios}
+                                collapsed
                             />
                         </div>
                     )}
-                    <div className="flex flex-col gap-6">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-base">
-                                    Itens Disponíveis
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="flex flex-col gap-3">
-                                    <p className="text-sm text-muted-foreground">
-                                        Itens recebidos disponíveis para
-                                        transferência.
-                                    </p>
-                                    {itens_recebidos.length === 0 ? (
-                                        <p className="text-sm text-muted-foreground">
-                                            Nenhum item disponível.
-                                        </p>
-                                    ) : (
-                                        <>
-                                            <ul className="flex flex-col gap-1 text-sm">
-                                                {itens_recebidos.map((item) => (
-                                                    <li key={item.categoria_id}>
-                                                        <span className="font-medium">
-                                                            {item.quantidade}×
-                                                        </span>{' '}
-                                                        {item.categoria}
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                            <Link
-                                                href="/instituicoes"
-                                                className="inline-flex items-center justify-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/5"
-                                            >
-                                                <ArrowLeftRight className="size-3.5" />
-                                                Transferir itens
-                                            </Link>
-                                        </>
-                                    )}
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
                 </div>
             </div>
         </AppLayout>
