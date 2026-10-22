@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers\Settings;
 
-use App\Enums\UserType;
 use App\Http\Controllers\Controller;
+use App\Models\Doador;
+use App\Models\Instituicao;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -12,9 +13,7 @@ class FotoPerfilController extends Controller
 {
     public function update(Request $request): RedirectResponse
     {
-        $user = $request->user();
-
-        abort_unless($user->tipo_usuario === UserType::Doador && $user->doador, 403);
+        $perfil = $this->perfilDe($request);
 
         $validated = $request->validate([
             'foto' => [
@@ -26,32 +25,36 @@ class FotoPerfilController extends Controller
             ],
         ]);
 
-        $doador = $user->doador;
-
-        if ($doador->foto_perfil) {
-            Storage::disk('public')->delete($doador->foto_perfil);
+        if ($perfil->foto_perfil) {
+            Storage::disk('public')->delete($perfil->foto_perfil);
         }
 
         $path = $validated['foto']->store('avatars', 'public');
 
-        $doador->update(['foto_perfil' => $path]);
+        $perfil->update(['foto_perfil' => $path]);
 
         return back();
     }
 
     public function destroy(Request $request): RedirectResponse
     {
-        $user = $request->user();
+        $perfil = $this->perfilDe($request);
 
-        abort_unless($user->tipo_usuario === UserType::Doador && $user->doador, 403);
-
-        $doador = $user->doador;
-
-        if ($doador->foto_perfil) {
-            Storage::disk('public')->delete($doador->foto_perfil);
-            $doador->update(['foto_perfil' => null]);
+        if ($perfil->foto_perfil) {
+            Storage::disk('public')->delete($perfil->foto_perfil);
+            $perfil->update(['foto_perfil' => null]);
         }
 
         return back();
+    }
+
+    private function perfilDe(Request $request): Doador|Instituicao
+    {
+        $user = $request->user();
+        $perfil = $user->doador ?? $user->instituicao;
+
+        abort_unless($perfil, 403);
+
+        return $perfil;
     }
 }

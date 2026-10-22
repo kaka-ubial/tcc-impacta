@@ -66,9 +66,9 @@ const painelItems: PainelItem[] = [
         description:
             'Visualize e edite as informações cadastrais da sua instituição.',
         icon: UserCog,
-        href: null,
-        accent: 'bg-muted',
-        accentText: 'text-muted-foreground',
+        href: '/instituicao/perfil',
+        accent: 'bg-brand/10',
+        accentText: 'text-brand',
     },
     {
         title: 'Transferência de Itens',

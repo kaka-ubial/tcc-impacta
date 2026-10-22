@@ -14,6 +14,7 @@ use App\Http\Controllers\Instituicao\HorarioController;
 use App\Http\Controllers\Instituicao\InstituicaoController;
 use App\Http\Controllers\Instituicao\OnboardingController;
 use App\Http\Controllers\Instituicao\PainelController;
+use App\Http\Controllers\Instituicao\PerfilController as InstituicaoPerfilController;
 use App\Http\Controllers\Instituicao\TransferenciaController;
 use App\Http\Controllers\NecessidadeController;
 use App\Http\Controllers\NotificacaoController;
@@ -50,6 +51,8 @@ Route::post('/validate/register-step-one', ValidateRegisterStepOne::class);
 Route::middleware(['auth', 'verified', 'user_type:instituicao', EnsureInstitutionIsApproved::class])->prefix('instituicao')->name('instituicao.')->group(function () {
 
     Route::get('painel', [PainelController::class, 'index'])->name('painel');
+
+    Route::get('perfil', [InstituicaoPerfilController::class, 'show'])->name('perfil');
 
     Route::get('estatisticas', [EstatisticasController::class, 'index'])->name('estatisticas');
 

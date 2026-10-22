@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\Instituicao\AgendaController;
 use App\Http\Controllers\Api\Instituicao\AvaliacaoController;
 use App\Http\Controllers\Api\Instituicao\DoacaoController as InstituicaoDoacaoController;
 use App\Http\Controllers\Api\Instituicao\DoadorController as InstituicaoDoadorController;
+use App\Http\Controllers\Api\Instituicao\PerfilController as InstituicaoPerfilController;
 use App\Http\Controllers\Api\Instituicao\TransferenciaController;
 use App\Http\Controllers\Api\InstituicaoController;
 use App\Http\Controllers\Api\NecessidadeController;
@@ -50,6 +51,8 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     });
 
     Route::middleware(['user_type:instituicao', EnsureInstitutionIsApproved::class])->group(function () {
+        Route::get('instituicao/perfil', [InstituicaoPerfilController::class, 'show'])->name('api.instituicao.perfil');
+
         Route::get('horarios', [HorarioController::class, 'index'])->name('api.horarios.index');
         Route::post('horarios', [HorarioController::class, 'store'])->name('api.horarios.store');
         Route::delete('horarios/{horario}', [HorarioController::class, 'destroy'])->name('api.horarios.destroy');

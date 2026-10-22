@@ -71,6 +71,7 @@ export type InstituicaoDetalhe = {
     telefone: string;
     endereco_completo: string;
     descricao: string | null;
+    foto_perfil: string | null;
     latitude: number | null;
     longitude: number | null;
     causas: Causa[];
@@ -133,12 +134,38 @@ export type DoadorPerfil = {
     doacoes_recentes: DoadorDoacaoResumo[];
 };
 
+export type InstituicaoPerfil = {
+    usuario_id: number;
+    nome_fantasia: string;
+    razao_social: string;
+    cnpj: string;
+    email: string;
+    telefone: string;
+    endereco_completo: string;
+    descricao: string | null;
+    foto_perfil: string | null;
+    verificada: boolean;
+    latitude: number | null;
+    longitude: number | null;
+    membro_desde: string | null;
+    causas: Causa[];
+    estatisticas: {
+        total_doacoes: number;
+        doacoes_concluidas: number;
+        doadores_atendidos: number;
+        necessidades_ativas: number;
+    };
+    necessidades_ativas: NecessidadeAtiva[];
+    horarios_disponiveis: HorarioDisponivel[];
+};
+
 export type Instituicao = {
     nome_fantasia: string;
     razao_social: string;
     cnpj: string;
     telefone: string;
     endereco_completo: string;
+    foto_perfil?: string | null;
 };
 
 export type User = {

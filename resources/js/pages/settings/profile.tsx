@@ -3,8 +3,8 @@ import { Form, Head, Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import DeleteUser from '@/components/delete-user';
-import { DoadorFotoUploader } from '@/components/doador-foto-uploader';
 import EnderecoCepFields from '@/components/endereco-cep-fields';
+import { FotoUploader } from '@/components/foto-uploader';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import AlertSuccess from '@/components/ui/alert-success';
@@ -174,24 +174,33 @@ export default function Profile({
 
             <SettingsLayout>
                 <div className="space-y-6">
-                    {tipo === 'doador' && (
-                        <div className="space-y-3">
-                            <Heading
-                                variant="small"
-                                title="Foto de perfil"
-                                description="Sua foto aparecerá para as instituições ao receberem suas doações."
-                            />
-                            <DoadorFotoUploader
-                                nome={
-                                    auth.user.doador?.nome_completo ??
-                                    auth.user.email
-                                }
-                                fotoAtual={
-                                    auth.user.doador?.foto_perfil ?? null
-                                }
-                            />
-                        </div>
-                    )}
+                    <div className="space-y-3">
+                        <Heading
+                            variant="small"
+                            title={
+                                tipo === 'doador'
+                                    ? 'Foto de perfil'
+                                    : 'Logo da instituição'
+                            }
+                            description={
+                                tipo === 'doador'
+                                    ? 'Sua foto aparecerá para as instituições ao receberem suas doações.'
+                                    : 'Seu logo aparecerá para os doadores na página pública da instituição.'
+                            }
+                        />
+                        <FotoUploader
+                            nome={
+                                auth.user.doador?.nome_completo ??
+                                auth.user.instituicao?.nome_fantasia ??
+                                auth.user.email
+                            }
+                            fotoAtual={
+                                auth.user.doador?.foto_perfil ??
+                                auth.user.instituicao?.foto_perfil ??
+                                null
+                            }
+                        />
+                    </div>
 
                     <Heading
                         variant="small"

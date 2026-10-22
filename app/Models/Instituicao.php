@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 
-#[Fillable(['usuario_id', 'nome_fantasia', 'razao_social', 'cnpj', 'telefone', 'endereco_completo', 'descricao', 'latitude', 'longitude', 'status'])]
+#[Fillable(['usuario_id', 'nome_fantasia', 'razao_social', 'cnpj', 'telefone', 'endereco_completo', 'descricao', 'foto_perfil', 'latitude', 'longitude', 'status'])]
 class Instituicao extends Model
 {
     use HasFactory;
@@ -71,6 +71,11 @@ class Instituicao extends Model
     public function necessidades(): HasMany
     {
         return $this->hasMany(Necessidade::class, 'instituicao_id', 'usuario_id');
+    }
+
+    public function doacoes(): HasMany
+    {
+        return $this->hasMany(Doacao::class, 'instituicao_id', 'usuario_id');
     }
 
     public function horarios(): HasMany

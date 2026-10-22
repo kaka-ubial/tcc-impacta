@@ -24,7 +24,7 @@ function iniciais(nome: string) {
         .join('');
 }
 
-export function DoadorFotoUploader({ nome, fotoAtual }: Props) {
+export function FotoUploader({ nome, fotoAtual }: Props) {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [preview, setPreview] = useState<string | null>(null);
     const [clientError, setClientError] = useState<string | null>(null);

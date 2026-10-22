@@ -33,19 +33,21 @@ export function UserMenuContent({ user }: Props) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-                {user.tipo_usuario === 'doador' && (
-                    <DropdownMenuItem asChild>
-                        <Link
-                            className="block w-full cursor-pointer"
-                            href="/perfil"
-                            prefetch
-                            onClick={cleanup}
-                        >
-                            <UserCircle className="mr-2" />
-                            Ver perfil
-                        </Link>
-                    </DropdownMenuItem>
-                )}
+                <DropdownMenuItem asChild>
+                    <Link
+                        className="block w-full cursor-pointer"
+                        href={
+                            user.tipo_usuario === 'doador'
+                                ? '/perfil'
+                                : '/instituicao/perfil'
+                        }
+                        prefetch
+                        onClick={cleanup}
+                    >
+                        <UserCircle className="mr-2" />
+                        Ver perfil
+                    </Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                     <Link
                         className="block w-full cursor-pointer"

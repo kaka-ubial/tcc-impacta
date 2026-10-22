@@ -16,12 +16,14 @@ import { CausaBadge } from '@/components/causa-badge';
 import { DoacaoNecessidadesModal } from '@/components/doacao/DoacaoNecessidadesModal';
 import { SolicitacaoDoacaoModal } from '@/components/doacao/SolicitacaoDoacaoModal';
 import { TransferenciaNecessidadesModal } from '@/components/transferencia/TransferenciaNecessidadesModal';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { VerificadaBadge } from '@/components/verificada-badge';
 import AppLayout from '@/layouts/app-layout';
+import { fotoUrl } from '@/lib/foto';
 import {
     index as instituicoesIndex,
     show as instituicoesShow,
@@ -221,9 +223,17 @@ export default function InstituicaoShow({
                         )}
 
                         <div className="mt-3 flex items-center gap-3">
-                            <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                                <Building2 className="size-6" />
-                            </div>
+                            <Avatar className="size-12 shrink-0 rounded-xl border">
+                                {fotoUrl(instituicao.foto_perfil) && (
+                                    <AvatarImage
+                                        src={fotoUrl(instituicao.foto_perfil)}
+                                        alt={instituicao.nome_fantasia}
+                                    />
+                                )}
+                                <AvatarFallback className="rounded-xl bg-primary/10 text-primary">
+                                    <Building2 className="size-6" />
+                                </AvatarFallback>
+                            </Avatar>
                             <div className="flex flex-col items-start gap-2 md:flex-row md:items-center">
                                 <h1 className="font-display text-2xl leading-tight font-bold md:text-3xl">
                                     {instituicao.nome_fantasia}

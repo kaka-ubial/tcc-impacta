@@ -32,6 +32,7 @@ class InstituicaoShowResource extends JsonResource
             'telefone' => $this->telefone,
             'endereco_completo' => $this->endereco_completo,
             'descricao' => $this->descricao,
+            'foto_perfil' => $this->foto_perfil,
             'latitude' => $this->latitude,
             'longitude' => $this->longitude,
             'causas' => $this->causas->map(fn ($c) => ['id' => $c->id, 'nome' => $c->nome, 'icone' => $c->icone]),

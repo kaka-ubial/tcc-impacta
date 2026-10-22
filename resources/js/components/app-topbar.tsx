@@ -1,11 +1,5 @@
 import { Link, router, usePage } from '@inertiajs/react';
-import {
-    LogOut,
-    Settings,
-    ShieldCheck,
-    UserCircle,
-    UserRound,
-} from 'lucide-react';
+import { LogOut, Settings, UserCircle } from 'lucide-react';
 import { NotificationsMenu } from '@/components/notifications-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -22,7 +16,6 @@ import { useInitials } from '@/hooks/use-initials';
 import { fotoUrl } from '@/lib/foto';
 import { logout } from '@/routes';
 import { edit as editProfile } from '@/routes/profile';
-import { edit as editSecurity } from '@/routes/security';
 import type { User } from '@/types';
 
 function nomeDe(user: User): string {
@@ -38,7 +31,9 @@ export function AppTopbar() {
     const user = auth.user;
     const getInitials = useInitials();
     const nome = nomeDe(user);
-    const foto = fotoUrl(user.doador?.foto_perfil ?? null);
+    const foto = fotoUrl(
+        user.doador?.foto_perfil ?? user.instituicao?.foto_perfil ?? null,
+    );
     const iniciais =
         nome
             .split(/\s+/)
@@ -56,42 +51,20 @@ export function AppTopbar() {
             <div className="ml-auto flex items-center gap-1">
                 <NotificationsMenu />
 
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="size-9 rounded-full"
-                            aria-label="Configurações"
-                        >
-                            <Settings aria-hidden="true" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="min-w-52">
-                        <DropdownMenuLabel>Configurações</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                            <Link
-                                className="w-full cursor-pointer"
-                                href={editProfile()}
-                                prefetch
-                            >
-                                <UserRound aria-hidden="true" />
-                                Dados da conta
-                            </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                            <Link
-                                className="w-full cursor-pointer"
-                                href={editSecurity()}
-                                prefetch
-                            >
-                                <ShieldCheck aria-hidden="true" />
-                                Segurança
-                            </Link>
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                <Button
+                    asChild
+                    variant="ghost"
+                    size="icon"
+                    className="size-9 rounded-full"
+                >
+                    <Link
+                        href={editProfile()}
+                        prefetch
+                        aria-label="Configurações"
+                    >
+                        <Settings aria-hidden="true" />
+                    </Link>
+                </Button>
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -119,18 +92,20 @@ export function AppTopbar() {
                             </p>
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        {user.tipo_usuario === 'doador' && (
-                            <DropdownMenuItem asChild>
-                                <Link
-                                    className="w-full cursor-pointer"
-                                    href="/perfil"
-                                    prefetch
-                                >
-                                    <UserCircle aria-hidden="true" />
-                                    Ver perfil
-                                </Link>
-                            </DropdownMenuItem>
-                        )}
+                        <DropdownMenuItem asChild>
+                            <Link
+                                className="w-full cursor-pointer"
+                                href={
+                                    user.tipo_usuario === 'doador'
+                                        ? '/perfil'
+                                        : '/instituicao/perfil'
+                                }
+                                prefetch
+                            >
+                                <UserCircle aria-hidden="true" />
+                                Ver perfil
+                            </Link>
+                        </DropdownMenuItem>
                         <DropdownMenuItem asChild>
                             <Link
                                 className="w-full cursor-pointer"
