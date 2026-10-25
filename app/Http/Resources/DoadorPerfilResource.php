@@ -7,6 +7,10 @@ use App\Models\Doador;
 use App\Services\GamificacaoService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+
+/**
+ * @mixin Doador
+ */
 class DoadorPerfilResource extends JsonResource
 {
     public function __construct($resource, protected ?int $instituicaoId = null)
