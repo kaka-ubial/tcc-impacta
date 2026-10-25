@@ -4,22 +4,52 @@ namespace Database\Seeders;
 
 use App\Models\Agendamento;
 use App\Models\CategoriaItem;
+use App\Models\Causa;
 use App\Models\Doacao;
 use App\Models\Doador;
 use App\Models\Instituicao;
 use App\Models\ItemDoacao;
 use App\Models\Notificacao;
+use App\Models\PontuacaoEvento;
 use App\Models\User;
 use App\Services\GamificacaoService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Deixa uma conta de doador (padrão kau@doadora.com) a uma entrega de
+ * conquistar um badge, para validar a gamificação. O cenário vem de
+ * GAMIFICACAO_CENARIO (padrão: doador-constante):
+ *
+ *  - doador-constante     4 entregues + 1 confirmada        -> "Doador Constante"
+ *  - impacto-local        5 entregues em 4 instituições
+ *                         + 1 confirmada numa 5ª            -> "Impacto Local"
+ *  - parceiro-das-causas  3 entregues em 2 causas
+ *                         + 1 confirmada numa 3ª causa      -> "Parceiro das Causas"
+ *  - referencia-solidaria 5 entregues + 695 pontos
+ *                         + 1 confirmada                    -> "Referência Solidária"
+ *
+ * Em todos, o badge sai quando a instituição marca a doação confirmada como
+ * entregue. Não faz parte do DatabaseSeeder. Rodar com:
+ *   GAMIFICACAO_CENARIO=impacto-local php artisan db:seed --class=GamificacaoDemoSeeder
+ * É re-executável: apaga as doações e badges dessa conta antes de recriar.
+ */
 class GamificacaoDemoSeeder extends Seeder
 {
     private const EMAIL = 'kau@doadora.com';
 
+    private const CENARIOS = ['doador-constante', 'impacto-local', 'parceiro-das-causas', 'referencia-solidaria'];
+
     public function run(GamificacaoService $gamificacao): void
     {
+        $cenario = env('GAMIFICACAO_CENARIO', 'doador-constante');
+
+        if (! in_array($cenario, self::CENARIOS, true)) {
+            $this->command?->error('Cenário inválido. Use: '.implode(', ', self::CENARIOS));
+
+            return;
+        }
+
         (new BadgeSeeder)->run();
 
         $doador = User::where('email', self::EMAIL)->first()?->doador;
@@ -30,10 +60,10 @@ class GamificacaoDemoSeeder extends Seeder
             return;
         }
 
-        [$a, $b] = $this->escolherInstituicoes();
         $categorias = CategoriaItem::orderBy('id')->get();
+        $instituicoes = Instituicao::where('status', 'approved')->with('usuario')->orderBy('usuario_id')->get();
 
-        if (! $a || ! $b || $categorias->isEmpty()) {
+        if ($instituicoes->count() < 5 || $categorias->isEmpty()) {
             $this->command?->error('Faltam instituições aprovadas ou categorias; rode os demais seeders antes.');
 
             return;
@@ -41,50 +71,72 @@ class GamificacaoDemoSeeder extends Seeder
 
         $this->resetar($doador);
 
-        // Alterna A/B: só 2 instituições distintas e poucas causas, para que
-        // a única conquista nova seja "Doador Constante" (5 entregas).
-        $entregues = [[$a, 40], [$b, 30], [$a, 20], [$b, 10]];
+        // [índice da instituição, dias atrás] de cada entregue; $pendente é o índice da que falta entregar.
+        [$entregues, $pendente] = match ($cenario) {
+            'impacto-local' => [[[0, 50], [1, 40], [2, 30], [3, 20], [0, 10]], 4],
+            'parceiro-das-causas' => [[[0, 30], [1, 20], [0, 10]], 2],
+            'referencia-solidaria' => [[[0, 50], [1, 40], [0, 30], [1, 20], [0, 10]], 0],
+            default => [[[0, 40], [1, 30], [0, 20], [1, 10]], 0],
+        };
 
-        foreach ($entregues as $i => [$instituicao, $diasAtras]) {
-            $doacao = $this->criarDoacao($doador, $instituicao, 'entregue', $categorias, $i, now()->subDays($diasAtras));
+        if ($cenario === 'parceiro-das-causas') {
+            $this->atribuirCausas($instituicoes->take(3));
+        }
+
+        foreach ($entregues as $i => [$idx, $diasAtras]) {
+            $doacao = $this->criarDoacao($doador, $instituicoes[$idx], 'entregue', $categorias, $i, now()->subDays($diasAtras));
             $gamificacao->registrarEntrega($doacao);
         }
 
-        $this->criarDoacao($doador, $a, 'confirmada', $categorias, 4, now()->subDays(3));
+        if ($cenario === 'referencia-solidaria') {
+            $this->completarPontos($doador, 695);
+        }
+
+        $alvo = $instituicoes[$pendente];
+        $this->criarDoacao($doador, $alvo, 'confirmada', $categorias, count($entregues), now()->subDays(3));
 
         $doador->refresh();
 
         $this->command?->info(sprintf(
-            '%s: %d pontos, %d badge(s). Instituição para entregar a doação pendente: %s (%s).',
+            '[%s] %s: %d pontos, %d badge(s). Entregue a doação pendente como %s (%s).',
+            $cenario,
             self::EMAIL,
             $doador->pontuacao_gamificacao,
             $doador->badges()->count(),
-            $a->nome_fantasia,
-            $a->usuario->email,
+            $alvo->nome_fantasia,
+            $alvo->usuario->email,
         ));
     }
 
     /**
-     * @return array{0: ?Instituicao, 1: ?Instituicao}
+     * Dá uma causa distinta a cada instituição que ainda não tem nenhuma.
      */
-    private function escolherInstituicoes(): array
+    private function atribuirCausas($instituicoes): void
     {
-        $candidatas = Instituicao::where('status', 'approved')->with(['causas', 'usuario'])->orderBy('usuario_id')->get()
-            ->values();
+        $causas = Causa::orderBy('id')->pluck('id');
 
-        foreach ($candidatas as $a) {
-            foreach ($candidatas as $b) {
-                if ($a->usuario_id === $b->usuario_id) {
-                    continue;
-                }
-
-                if ($a->causas->pluck('id')->merge($b->causas->pluck('id'))->unique()->count() <= 2) {
-                    return [$a, $b];
-                }
+        foreach ($instituicoes->values() as $i => $instituicao) {
+            if ($instituicao->causas()->doesntExist()) {
+                $instituicao->usuario->causas()->attach($causas[$i]);
             }
         }
+    }
 
-        return [$candidatas->get(0), $candidatas->get(1)];
+    /**
+     * Acrescenta um evento avulso para o total chegar a $alvo pontos.
+     */
+    private function completarPontos(Doador $doador, int $alvo): void
+    {
+        $doador->refresh();
+
+        PontuacaoEvento::create([
+            'doador_id' => $doador->usuario_id,
+            'doacao_id' => $doador->doacoes()->value('id'),
+            'tipo' => 'ajuste_demo',
+            'pontos' => $alvo - $doador->pontuacao_gamificacao,
+        ]);
+
+        $doador->update(['pontuacao_gamificacao' => $alvo]);
     }
 
     private function resetar(Doador $doador): void
