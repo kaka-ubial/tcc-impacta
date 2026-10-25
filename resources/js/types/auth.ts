@@ -119,6 +119,18 @@ export type DoadorDoacaoResumo = {
     }[];
 };
 
+export type Conquista = {
+    id: number;
+    codigo: string;
+    nome: string;
+    descricao: string;
+    imagem_url: string | null;
+    conquistada: boolean;
+    conquistado_em: string | null;
+    progresso: { atual: number; limiar: number };
+    url_compartilhamento: string | null;
+};
+
 export type DoadorPerfil = {
     usuario_id: number;
     nome_completo: string;
@@ -139,6 +151,7 @@ export type DoadorPerfil = {
         total_avaliacoes: number;
     };
     doacoes_recentes: DoadorDoacaoResumo[];
+    conquistas?: Conquista[];
 };
 
 export type Instituicao = {

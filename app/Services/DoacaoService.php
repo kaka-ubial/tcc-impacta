@@ -173,6 +173,8 @@ class DoacaoService
 
         $doacao->update(['status' => DoacaoStatus::Entregue, 'data_entrega' => now()]);
 
+        app(GamificacaoService::class)->registrarEntrega($doacao);
+
         Notificacao::enviar(
             $doacao->doador_id,
             'Doação concluída',

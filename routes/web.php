@@ -3,6 +3,8 @@
 use App\Actions\Auth\ValidateRegisterStepOne;
 use App\Http\Controllers\Admin\InstitutionCheckController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\ConquistaPublicaController;
+use App\Http\Controllers\Doador\ConquistaController;
 use App\Http\Controllers\Doador\DoacaoController;
 use App\Http\Controllers\Doador\PerfilController as DoadorPerfilController;
 use App\Http\Controllers\Instituicao\AgendaController;
@@ -43,6 +45,10 @@ Route::get('/', function () {
 Route::get('transparencia', [TransparenciaController::class, 'index'])
     ->middleware('throttle:60,1')
     ->name('transparencia');
+
+Route::get('conquistas/{token}', ConquistaPublicaController::class)
+    ->middleware('throttle:60,1')
+    ->name('conquistas.publica');
 
 Route::get('/redirect', RedirectController::class)->middleware('auth')->name('redirect');
 
@@ -98,6 +104,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'verified', 'user_type:doador'])->group(function () {
 
     Route::get('perfil', [DoadorPerfilController::class, 'show'])->name('doador.perfil');
+
+    Route::post('conquistas/{badge}/compartilhar', [ConquistaController::class, 'compartilhar'])->name('conquistas.compartilhar');
+    Route::delete('conquistas/{badge}/compartilhar', [ConquistaController::class, 'revogar'])->name('conquistas.revogar');
 
     Route::get('doacoes', [DoacaoController::class, 'index'])->name('doacoes.index');
     Route::post('doacoes', [DoacaoController::class, 'store'])->name('doacoes.store');

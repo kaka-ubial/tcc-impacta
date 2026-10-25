@@ -2,32 +2,66 @@
 
 namespace Database\Seeders;
 
+use App\Models\Badge;
+use App\Services\GamificacaoService;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 /**
- * A tabela `badges` ainda não tem model (a gamificação é a RF20), então o
- * catálogo é inserido direto pelo query builder.
+ * Catálogo de badges da gamificação (RF20). A avaliação das regras fica em
+ * GamificacaoService; aqui só se declara o que cada badge exige.
  */
 class BadgeSeeder extends Seeder
 {
     private const BADGES = [
-        ['nome' => 'Primeira Doação', 'descricao' => 'Concluiu a primeira doação na plataforma.', 'requisito_pontos' => 0],
-        ['nome' => 'Doador Constante', 'descricao' => 'Realizou cinco doações entregues.', 'requisito_pontos' => 100],
-        ['nome' => 'Parceiro das Causas', 'descricao' => 'Apoiou três causas diferentes.', 'requisito_pontos' => 250],
-        ['nome' => 'Impacto Local', 'descricao' => 'Doou para cinco instituições distintas.', 'requisito_pontos' => 400],
-        ['nome' => 'Referência Solidária', 'descricao' => 'Alcançou 700 pontos de gamificação.', 'requisito_pontos' => 700],
+        [
+            'codigo' => 'primeira-doacao',
+            'nome' => 'Primeira Doação',
+            'descricao' => 'Concluiu a primeira doação na plataforma.',
+            'regra' => GamificacaoService::REGRA_DOACOES,
+            'limiar' => 1,
+        ],
+        [
+            'codigo' => 'doador-constante',
+            'nome' => 'Doador Constante',
+            'descricao' => 'Realizou cinco doações entregues.',
+            'regra' => GamificacaoService::REGRA_DOACOES,
+            'limiar' => 5,
+        ],
+        [
+            'codigo' => 'parceiro-das-causas',
+            'nome' => 'Parceiro das Causas',
+            'descricao' => 'Apoiou três causas diferentes.',
+            'regra' => GamificacaoService::REGRA_CAUSAS,
+            'limiar' => 3,
+        ],
+        [
+            'codigo' => 'impacto-local',
+            'nome' => 'Impacto Local',
+            'descricao' => 'Doou para cinco instituições distintas.',
+            'regra' => GamificacaoService::REGRA_INSTITUICOES,
+            'limiar' => 5,
+        ],
+        [
+            'codigo' => 'referencia-solidaria',
+            'nome' => 'Referência Solidária',
+            'descricao' => 'Alcançou 700 pontos de gamificação.',
+            'regra' => GamificacaoService::REGRA_PONTOS,
+            'limiar' => 700,
+        ],
     ];
 
     public function run(): void
     {
         foreach (self::BADGES as $badge) {
-            DB::table('badges')->updateOrInsert(
+            Badge::updateOrCreate(
                 ['nome' => $badge['nome']],
-                $badge + ['imagem_url' => null, 'created_at' => now(), 'updated_at' => now()],
+                $badge + [
+                    'imagem_url' => '/badges/'.$badge['codigo'].'.png',
+                    'requisito_pontos' => $badge['regra'] === GamificacaoService::REGRA_PONTOS ? $badge['limiar'] : 0,
+                ],
             );
         }
 
-        $this->command?->info('Badges: '.DB::table('badges')->count().' no catálogo.');
+        $this->command?->info('Badges: '.Badge::count().' no catálogo.');
     }
 }
