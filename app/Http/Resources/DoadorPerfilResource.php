@@ -4,21 +4,11 @@ namespace App\Http\Resources;
 
 use App\Enums\DoacaoStatus;
 use App\Models\Doador;
+use App\Services\GamificacaoService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Espelha os dois formatos quase idênticos montados por
- * Doador\PerfilController::show() (perfil próprio) e
- * Instituicao\DoadorController::show() (visão da instituição sobre um
- * doador com quem já interagiu). Passe $instituicaoId para obter a visão
- * institucional (estatísticas extras + eh_para_esta_instituicao); deixe
- * null para a visão de perfil próprio.
- *
- * Requer os relacionamentos usuario.causas, doacoes (constrained a
- * status='entregue', 10 mais recentes), doacoes.instituicao e
- * doacoes.itens.categoria já carregados.
- *
  * @mixin Doador
  */
 class DoadorPerfilResource extends JsonResource
@@ -73,6 +63,7 @@ class DoadorPerfilResource extends JsonResource
                 'icone' => $c->icone,
             ])->values(),
             'estatisticas' => $estatisticas,
+            'conquistas' => $this->when($isOwnProfile, fn () => app(GamificacaoService::class)->conquistas($this->resource)),
             'doacoes_recentes' => $this->doacoes->map(fn ($d) => [
                 'id' => $d->id,
                 'status' => $d->status,
