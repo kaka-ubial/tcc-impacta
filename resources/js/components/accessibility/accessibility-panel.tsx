@@ -30,6 +30,11 @@ const toggles: {
     hint: string;
 }[] = [
     {
+        key: 'colorBlindMode',
+        label: 'Modo para daltonismo',
+        hint: 'Paleta que não depende de verde x vermelho, com status também em ícones.',
+    },
+    {
         key: 'underlineLinks',
         label: 'Sublinhar links',
         hint: 'Links não dependem só da cor.',

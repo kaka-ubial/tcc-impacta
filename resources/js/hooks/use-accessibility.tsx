@@ -7,6 +7,7 @@ export type AccessibilityPreferences = {
     underlineLinks: boolean;
     strongFocus: boolean;
     announceNavigation: boolean;
+    colorBlindMode: boolean;
 };
 
 export const defaultAccessibility: AccessibilityPreferences = {
@@ -16,6 +17,7 @@ export const defaultAccessibility: AccessibilityPreferences = {
     underlineLinks: false,
     strongFocus: false,
     announceNavigation: true,
+    colorBlindMode: false,
 };
 
 const STORAGE_KEY = 'accessibility';
@@ -43,6 +45,7 @@ const apply = (prefs: AccessibilityPreferences): void => {
     root.classList.toggle('a11y-reduce-motion', prefs.reduceMotion);
     root.classList.toggle('a11y-underline', prefs.underlineLinks);
     root.classList.toggle('a11y-focus', prefs.strongFocus);
+    root.classList.toggle('a11y-cvd', prefs.colorBlindMode);
 };
 
 export function initializeAccessibility(): void {

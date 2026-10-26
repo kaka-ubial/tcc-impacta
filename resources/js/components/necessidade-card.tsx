@@ -1,4 +1,5 @@
 import { router } from '@inertiajs/react';
+import { ChevronsUp, ChevronUp, Minus } from 'lucide-react';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -23,9 +24,13 @@ type Necessidade = {
 };
 
 const prioridadeConfig = {
-    alta: { variant: 'destructive', label: 'Alta prioridade' },
-    media: { variant: 'default', label: 'Média prioridade' },
-    baixa: { variant: 'secondary', label: 'Baixa prioridade' },
+    alta: {
+        variant: 'destructive',
+        label: 'Alta prioridade',
+        icon: ChevronsUp,
+    },
+    media: { variant: 'default', label: 'Média prioridade', icon: ChevronUp },
+    baixa: { variant: 'secondary', label: 'Baixa prioridade', icon: Minus },
 };
 
 type Props = {
@@ -69,6 +74,7 @@ export function NecessidadeCard({
                     </span>
 
                     <Badge variant={cfg.variant as any} className="text-xs">
+                        <cfg.icon aria-hidden="true" />
                         {cfg.label}
                     </Badge>
                 </div>
