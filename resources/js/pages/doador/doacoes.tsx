@@ -1,5 +1,19 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Building2, Calendar, Package, Plus, X } from 'lucide-react';
+import {
+    Ban,
+    Building2,
+    Calendar,
+    CalendarClock,
+    CheckCircle2,
+    Clock,
+    Package,
+    PackageCheck,
+    PackageX,
+    Plus,
+    X,
+    XCircle,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
@@ -38,29 +52,38 @@ type StatusKey =
     | 'recusada'
     | 'nao_entregue';
 
-const statusConfig: Record<StatusKey, { label: string; className: string }> = {
+const statusConfig: Record<
+    StatusKey,
+    { label: string; className: string; icon: LucideIcon }
+> = {
     pendente: {
         label: 'Aguardando confirmação',
+        icon: Clock,
         className: 'border-pending/30 bg-pending/10 text-pending',
     },
     confirmada: {
         label: 'Confirmada',
+        icon: CheckCircle2,
         className: 'border-success/20 bg-success/10 text-success',
     },
     entregue: {
         label: 'Entregue',
+        icon: PackageCheck,
         className: 'border-success/20 bg-success/10 text-success',
     },
     nao_entregue: {
         label: 'Não entregue',
+        icon: PackageX,
         className: 'border-destructive/20 bg-destructive/5 text-destructive',
     },
     cancelado: {
         label: 'Cancelada',
+        icon: Ban,
         className: 'border-border bg-muted/50 text-muted-foreground',
     },
     recusada: {
         label: 'Recusada',
+        icon: XCircle,
         className: 'border-destructive/20 bg-destructive/5 text-destructive',
     },
 };
@@ -105,6 +128,7 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
         ? {
               label: 'Aguardando sua resposta',
               className: 'border-pending/30 bg-pending/10 text-pending',
+              icon: CalendarClock,
           }
         : (statusConfig[doacao.status] ?? statusConfig.pendente);
     const canCancel =
@@ -151,8 +175,9 @@ function DoacaoCard({ doacao }: { doacao: Doacao }) {
                 </div>
                 <Badge
                     variant="outline"
-                    className={`shrink-0 text-xs ${cfg.className}`}
+                    className={`shrink-0 gap-1 text-xs ${cfg.className}`}
                 >
+                    <cfg.icon aria-hidden="true" className="size-3" />
                     {cfg.label}
                 </Badge>
             </div>

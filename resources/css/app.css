@@ -115,6 +115,8 @@
     --chart-3: oklch(0.685 0.148 237);
     --chart-4: oklch(0.606 0.22 293);
     --chart-5: oklch(0.637 0.237 25);
+    --chart-danger: oklch(0.63 0.2 27);
+    --chart-neutral: var(--muted-foreground);
     --radius: 0.625rem;
     --shell: oklch(0.8 0.03 188);
     --sidebar: oklch(1 0 0);
@@ -165,6 +167,8 @@
     --chart-3: oklch(0.769 0.188 70.08);
     --chart-4: oklch(0.627 0.265 303.9);
     --chart-5: oklch(0.645 0.246 16.439);
+    --chart-danger: oklch(0.63 0.2 27);
+    --chart-neutral: var(--muted-foreground);
 
     --success: oklch(0.65 0.065 152);
     --success-foreground: oklch(0.155 0.008 188);
@@ -517,6 +521,56 @@ html.a11y-contrast.dark {
     --primary: oklch(0.85 0.16 188);
     --primary-foreground: oklch(0 0 0);
     --ring: oklch(0.9 0.15 95);
+}
+
+html.a11y-cvd {
+    --brand: oklch(0.403 0.133 259);
+    --brand-strong: oklch(0.33 0.12 259);
+    --brand-soft: oklch(0.955 0.025 250);
+    --brand-green: oklch(0.551 0.087 211);
+    --primary: oklch(0.403 0.133 259);
+    --primary-foreground: oklch(0.99 0 0);
+    --ring: oklch(0.403 0.133 259);
+    --success: oklch(0.551 0.087 211);
+    --success-foreground: oklch(0.99 0 0);
+    --pending: oklch(0.561 0.137 102);
+    --pending-foreground: oklch(0.99 0 0);
+    --destructive: oklch(0.483 0.141 20.5);
+    --destructive-foreground: oklch(0.99 0 0);
+    --chart-1: oklch(0.403 0.133 259);
+    --chart-2: oklch(0.74 0.15 75);
+    --chart-3: oklch(0.72 0.12 235);
+    --chart-4: oklch(0.65 0.14 350);
+    --chart-5: oklch(0.55 0.17 40);
+    --chart-danger: oklch(0.483 0.141 20.5);
+    --chart-neutral: oklch(0.52 0 0);
+    --sidebar-primary: oklch(0.403 0.133 259);
+    --sidebar-accent: oklch(0.95 0.03 250);
+    --sidebar-accent-foreground: oklch(0.33 0.12 259);
+    --sidebar-ring: oklch(0.403 0.133 259);
+}
+
+html.a11y-cvd.dark {
+    --brand: oklch(0.604 0.106 241);
+    --brand-strong: oklch(0.8 0.09 241);
+    --brand-soft: oklch(0.24 0.02 250);
+    --brand-green: oklch(0.844 0.132 233);
+    --primary: oklch(0.72 0.1 241);
+    --primary-foreground: oklch(0.15 0.01 250);
+    --ring: oklch(0.72 0.1 241);
+    --success: oklch(0.844 0.132 233);
+    --success-foreground: oklch(0.15 0.01 250);
+    --pending: oklch(0.862 0.121 99.5);
+    --pending-foreground: oklch(0.15 0.01 250);
+    --destructive: oklch(0.634 0.142 42.6);
+    --destructive-foreground: oklch(0.99 0 0);
+    --chart-1: oklch(0.72 0.1 241);
+    --chart-3: oklch(0.8 0.1 235);
+    --chart-danger: oklch(0.634 0.142 42.6);
+    --sidebar-primary: oklch(0.72 0.1 241);
+    --sidebar-accent: oklch(0.3 0.03 250);
+    --sidebar-accent-foreground: oklch(0.9 0.05 241);
+    --sidebar-ring: oklch(0.72 0.1 241);
 }
 
 html.a11y-underline a:not([data-slot='sidebar-menu-button']) {

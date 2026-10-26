@@ -75,13 +75,13 @@ type Estatisticas = {
 
 const pct = (v: number | null) => (v === null ? '—' : `${v}%`);
 
-// Cores do tema (claro/escuro). O vermelho é fixo porque o --destructive
-// do modo escuro é escuro demais para linhas e barras.
+// Cores do tema (claro/escuro/daltônico). O vermelho vem de --chart-danger
+// porque o --destructive do modo escuro é escuro demais para linhas e barras.
 const COR = {
     marca: 'var(--brand)',
     verde: 'var(--success)',
-    neutra: 'var(--muted-foreground)',
-    vermelha: 'oklch(0.63 0.2 27)',
+    neutra: 'var(--chart-neutral)',
+    vermelha: 'var(--chart-danger)',
 };
 
 const eixo = {
@@ -309,6 +309,7 @@ export default function Estatisticas({
                             name="Canceladas"
                             stroke={COR.vermelha}
                             strokeWidth={2}
+                            strokeDasharray="10 3 2 3"
                             dot={false}
                         />
                     </LineChart>
