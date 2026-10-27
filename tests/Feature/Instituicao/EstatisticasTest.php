@@ -7,6 +7,7 @@ use App\Models\Doador;
 use App\Models\Instituicao;
 use App\Models\ItemDoacao;
 use App\Models\User;
+use App\Services\EstatisticasInstituicaoService;
 
 function estatInstituicao(): Instituicao
 {
@@ -96,4 +97,95 @@ test('período inválido é rejeitado', function () {
     $this->actingAs($inst->usuario)
         ->get('/instituicao/estatisticas?periodo=banana')
         ->assertSessionHasErrors('periodo');
+});
+
+function layoutValido(): array
+{
+    return [
+        'widgets' => [
+            ['id' => 'transferencias', 'visivel' => true],
+            ['id' => 'serie', 'visivel' => false],
+            ['id' => 'indicadores', 'visivel' => true],
+            ['id' => 'doadores', 'visivel' => true],
+            ['id' => 'itens_categoria', 'visivel' => false],
+            ['id' => 'avaliacoes', 'visivel' => true],
+        ],
+        'periodo' => '12m',
+    ];
+}
+
+test('salva o layout das estatísticas sem apagar outras preferências', function () {
+    $inst = estatInstituicao();
+    $inst->usuario->forceFill(['preferencias' => ['outra_tela' => ['x' => 1]]])->save();
+
+    $this->actingAs($inst->usuario)
+        ->from('/instituicao/estatisticas')
+        ->patch('/instituicao/estatisticas/layout', layoutValido())
+        ->assertRedirect('/instituicao/estatisticas');
+
+    $prefs = $inst->usuario->fresh()->preferencias;
+    expect($prefs['outra_tela'])->toBe(['x' => 1])
+        ->and($prefs['estatisticas'])->toBe(layoutValido());
+});
+
+test('layout com widget desconhecido, repetido ou período inválido é rejeitado', function (array $dados, string $erro) {
+    $inst = estatInstituicao();
+
+    $this->actingAs($inst->usuario)
+        ->patch('/instituicao/estatisticas/layout', [...layoutValido(), ...$dados])
+        ->assertSessionHasErrors($erro);
+
+    expect($inst->usuario->fresh()->preferencias)->toBeNull();
+})->with([
+    'widget desconhecido' => [['widgets' => [['id' => 'banana', 'visivel' => true]]], 'widgets.0.id'],
+    'widget repetido' => [['widgets' => [['id' => 'serie', 'visivel' => true], ['id' => 'serie', 'visivel' => false]]], 'widgets.0.id'],
+    'período inválido' => [['periodo' => 'banana'], 'periodo'],
+]);
+
+test('doadores não salvam layout de estatísticas', function () {
+    $this->actingAs(estatDoador()->usuario)
+        ->patch('/instituicao/estatisticas/layout', layoutValido())
+        ->assertForbidden();
+});
+
+test('sem layout salvo, todos os widgets aparecem na ordem padrão', function () {
+    $inst = estatInstituicao();
+
+    $this->actingAs($inst->usuario)
+        ->get('/instituicao/estatisticas')
+        ->assertInertia(fn ($page) => $page
+            ->where('layout.periodo', '90d')
+            ->where('estatisticas.periodo', '90d')
+            ->where('layout.widgets', collect(EstatisticasInstituicaoService::WIDGETS)
+                ->map(fn ($id) => ['id' => $id, 'visivel' => true])->all()));
+});
+
+test('layout salvo é normalizado e o período salvo vira o padrão', function () {
+    $inst = estatInstituicao();
+    // Layout antigo: sem o widget "avaliacoes" e com um id que não existe mais
+    $inst->usuario->forceFill(['preferencias' => ['estatisticas' => [
+        'widgets' => [
+            ['id' => 'serie', 'visivel' => false],
+            ['id' => 'removido', 'visivel' => true],
+            ['id' => 'indicadores', 'visivel' => true],
+            ['id' => 'doadores', 'visivel' => true],
+            ['id' => 'itens_categoria', 'visivel' => true],
+            ['id' => 'transferencias', 'visivel' => true],
+        ],
+        'periodo' => '30d',
+    ]]])->save();
+
+    $this->actingAs($inst->usuario)
+        ->get('/instituicao/estatisticas')
+        ->assertInertia(fn ($page) => $page
+            ->where('estatisticas.periodo', '30d')
+            ->where('layout.widgets.0', ['id' => 'serie', 'visivel' => false])
+            ->where('layout.widgets.1.id', 'indicadores')
+            ->where('layout.widgets.5', ['id' => 'avaliacoes', 'visivel' => true])
+            ->count('layout.widgets', 6));
+
+    // O período da URL tem prioridade sobre o salvo
+    $this->actingAs($inst->usuario)
+        ->get('/instituicao/estatisticas?periodo=todo')
+        ->assertInertia(fn ($page) => $page->where('estatisticas.periodo', 'todo'));
 });

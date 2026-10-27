@@ -11,7 +11,7 @@ import {
     User,
     X,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
 import SugerirAlteracaoDialog from '@/components/doacao/SugerirAlteracaoDialog';
 import { Badge } from '@/components/ui/badge';
@@ -141,6 +141,7 @@ function statusVisual(
         return {
             label: 'Aguardando resposta',
             chip: 'bg-pending/20 text-pending',
+            dot: 'bg-pending',
             badge: 'border-pending/30 bg-pending/10 text-pending',
         };
     }
@@ -152,6 +153,7 @@ function statusVisual(
         return {
             label: 'Concluída',
             chip: 'bg-success/15 text-success',
+            dot: 'bg-success',
             badge: 'border-success/20 bg-success/10 text-success',
         };
     }
@@ -160,6 +162,7 @@ function statusVisual(
         return {
             label: 'Não entregue',
             chip: 'bg-destructive/15 text-destructive',
+            dot: 'bg-destructive',
             badge: 'border-destructive/20 bg-destructive/10 text-destructive',
         };
     }
@@ -168,6 +171,7 @@ function statusVisual(
         return {
             label: 'Atrasada',
             chip: 'bg-pending/20 text-pending',
+            dot: 'bg-pending',
             badge: 'border-pending/30 bg-pending/10 text-pending',
         };
     }
@@ -176,6 +180,7 @@ function statusVisual(
         return {
             label: 'Confirmada',
             chip: 'bg-primary/15 text-primary',
+            dot: 'bg-primary',
             badge: 'border-primary/20 bg-primary/10 text-primary',
         };
     }
@@ -183,6 +188,7 @@ function statusVisual(
     return {
         label: 'Pendente',
         chip: 'bg-muted text-muted-foreground',
+        dot: 'bg-muted-foreground',
         badge: 'border-border bg-muted text-muted-foreground',
     };
 }
@@ -510,6 +516,7 @@ export default function Agenda({
         mes: hoje.getMonth(),
     }));
     const [diaSelecionado, setDiaSelecionado] = useState<string | null>(null);
+    const detalheRef = useRef<HTMLDivElement>(null);
 
     const porDia = useMemo(() => {
         const map: Record<string, Agendamento[]> = {};
@@ -558,6 +565,21 @@ export default function Agenda({
         setDiaSelecionado(null);
     }
 
+    function selecionarDia(k: string) {
+        const novo = k === diaSelecionado ? null : k;
+        setDiaSelecionado(novo);
+
+        // Abaixo de lg o painel do dia fica embaixo do calendário
+        if (novo && !window.matchMedia('(min-width: 1024px)').matches) {
+            requestAnimationFrame(() =>
+                detalheRef.current?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start',
+                }),
+            );
+        }
+    }
+
     const transferenciasPorDia = useMemo(() => {
         const map: Record<string, TransferenciaAgenda[]> = {};
 
@@ -603,9 +625,9 @@ export default function Agenda({
                     <AddHorarioDialog />
                 </div>
 
-                <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+                <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
                     <Card>
-                        <CardHeader className="flex flex-row items-center justify-between gap-2 pb-3">
+                        <CardHeader className="flex flex-row items-center justify-between gap-2 px-3 pb-3 sm:px-6">
                             <CardTitle className="text-base">
                                 {MESES[ref.mes]} de {ref.ano}
                             </CardTitle>
@@ -613,7 +635,8 @@ export default function Agenda({
                                 <Button
                                     variant="outline"
                                     size="icon"
-                                    className="size-8"
+                                    className="size-9 sm:size-8"
+                                    aria-label="Mês anterior"
                                     onClick={() => mudarMes(-1)}
                                 >
                                     <ChevronLeft className="size-4" />
@@ -621,21 +644,27 @@ export default function Agenda({
                                 <Button
                                     variant="outline"
                                     size="icon"
-                                    className="size-8"
+                                    className="size-9 sm:size-8"
+                                    aria-label="Próximo mês"
                                     onClick={() => mudarMes(1)}
                                 >
                                     <ChevronRight className="size-4" />
                                 </Button>
                             </div>
                         </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-7 gap-1">
+                        <CardContent className="px-2 sm:px-6">
+                            <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
                                 {DIAS_CURTOS.map((d) => (
                                     <div
                                         key={d}
                                         className="py-1 text-center text-xs font-semibold text-muted-foreground"
                                     >
-                                        {d}
+                                        <span className="sm:hidden">
+                                            {d[0]}
+                                        </span>
+                                        <span className="hidden sm:inline">
+                                            {d}
+                                        </span>
                                     </div>
                                 ))}
                                 {celulas.map((dia, i) => {
@@ -645,19 +674,20 @@ export default function Agenda({
 
                                     const k = dateKey(dia);
                                     const itens = porDia[k] ?? [];
+                                    const transfs =
+                                        transferenciasPorDia[k] ?? [];
                                     const ehHoje = k === hojeKey;
                                     const selecionado = k === diaSelecionado;
+                                    const total = itens.length + transfs.length;
 
                                     return (
                                         <button
                                             key={k}
                                             type="button"
-                                            onClick={() =>
-                                                setDiaSelecionado(
-                                                    selecionado ? null : k,
-                                                )
-                                            }
-                                            className={`flex min-h-20 flex-col gap-1 rounded-lg border p-1.5 text-left transition-colors ${
+                                            aria-pressed={selecionado}
+                                            aria-label={`${dia.getDate()} de ${MESES[ref.mes]}${total ? `, ${total} ${total === 1 ? 'evento' : 'eventos'}` : ''}`}
+                                            onClick={() => selecionarDia(k)}
+                                            className={`flex aspect-square min-w-0 flex-col items-center gap-1 rounded-md border p-1 text-left transition-colors sm:aspect-auto sm:min-h-20 sm:items-stretch sm:rounded-lg sm:p-1.5 ${
                                                 selecionado
                                                     ? 'border-primary bg-primary/5'
                                                     : 'border-border hover:bg-muted/50'
@@ -672,7 +702,28 @@ export default function Agenda({
                                             >
                                                 {dia.getDate()}
                                             </span>
-                                            <div className="flex flex-col gap-0.5">
+                                            {/* Telas pequenas: um ponto por evento no lugar dos chips */}
+                                            {total > 0 && (
+                                                <div className="flex flex-wrap justify-center gap-0.5 sm:hidden">
+                                                    {itens
+                                                        .slice(0, 3)
+                                                        .map((a) => (
+                                                            <span
+                                                                key={a.id}
+                                                                className={`size-1.5 rounded-full ${statusVisual(a.doacao_status, a.data_hora, a.status).dot}`}
+                                                            />
+                                                        ))}
+                                                    {transfs.length > 0 && (
+                                                        <span className="size-1.5 rounded-full bg-fuchsia-500" />
+                                                    )}
+                                                    {itens.length > 3 && (
+                                                        <span className="text-[9px] leading-none text-muted-foreground">
+                                                            +
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            )}
+                                            <div className="hidden min-w-0 flex-col gap-0.5 sm:flex">
                                                 {itens.slice(0, 3).map((a) => (
                                                     <span
                                                         key={a.id}
@@ -693,7 +744,7 @@ export default function Agenda({
                                                         +{itens.length - 3} mais
                                                     </span>
                                                 )}
-                                                {(transferenciasPorDia[k] ?? [])
+                                                {transfs
                                                     .slice(0, 2)
                                                     .map((t) => (
                                                         <span
@@ -716,8 +767,8 @@ export default function Agenda({
                         </CardContent>
                     </Card>
 
-                    <div className="flex flex-col gap-6">
-                        <Card>
+                    <div className="flex min-w-0 flex-col gap-6">
+                        <Card ref={detalheRef} className="scroll-mt-4">
                             <CardHeader className="pb-3">
                                 <CardTitle className="text-base">
                                     {diaSelecionado

@@ -23,12 +23,49 @@ class EstatisticasInstituicaoService
 {
     public const PERIODOS = ['30d', '90d', '12m', 'todo'];
 
+    public const PERIODO_PADRAO = '90d';
+
+    /** Blocos da tela de estatísticas que a instituição pode ocultar e reordenar. */
+    public const WIDGETS = ['indicadores', 'serie', 'doadores', 'itens_categoria', 'avaliacoes', 'transferencias'];
+
     private const FINALIZADAS = [
         DoacaoStatus::Entregue,
         DoacaoStatus::Cancelado,
         DoacaoStatus::Recusada,
         DoacaoStatus::NaoEntregue,
     ];
+
+    /**
+     * Layout da tela salvo em usuarios.preferencias['estatisticas'], normalizado:
+     * ids desconhecidos saem e widgets que não estão no salvo (ex.: criados
+     * depois) entram visíveis no fim, para layouts antigos não esconderem nada.
+     *
+     * @param  array<string, mixed>|null  $salvo
+     * @return array{widgets: list<array{id: string, visivel: bool}>, periodo: string}
+     */
+    public function layout(?array $salvo): array
+    {
+        $widgets = [];
+
+        foreach ($salvo['widgets'] ?? [] as $w) {
+            $id = $w['id'] ?? null;
+
+            if (in_array($id, self::WIDGETS, true) && ! isset($widgets[$id])) {
+                $widgets[$id] = ['id' => $id, 'visivel' => (bool) ($w['visivel'] ?? true)];
+            }
+        }
+
+        foreach (self::WIDGETS as $id) {
+            $widgets[$id] ??= ['id' => $id, 'visivel' => true];
+        }
+
+        $periodo = $salvo['periodo'] ?? null;
+
+        return [
+            'widgets' => array_values($widgets),
+            'periodo' => in_array($periodo, self::PERIODOS, true) ? $periodo : self::PERIODO_PADRAO,
+        ];
+    }
 
     /**
      * @return array<string, mixed>
