@@ -59,6 +59,7 @@ Route::middleware(['auth', 'verified', 'user_type:instituicao', EnsureInstitutio
     Route::get('painel', [PainelController::class, 'index'])->name('painel');
 
     Route::get('estatisticas', [EstatisticasController::class, 'index'])->name('estatisticas');
+    Route::patch('estatisticas/layout', [EstatisticasController::class, 'salvarLayout'])->name('estatisticas.layout');
 
     Route::get('perfil', [InstituicaoPerfilController::class, 'show'])->name('perfil');
     Route::patch('perfil', [InstituicaoPerfilController::class, 'update'])->name('perfil.update');
