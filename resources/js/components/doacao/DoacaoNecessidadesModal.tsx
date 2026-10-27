@@ -221,13 +221,13 @@ export function DoacaoNecessidadesModal({
 
     return (
         <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
-            <DialogContent className="max-w-lg">
+            <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
                     <DialogTitle>Atender necessidades</DialogTitle>
                 </DialogHeader>
 
                 {/* stepper */}
-                <div className="flex items-center gap-2 text-sm">
+                <div className="flex flex-wrap items-center gap-2 text-sm">
                     {STEPS.map((s, i) => (
                         <div key={s} className="flex items-center gap-2">
                             <span
@@ -246,7 +246,7 @@ export function DoacaoNecessidadesModal({
                                 className={
                                     i === step
                                         ? 'font-medium'
-                                        : 'text-muted-foreground'
+                                        : 'hidden text-muted-foreground sm:inline'
                                 }
                             >
                                 {s}
@@ -296,7 +296,7 @@ export function DoacaoNecessidadesModal({
                                 Todas as necessidades já foram atendidas.
                             </p>
                         ) : (
-                            <div className="flex max-h-80 flex-col gap-2 overflow-y-auto pr-1">
+                            <div className="flex flex-col gap-2 sm:max-h-80 sm:overflow-y-auto sm:pr-1">
                                 {abertas.map((n) => {
                                     const remaining =
                                         n.quantidade_objetivo -
@@ -364,7 +364,7 @@ export function DoacaoNecessidadesModal({
                                             {/* quantity input when selected */}
                                             {isSelected && (
                                                 <div
-                                                    className="flex items-center gap-2"
+                                                    className="flex flex-wrap items-center gap-2"
                                                     onClick={(e) =>
                                                         e.stopPropagation()
                                                     }
@@ -477,8 +477,8 @@ export function DoacaoNecessidadesModal({
                         <div className="flex flex-col gap-2 rounded-lg border p-4 text-sm">
                             <p className="font-medium">Resumo</p>
                             <Separator />
-                            <div className="flex items-center gap-2">
-                                <span className="w-24 shrink-0 text-muted-foreground">
+                            <div className="flex items-start gap-2">
+                                <span className="w-20 shrink-0 text-muted-foreground sm:w-24">
                                     Tipo:
                                 </span>
                                 <Badge variant="outline">
@@ -512,15 +512,15 @@ export function DoacaoNecessidadesModal({
                                     })}
                                 </ul>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <span className="w-24 shrink-0 text-muted-foreground">
+                            <div className="flex items-start gap-2">
+                                <span className="w-20 shrink-0 text-muted-foreground sm:w-24">
                                     Data/hora:
                                 </span>
                                 <span>{dataHora.replace('T', ' ')}</span>
                             </div>
                             {tipo === 'coleta' && enderecoReferencia && (
-                                <div className="flex items-center gap-2">
-                                    <span className="w-24 shrink-0 text-muted-foreground">
+                                <div className="flex items-start gap-2">
+                                    <span className="w-20 shrink-0 text-muted-foreground sm:w-24">
                                         Endereço:
                                     </span>
                                     <span>{enderecoReferencia}</span>

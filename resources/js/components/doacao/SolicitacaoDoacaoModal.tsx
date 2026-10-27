@@ -214,13 +214,13 @@ export function SolicitacaoDoacaoModal({
 
     return (
         <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
-            <DialogContent className="max-w-lg">
+            <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
                     <DialogTitle>Solicitar doação</DialogTitle>
                 </DialogHeader>
 
                 {/* stepper */}
-                <div className="flex items-center gap-2 text-sm">
+                <div className="flex flex-wrap items-center gap-2 text-sm">
                     {STEPS.map((s, i) => (
                         <div key={s} className="flex items-center gap-2">
                             <span
@@ -239,7 +239,7 @@ export function SolicitacaoDoacaoModal({
                                 className={
                                     i === step
                                         ? 'font-medium'
-                                        : 'text-muted-foreground'
+                                        : 'hidden text-muted-foreground sm:inline'
                                 }
                             >
                                 {s}
@@ -464,8 +464,8 @@ export function SolicitacaoDoacaoModal({
                         <div className="flex flex-col gap-2 rounded-lg border p-4 text-sm">
                             <p className="font-medium">Resumo da solicitação</p>
                             <Separator />
-                            <div className="flex items-center gap-2">
-                                <span className="w-24 shrink-0 text-muted-foreground">
+                            <div className="flex items-start gap-2">
+                                <span className="w-20 shrink-0 text-muted-foreground sm:w-24">
                                     Tipo:
                                 </span>
                                 <Badge variant="outline">
@@ -501,15 +501,15 @@ export function SolicitacaoDoacaoModal({
                                     })}
                                 </ul>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <span className="w-24 shrink-0 text-muted-foreground">
+                            <div className="flex items-start gap-2">
+                                <span className="w-20 shrink-0 text-muted-foreground sm:w-24">
                                     Data/hora:
                                 </span>
                                 <span>{dataHora.replace('T', ' ')}</span>
                             </div>
                             {tipo === 'coleta' && enderecoReferencia && (
-                                <div className="flex items-center gap-2">
-                                    <span className="w-24 shrink-0 text-muted-foreground">
+                                <div className="flex items-start gap-2">
+                                    <span className="w-20 shrink-0 text-muted-foreground sm:w-24">
                                         Endereço:
                                     </span>
                                     <span>{enderecoReferencia}</span>

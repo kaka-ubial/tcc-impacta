@@ -225,12 +225,12 @@ export function TransferenciaNecessidadesModal({
 
     return (
         <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
-            <DialogContent className="max-w-lg">
+            <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
                     <DialogTitle>Transferir itens</DialogTitle>
                 </DialogHeader>
 
-                <div className="flex items-center gap-2 text-sm">
+                <div className="flex flex-wrap items-center gap-2 text-sm">
                     {STEPS.map((s, i) => (
                         <div key={s} className="flex items-center gap-2">
                             <span
@@ -249,7 +249,7 @@ export function TransferenciaNecessidadesModal({
                                 className={
                                     i === step
                                         ? 'font-medium'
-                                        : 'text-muted-foreground'
+                                        : 'hidden text-muted-foreground sm:inline'
                                 }
                             >
                                 {s}
@@ -274,7 +274,7 @@ export function TransferenciaNecessidadesModal({
                                 Todas as necessidades já foram atendidas.
                             </p>
                         ) : (
-                            <div className="flex max-h-80 flex-col gap-2 overflow-y-auto pr-1">
+                            <div className="flex flex-col gap-2 sm:max-h-80 sm:overflow-y-auto sm:pr-1">
                                 {abertas.map((n) => {
                                     const remaining =
                                         n.quantidade_objetivo -
@@ -354,7 +354,7 @@ export function TransferenciaNecessidadesModal({
                                                 )}
                                             {isSelected && (
                                                 <div
-                                                    className="flex items-center gap-2"
+                                                    className="flex flex-wrap items-center gap-2"
                                                     onClick={(e) =>
                                                         e.stopPropagation()
                                                     }
@@ -490,8 +490,8 @@ export function TransferenciaNecessidadesModal({
                                 Resumo da transferência
                             </p>
                             <Separator />
-                            <div className="flex items-center gap-2">
-                                <span className="w-24 shrink-0 text-muted-foreground">
+                            <div className="flex items-start gap-2">
+                                <span className="w-20 shrink-0 text-muted-foreground sm:w-24">
                                     Tipo:
                                 </span>
                                 <Badge variant="outline">
@@ -525,15 +525,15 @@ export function TransferenciaNecessidadesModal({
                                     })}
                                 </ul>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <span className="w-24 shrink-0 text-muted-foreground">
+                            <div className="flex items-start gap-2">
+                                <span className="w-20 shrink-0 text-muted-foreground sm:w-24">
                                     Data/hora:
                                 </span>
                                 <span>{dataHora.replace('T', ' ')}</span>
                             </div>
                             {tipo === 'coleta' && enderecoReferencia && (
-                                <div className="flex items-center gap-2">
-                                    <span className="w-24 shrink-0 text-muted-foreground">
+                                <div className="flex items-start gap-2">
+                                    <span className="w-20 shrink-0 text-muted-foreground sm:w-24">
                                         Endereço:
                                     </span>
                                     <span>{enderecoReferencia}</span>
