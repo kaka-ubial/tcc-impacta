@@ -6,7 +6,7 @@ import Painel from '@/pages/instituicao/painel';
 import Security from '@/pages/settings/security';
 import { instUser, user } from '@/tests/factories';
 import { formBehavior, router, setPage } from '@/tests/inertia-mock';
-import { render, screen } from '@/tests/render';
+import { act, render, screen } from '@/tests/render';
 
 const tfa = vi.hoisted(() => ({
     value: {
@@ -89,10 +89,55 @@ const est = (over: any = {}) => ({
     ...over,
 });
 
+const LAYOUT = {
+    periodo: '90d',
+    widgets: [
+        'indicadores',
+        'serie',
+        'doadores',
+        'itens_categoria',
+        'avaliacoes',
+        'transferencias',
+    ].map((id) => ({ id, visivel: true })),
+};
+
 describe('Estatisticas', () => {
+    it('personaliza o layout', async () => {
+        setPage({ auth: { user: instUser() } });
+        const { rerender } = render(
+            <Estatisticas estatisticas={est() as any} layout={LAYOUT as any} />,
+        );
+        const u = userEvent.setup();
+        await u.click(screen.getByRole('button', { name: /Personalizar/ }));
+        await u.click(
+            await screen.findByLabelText('Mover Resumo de doadores para cima'),
+        );
+        await u.click(
+            screen.getByLabelText('Mover Resumo de doadores para baixo'),
+        );
+        await u.click(screen.getByLabelText('Indicadores de doações'));
+        await u.click(screen.getByRole('button', { name: 'Restaurar padrão' }));
+        await u.click(screen.getByRole('button', { name: 'Salvar layout' }));
+        const opts = (router.patch as any).mock.calls[0][2];
+        act(() => {
+            opts.onStart();
+            opts.onSuccess();
+            opts.onFinish();
+        });
+        rerender(
+            <Estatisticas
+                estatisticas={est() as any}
+                layout={{ ...LAYOUT, periodo: '30d' } as any}
+            />,
+        );
+        await u.click(screen.getByRole('button', { name: /Personalizar/ }));
+        await u.keyboard('{Escape}');
+    });
     it('renderiza e troca período', async () => {
         setPage({ auth: { user: instUser() } });
-        render(<Estatisticas estatisticas={est() as any} />);
+        render(
+            <Estatisticas estatisticas={est() as any} layout={LAYOUT as any} />,
+        );
         const u = userEvent.setup();
         await u.click(screen.getByRole('button', { name: '90 dias' }));
         expect(router.get).toHaveBeenCalledWith(
@@ -106,6 +151,7 @@ describe('Estatisticas', () => {
         setPage({ auth: { user: instUser() } });
         render(
             <Estatisticas
+                layout={LAYOUT as any}
                 estatisticas={
                     est({
                         periodo: 'todo',

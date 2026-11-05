@@ -88,3 +88,4 @@ vi.mock('maplibre-gl', () => {
 vi.mock('maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url', () => ({
     default: 'worker.js',
 }));
+document.elementFromPoint = document.elementFromPoint ?? (() => null);
