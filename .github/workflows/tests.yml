@@ -54,6 +54,16 @@ jobs:
       - name: Build Assets
         run: npm run build
 
+      # Falha se a cobertura do frontend ficar abaixo de 75% (vitest.config.ts)
+      - name: Frontend tests with coverage
+        run: npm run test:coverage
+
+      - name: Upload frontend coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: coverage/frontend
+
       # SQLite em memoria — o runner do CI nao tem o Postgres do docker local
       - name: Tests
         run: ./vendor/bin/pest
