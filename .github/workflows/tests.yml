@@ -65,8 +65,16 @@ jobs:
           path: coverage/frontend
 
       # SQLite em memoria — o runner do CI nao tem o Postgres do docker local
-      - name: Tests
-        run: ./vendor/bin/pest
+      # Falha se a cobertura do backend ficar abaixo de 75%
+      - name: Tests with coverage
+        run: ./vendor/bin/pest --coverage --min=75 --coverage-clover=coverage/backend/clover.xml --coverage-html=coverage/backend/html
         env:
           DB_CONNECTION: sqlite
           DB_DATABASE: ':memory:'
+
+      - name: Upload backend coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage-php${{ matrix.php-version }}
+          path: coverage/backend
