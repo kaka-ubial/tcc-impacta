@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import TwoFactorRecoveryCodes from '@/components/two-factor-recovery-codes';
 import TwoFactorSetupModal from '@/components/two-factor-setup-modal';
 import { formBehavior } from '@/tests/inertia-mock';
@@ -48,6 +48,8 @@ describe('TwoFactorRecoveryCodes', () => {
 });
 
 describe('TwoFactorSetupModal', () => {
+    // input-otp agenda setTimeouts (até ~50ms); deixa rodarem antes do teardown do jsdom
+    afterEach(() => new Promise((r) => setTimeout(r, 60)));
     const base = {
         isOpen: true,
         onClose: vi.fn(),
